@@ -36,3 +36,22 @@ export interface Stores {
   updatedAt: string;
   categories?: Category[];
 }
+
+export type SupplierData = {
+  name: string;
+  type: "emp" | "par";
+  phone: string;
+  email: string;
+  nif: string;
+  address: string;
+  supplyType: "src" | "prd" | "amb";
+  deliveryTime: string;
+  products: string[];
+};
+
+export type SupplierResponse = SupplierData & {
+  id: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};

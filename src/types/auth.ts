@@ -6,17 +6,17 @@ export interface LoginResponse {
   tokens: Tokens;
 }
 
-export type Role = 'ADMIN' | 'OWNER' | 'MANAGER' | "CASHIER"
+export type Role = "ADMIN";
 
 export type User = {
   id: string;
   email: string;
   name: string;
   role: Role;
-  phone: string,
+  phone: string;
   company: Company;
-  store?: Store
-}
+  store?: Store;
+};
 
 export interface Tokens {
   accessToken: string;

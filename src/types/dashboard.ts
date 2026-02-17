@@ -44,14 +44,11 @@ export interface UserContext {
   email: string;
 }
 
-export interface ManagerDashboardData {
+export interface AdminDashboardData {
   summary: DashboardSummary;
   revenueEvolution: RevenueEvolution[];
   salesDistribution: SalesDistribution[];
   recentSales: RecentSale[];
   userContext: UserContext;
-}
-
-export interface OwnerDashboardData extends ManagerDashboardData {
   storesBreakdown: StoreBreakdown[];
 }

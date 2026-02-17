@@ -1,1 +1,2 @@
-export * from "./current-cashier-store"
+// POS store index
+export {};

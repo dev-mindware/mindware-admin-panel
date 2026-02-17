@@ -1,15 +1,7 @@
-import { Role } from "@/types";
-
 export const DEFAULT_LOGIN_REDIRECT = "/auth/login";
+export const ADMIN_DASHBOARD = "/dashboard";
 
-export const roleRedirects: Record<Role, string> = {
-  "ADMIN": "/dashboard",
-  "OWNER": "/dashboard",
-  "MANAGER": "/dashboard",
-  "CASHIER": "/dashboard",
-};
-
-export const getRouteByRole = (role: Role): string => {
-  if (!role) return DEFAULT_LOGIN_REDIRECT;
-  return roleRedirects[role] || DEFAULT_LOGIN_REDIRECT;
+export const getRouteByRole = (role?: string): string => {
+  if (role === "ADMIN") return ADMIN_DASHBOARD;
+  return DEFAULT_LOGIN_REDIRECT;
 };

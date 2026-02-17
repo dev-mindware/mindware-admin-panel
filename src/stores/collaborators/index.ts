@@ -1,2 +1,2 @@
-export * from "./current-cashier-store"
-export * from "./current-manager-store"
+// This folder is deprecated. Users are strictly ADMIN.
+export {};

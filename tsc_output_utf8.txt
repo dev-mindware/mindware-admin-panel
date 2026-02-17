@@ -1,0 +1,2 @@
+﻿src/stores/entities/current-supplier-store.ts(1,10): error TS2305: Module '"@/types"' has no exported member 'SupplierResponse'.
+src/stores/pos/current-cashier-store.ts(2,25): error TS2307: Cannot find module '@/types/cashier' or its corresponding type declarations.

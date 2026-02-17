@@ -11,7 +11,6 @@ export * from "./pos-category-skeleton";
 export * from "./pos-product-skeleton";
 export * from "./pos-cart-skeleton";
 export * from "./loader-stores-skeleton";
-export * from "./notification-skeleton";
 export * from "./sales-skeleton";
 export * from "./dashboard-skeleton";
 export * from "./dynamic-metric-card-skeleton";

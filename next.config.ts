@@ -7,6 +7,4 @@ const nextConfig: any = {
   },
 };
 
-
-
 export default nextConfig;

@@ -22,7 +22,7 @@ export function ProofViewerModal() {
             title={
                 <div className="flex items-center gap-2">
                     <Icon name="FileText" className="w-5 h-5 text-primary" />
-                    <span>Provativo de Pagamento</span>
+                    <span>Comprovativo de Pagamento</span>
                 </div>
             }
             className="w-full max-w-4xl max-h-[90vh]"
@@ -49,14 +49,14 @@ export function ProofViewerModal() {
                         <iframe
                             src={proofUrl}
                             className="w-full h-[60vh]"
-                            title="Provativo PDF"
+                            title="Comprovativo PDF"
                         />
                     ) : (
                         <div className="relative w-full overflow-auto max-h-[70vh] flex justify-center p-4">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={proofUrl}
-                                alt="Provativo de Pagamento"
+                                alt="Comprovativo de Pagamento"
                                 className="max-w-full h-auto object-contain shadow-md"
                             />
                         </div>

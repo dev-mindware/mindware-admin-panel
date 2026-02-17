@@ -2,8 +2,7 @@
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { roleRedirects } from "@/utils";
-import { LoginResponse, Role, User } from "@/types";
+import { LoginResponse, User } from "@/types";
 import { loginSchema } from "@/schemas";
 import api from "@/services/api";
 import { createSession } from "@/lib/session";
@@ -37,7 +36,7 @@ export async function loginAction({
       refreshToken: tokens.refreshToken,
     });
 
-    const redirectPath = getRedirectPath(user.role);
+    const redirectPath = "/dashboard";
     console.log(`Login bem-sucedido! Redirecionando para: ${redirectPath}`);
 
     return { message, user, redirectPath };
@@ -56,10 +55,6 @@ export async function loginAction({
       message: messageError,
     };
   }
-}
-
-function getRedirectPath(role: Role): string {
-  return roleRedirects[role as keyof typeof roleRedirects] || "/";
 }
 
 export async function logoutAction() {

@@ -9,7 +9,6 @@ export const storeSchema = z.object({
     .regex(/^\d{9}$/, "Telefone deve ter 9 dígitos"),
   address: z.string().trim().min(5, "Endereço muito curto"),
   status: z.string().trim().optional(),
-  manager: z.string().trim().optional(),
   companyId: z.string().trim().optional(),
 });
 

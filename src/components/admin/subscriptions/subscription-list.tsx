@@ -14,6 +14,7 @@ import { Subscription } from "@/types";
 import { formatDateTime } from "@/utils";
 import { useModal } from "@/stores/modal/use-modal-store";
 import { ProofViewerModal } from "./proof-viewer-modal";
+import { SubscriptionDetailsModal } from "./subscription-details-modal";
 
 export function SubscriptionList() {
     const { data, isLoading, isError, refetch } = useSubscriptions();
@@ -68,9 +69,14 @@ export function SubscriptionList() {
                     data={item}
                     actions={[
                         {
-                            label: "Ver Provativo",
+                            label: "Comprovativo",
                             icon: "FileText",
                             onClick: (data) => openModal("view-proof", data.proofFileUrl),
+                        },
+                        {
+                            label: "Ver Detalhes",
+                            icon: "Info",
+                            onClick: (data) => openModal("view-subscription-details", data),
                         },
                         { type: "separator" },
                         ...getAvailableActions(item),
@@ -95,7 +101,6 @@ export function SubscriptionList() {
             />
         );
     }
-
     return (
         <div className="space-y-4">
             <GenericTable<Subscription>
@@ -110,6 +115,7 @@ export function SubscriptionList() {
             />
 
             <ProofViewerModal />
+            <SubscriptionDetailsModal />
         </div>
     );
 }
