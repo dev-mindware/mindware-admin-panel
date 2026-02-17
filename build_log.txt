@@ -1,0 +1,29 @@
+
+> mindgest-frontend@0.1.0 build C:\Users\JonataoCardoso\Documents\GitHub\mindgest-frontend
+> next build
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   ▲ Next.js 16.0.10 (Turbopack)
+   - Environments: .env
+
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ✓ Compiled successfully in 18.2s
+   Running TypeScript ...
+Failed to compile.
+
+./src/components/client/items/services/service-modals/service-modal.tsx:86:29
+Type error: Argument of type '{ name: string; price: number; type: "SERVICE" | "PRODUCT"; categoryId: string; sku?: string | undefined; unit?: string | undefined; minStock?: number | undefined; expiryDate?: string | undefined; ... 11 more ...; daysToExpiry?: number | undefined; }' is not assignable to parameter of type 'CreateItemData'.
+  Types of property 'cost' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+
+[0m [90m 84 |[39m     [36mtry[39m {
+ [90m 85 |[39m       [36mif[39m (action [33m===[39m [32m"add"[39m) {
+[31m[1m>[22m[39m[90m 86 |[39m         [36mawait[39m addItemMutate(data)[33m;[39m
+ [90m    |[39m                             [31m[1m^[22m[39m
+ [90m 87 |[39m       } [36melse[39m [36mif[39m (currentService) {
+ [90m 88 |[39m         [36mconst[39m { type[33m,[39m [33m...[39mrest } [33m=[39m data[33m;[39m
+ [90m 89 |[39m         [36mawait[39m updateService({[0m
+Next.js build worker exited with code: 1 and signal: null
+ ELIFECYCLE  Command failed with exit code 1.
