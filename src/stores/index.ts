@@ -8,5 +8,3 @@ export * from "./categories";
 export * from "./collaborators";
 export * from "./documents";
 export * from "./stock";
-
-export * from "./pos";

@@ -456,61 +456,6 @@ body {
   }
 }
 
-/* Simple Keyboard Theming */
-.simple-keyboard-theme {
-  background-color: transparent !important;
-  font-family: inherit !important;
-}
-
-.simple-keyboard-theme .hg-button {
-  background: var(--secondary) !important;
-  color: var(--secondary-foreground) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: 12px !important;
-  box-shadow: none !important;
-  height: 64px !important;
-  font-size: 20px !important;
-  font-weight: 700 !important;
-  transition: all 0.1s ease !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.simple-keyboard-theme .hg-button:active {
-  transform: scale(0.96) !important;
-  background-color: var(--muted) !important;
-}
-
-.simple-keyboard-theme .hg-button.hg-button-special {
-  background: var(--muted) !important;
-  color: var(--foreground) !important;
-}
-
-.simple-keyboard-theme .hg-button.hg-button-active {
-  background: var(--primary) !important;
-  color: var(--primary-foreground) !important;
-  border-color: var(--primary) !important;
-}
-
-.simple-keyboard-theme .hg-button.hg-button-primary {
-  background: var(--primary) !important;
-  color: var(--primary-foreground) !important;
-  border-color: var(--primary) !important;
-}
-
-.simple-keyboard-theme .hg-button.hg-button-primary:active {
-  background-color: color-mix(in srgb, var(--primary), black 10%) !important;
-}
-
-.simple-keyboard-theme .hg-row {
-  gap: 10px !important;
-  margin-bottom: 10px !important;
-}
-
-.simple-keyboard-theme .hg-row:last-child {
-  margin-bottom: 0 !important;
-}
 @keyframes pulse-twice {
   0%,
   100% {

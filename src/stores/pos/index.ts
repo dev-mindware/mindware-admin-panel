@@ -1,2 +1,0 @@
-// POS store index
-export {};
