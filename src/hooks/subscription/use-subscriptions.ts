@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { subscriptionService } from "@/services/subscription-service";
-import { Subscription } from "@/types";
+import { Subscription, SubscriptionStatus } from "@/types";
 
 export function useSubscriptions() {
     return useQuery({
@@ -26,7 +26,7 @@ export function useUpdateSubscriptionStatus() {
 
     return useMutation({
         mutationFn: ({ id, status }: { id: string; status: string }) =>
-            subscriptionService.updateSubscriptionStatus(id, status),
+            subscriptionService.updateSubscriptionStatus(id, status as SubscriptionStatus),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
         },

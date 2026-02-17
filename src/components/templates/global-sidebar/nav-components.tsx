@@ -12,7 +12,6 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  UpgradeModal,
   useSidebar,
 } from "@/components";
 import { useState } from "react";
@@ -22,7 +21,6 @@ import { useModal } from "@/stores";
 
 export function NavMenu({ items }: { items: MenuItem[] }) {
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
-  const [upgradeItem, setUpgradeItem] = useState<MenuItem | null>(null);
   const pathname = usePathname();
   const { openModal } = useModal();
   const { isMobile, setOpenMobile } = useSidebar();
@@ -31,14 +29,6 @@ export function NavMenu({ items }: { items: MenuItem[] }) {
     setOpenSubmenu((prev) => (prev === id ? null : id));
 
   const isActive = (url: string) => pathname.startsWith(url);
-
-  const handleClickUpgrade = (e: React.MouseEvent, item: MenuItem) => {
-    if (item.showUpgrade) {
-      e.preventDefault();
-      setUpgradeItem(item);
-      openModal("upgrade-modal");
-    }
-  };
 
   const handleMobileClick = () => {
     if (isMobile) {
@@ -63,11 +53,7 @@ export function NavMenu({ items }: { items: MenuItem[] }) {
                 {hasSubmenu ? (
                   <>
                     <SidebarMenuButton
-                      onClick={(e) =>
-                        item.showUpgrade
-                          ? handleClickUpgrade(e, item)
-                          : toggleSubmenu(id)
-                      }
+                      onClick={() => toggleSubmenu(id)}
                       tooltip={item.name}
                       className={cn(
                         activeMain
@@ -77,21 +63,14 @@ export function NavMenu({ items }: { items: MenuItem[] }) {
                     >
                       {item.icon}
                       <span>{item.name}</span>
-                      {item.showUpgrade && (
-                        <span className="ml-auto text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                          Pro
-                        </span>
-                      )}
-                      {!item.showUpgrade && (
-                        <Icon
-                          name="ChevronRight"
-                          className={`ml-auto transition-transform duration-200 ${isOpen ? "rotate-90" : ""
-                            }`}
-                        />
-                      )}
+                      <Icon
+                        name="ChevronRight"
+                        className={`ml-auto transition-transform duration-200 ${isOpen ? "rotate-90" : ""
+                          }`}
+                      />
                     </SidebarMenuButton>
 
-                    {!item.showUpgrade && isOpen && (
+                    {isOpen && (
                       <SidebarMenuSub>
                         {item.items!.map((sub) => {
                           const activeSub = isActive(sub.url);
@@ -118,35 +97,19 @@ export function NavMenu({ items }: { items: MenuItem[] }) {
                 ) : (
                   <>
                     <SidebarMenuButton
-                      asChild={!item.showUpgrade}
+                      asChild
                       tooltip={item.name}
-                      onClick={(e) => {
-                        if (item.showUpgrade) {
-                          handleClickUpgrade(e, item);
-                        } else {
-                          handleMobileClick();
-                        }
-                      }}
+                      onClick={handleMobileClick}
                       className={cn(
                         activeMain
                           ? "bg-primary/10 text-primary"
                           : "hover:bg-sidebar-accent "
                       )}
                     >
-                      {item.showUpgrade ? (
-                        <div className="flex items-center gap-2 cursor-pointer">
-                          {item.icon}
-                          <span>{item.name}</span>
-                          <span className="ml-auto text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
-                            Pro
-                          </span>
-                        </div>
-                      ) : (
-                        <Link href={item.url}>
-                          {item.icon}
-                          <span>{item.name}</span>
-                        </Link>
-                      )}
+                      <Link href={item.url}>
+                        {item.icon}
+                        <span>{item.name}</span>
+                      </Link>
                     </SidebarMenuButton>
                     {item.showMoreIcon && (
                       <SidebarMenuAction>
@@ -160,8 +123,6 @@ export function NavMenu({ items }: { items: MenuItem[] }) {
           })}
         </SidebarMenu>
       </SidebarGroup>
-
-      {upgradeItem && <UpgradeModal feature={upgradeItem.name} />}
     </>
   );
 }
