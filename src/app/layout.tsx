@@ -17,8 +17,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "MindGest",
-  description: "Software de Gestão e Faturação",
+  title: "Mindware Admin Panel",
+  description: "Sistema de Administração da Mindware",
   icons: {
     icon: "/mindware.png",
   },
