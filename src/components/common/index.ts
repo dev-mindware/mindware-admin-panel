@@ -20,6 +20,5 @@ export * from "./input-fetch/async-multi-select";
 export * from "./input-fetch/async-select";
 export * from "./feature-gate";
 export * from "./item-status-badge";
-export * from "./def-setup-stub";
 
 

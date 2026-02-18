@@ -46,13 +46,9 @@ export const menuItems: MenuStructure = {
       icon: <Icon name="FileSearch" />,
     },
     {
-      name: "Configurações",
-      url: "/settings",
+      name: "Definições",
+      url: "/definitions",
       icon: <Icon name="Settings2" />,
-      items: [
-        { name: "Geral", url: "/settings/general" },
-        { name: "Exportação", url: "/settings/export" },
-      ],
     },
   ],
 };

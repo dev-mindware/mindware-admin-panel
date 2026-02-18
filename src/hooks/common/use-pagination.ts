@@ -18,6 +18,7 @@ interface UsePaginatedFetchOptions {
   queryParams?: Record<string, any>;
   enabled?: boolean;
   keepPreviousData?: boolean;
+  limit?: number;
 }
 
 export function usePagination<T>({
@@ -26,34 +27,36 @@ export function usePagination<T>({
   queryParams = {},
   enabled = true,
   keepPreviousData = true,
+  limit: initialLimit = 10,
 }: UsePaginatedFetchOptions) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const page = Number(searchParams.get("page")) || 1;
+  const limit = Number(searchParams.get("limit")) || initialLimit;
 
   const query = useQuery<PaginationResponse<T>>({
     queryKey: Array.isArray(queryKey)
-      ? [...queryKey, page, queryParams]
-      : [queryKey, page, queryParams],
+      ? [...queryKey, page, limit, queryParams]
+      : [queryKey, page, limit, queryParams],
     queryFn: async () => {
       const response = await api.get(endpoint, {
-        params: { page, ...queryParams },
+        params: { page, limit, ...queryParams },
       });
 
       const raw = response.data;
 
       // 🔹 Normaliza para sempre devolver o mesmo shape
-      const dataKey = Object.keys(raw).find(
-        (key) => Array.isArray(raw[key])
+      const dataKey = Object.keys(raw).find((key) =>
+        Array.isArray(raw[key]),
       ) as keyof typeof raw;
 
       return {
         data: (raw[dataKey] as T[]) ?? [],
         total: raw.total ?? 0,
         page: raw.page ?? page,
-        limit: raw.limit ?? queryParams.limit ?? 10,
+        limit: raw.limit ?? limit,
         totalPages:
           raw.totalPages ??
           (raw.total && raw.limit ? Math.ceil(raw.total / raw.limit) : 1),
@@ -89,7 +92,7 @@ export function usePagination<T>({
     data: query.data?.data ?? [],
     total: query.data?.total ?? 0,
     page,
-    limit: query.data?.limit ?? queryParams.limit ?? 10,
+    limit: query.data?.limit ?? limit,
     totalPages: query.data?.totalPages ?? 1,
     isLoading: query.isLoading || isPending,
     isError: query.isError,
