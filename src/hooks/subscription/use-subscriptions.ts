@@ -1,34 +1,51 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { subscriptionService } from "@/services/subscription-service";
 import { Subscription, SubscriptionStatus } from "@/types";
+import { usePagination } from "@/hooks/common";
 
-export function useSubscriptions() {
-    return useQuery({
-        queryKey: ["subscriptions"],
-        queryFn: async () => {
-            const response = await subscriptionService.getSubscriptions();
-            const raw = response.data;
+export function useSubscriptions(filters?: {
+  status?: string;
+  company?: string;
+}) {
+  return usePagination<Subscription>({
+    endpoint: "/subscriptions",
+    queryKey: "subscriptions",
+    queryParams: {
+      status: filters?.status || undefined,
+      company: filters?.company || undefined,
+    },
+  });
+}
 
-            // Normalize: Extract array if nested, or return array if it's already an array
-            if (Array.isArray(raw)) return raw;
+export function useAllSubscriptions() {
+  return useQuery<Subscription[]>({
+    queryKey: ["subscriptions", "all"],
+    queryFn: async () => {
+      const response = await subscriptionService.getSubscriptions();
+      const raw = response.data;
 
-            const dataKey = Object.keys(raw).find(
-                (key) => Array.isArray((raw as any)[key])
-            );
+      if (Array.isArray(raw)) return raw;
 
-            return (dataKey ? (raw as any)[dataKey] : []) as Subscription[];
-        },
-    });
+      const dataKey = Object.keys(raw).find((key) =>
+        Array.isArray((raw as any)[key]),
+      );
+
+      return (dataKey ? (raw as any)[dataKey] : []) as Subscription[];
+    },
+  });
 }
 
 export function useUpdateSubscriptionStatus() {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: ({ id, status }: { id: string; status: string }) =>
-            subscriptionService.updateSubscriptionStatus(id, status as SubscriptionStatus),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
-        },
-    });
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      subscriptionService.updateSubscriptionStatus(
+        id,
+        status as SubscriptionStatus,
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
+    },
+  });
 }

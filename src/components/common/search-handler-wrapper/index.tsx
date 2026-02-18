@@ -7,6 +7,7 @@ type Props = {
   search: string;
   className?: string;
   setSearch: (search: string) => void;
+  placeholder?: string;
 };
 
 export function SearchHandlerWrapper({
@@ -14,6 +15,7 @@ export function SearchHandlerWrapper({
   search,
   setSearch,
   className,
+  placeholder = "Pesquisar...",
 }: Props) {
   return (
     <div className={cn("flex gap-4", className)}>
@@ -23,7 +25,7 @@ export function SearchHandlerWrapper({
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Pesquisar..."
+            placeholder={placeholder}
             className="w-full h-10 text-sm border rounded-md ps-10 pe-10 border-input bg-background"
           />
           <div className="absolute inset-y-0 flex items-center pointer-events-none start-0 ps-3 text-muted-foreground">

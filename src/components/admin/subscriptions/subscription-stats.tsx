@@ -1,11 +1,11 @@
 "use client";
 
-import { useSubscriptions } from "@/hooks/subscription/use-subscriptions";
+import { useAllSubscriptions } from "@/hooks/subscription/use-subscriptions";
 import { DynamicMetricCard } from "@/components/shared/dynamic-metric-card";
 import { Skeleton } from "@/components";
 
 export function SubscriptionStats() {
-    const { data: subscriptions, isLoading } = useSubscriptions();
+    const { data: subscriptions, isLoading } = useAllSubscriptions();
 
     if (isLoading) {
         return (
@@ -21,7 +21,7 @@ export function SubscriptionStats() {
         active: subscriptions?.filter((s) => s.status === "ACTIVE").length || 0,
         pending: subscriptions?.filter((s) => s.status === "PENDING").length || 0,
         expired: subscriptions?.filter((s) => s.status === "EXPIRED").length || 0,
-        pastDue: subscriptions?.filter((s) => s.status === "PAST_DUE").length || 0,
+        trial: subscriptions?.filter((s) => s.status === "TRIALING").length || 0,
     };
 
     return (
@@ -41,18 +41,18 @@ export function SubscriptionStats() {
                 variant="action"
             />
             <DynamicMetricCard
+                title={stats.trial}
+                subtitle="Em Teste"
+                description="Subscrições em teste"
+                icon="TriangleAlert"
+                colors="default"
+                variant="action"
+            />
+            <DynamicMetricCard
                 title={stats.expired}
                 subtitle="Expiradas"
                 description="Subscrições encerradas"
                 icon="CircleAlert"
-                colors="destructive"
-                variant="action"
-            />
-            <DynamicMetricCard
-                title={stats.pastDue}
-                subtitle="Atrasadas"
-                description="Pagamento em falta"
-                icon="TriangleAlert"
                 colors="destructive"
                 variant="action"
             />

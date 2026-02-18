@@ -1,6 +1,6 @@
 "use client";
 
-import { useSubscriptions, useSubscriptionActions } from "@/hooks/subscription";
+import { useSubscriptions, useSubscriptionActions, useSubscriptionFilters } from "@/hooks/subscription";
 import {
     GenericTable,
     Column,
@@ -9,6 +9,7 @@ import {
     EmptyState,
     ItemStatusBadge,
     ButtonOnlyAction,
+    SubscriptionFilters,
 } from "@/components";
 import { Subscription } from "@/types";
 import { formatDateTime } from "@/utils";
@@ -17,7 +18,19 @@ import { ProofViewerModal } from "./proof-viewer-modal";
 import { SubscriptionDetailsModal } from "./subscription-details-modal";
 
 export function SubscriptionList() {
-    const { data, isLoading, isError, refetch } = useSubscriptions();
+    const { filters } = useSubscriptionFilters();
+    const {
+        data,
+        isLoading,
+        isError,
+        refetch,
+        page,
+        total,
+        totalPages,
+        setPage,
+        goToNextPage,
+        goToPreviousPage
+    } = useSubscriptions(filters);
     const { openModal } = useModal();
     const { getAvailableActions } = useSubscriptionActions();
 
@@ -92,26 +105,20 @@ export function SubscriptionList() {
         return <RequestError refetch={refetch} message="Erro ao carregar subscrições" />;
     }
 
-    if (!data || data.length === 0) {
-        return (
-            <EmptyState
-                title="Sem subscrições"
-                description="Nenhuma subscrição encontrada no sistema."
-                icon="CreditCard"
-            />
-        );
-    }
     return (
         <div className="space-y-4">
+            <SubscriptionFilters hasData={data && data.length > 0} />
+
             <GenericTable<Subscription>
-                data={data?.slice(0, 10) as any[]}
+                data={data || []}
                 columns={columns}
-                page={1}
-                total={data.length}
-                totalPages={1}
-                setPage={() => { }}
-                goToNextPage={() => { }}
-                goToPreviousPage={() => { }}
+                page={page}
+                total={total}
+                totalPages={totalPages}
+                setPage={setPage}
+                goToNextPage={goToNextPage}
+                goToPreviousPage={goToPreviousPage}
+                emptyMessage="Nenhuma subscrição encontrada com os filtros selecionados."
             />
 
             <ProofViewerModal />
