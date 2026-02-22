@@ -28,17 +28,12 @@ export const menuItems: MenuStructure = {
     {
       name: "Planos",
       url: "/plans",
-      icon: <Icon name="Wallet" />,
+      icon: <Icon name="Package" />,
     },
     {
       name: "Subscrições",
       url: "/subscriptions",
       icon: <Icon name="Wallet" />,
-    },
-    {
-      name: "Categorias",
-      url: "/categories",
-      icon: <Icon name="Tag" />,
     },
     {
       name: "Logs do Sistema",

@@ -1,15 +1,12 @@
-import { PageWrapper, TitleList } from "@/components";
+"use client";
 
-export default function LosPage() {
+import { PageWrapper } from "@/components";
+import { PlansClient } from "@/components/admin/plans/plans-client";
+
+export default function PlansPage() {
   return (
-    <PageWrapper subRoute="Planos e Faturação">
-      <TitleList
-        title="Logs"
-        suTitle="Controle geral do sistema"
-      />
-      <div className="space-y-5">
-      AQUI VIRA A LISTAGEM DAS AÇÕES DO SISTEMA E TAL..
-      </div>
+    <PageWrapper subRoute="Planos">
+      <PlansClient />
     </PageWrapper>
   );
 }
