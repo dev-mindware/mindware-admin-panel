@@ -2,19 +2,22 @@
 import { getSession } from "@/lib/auth";
 import { createSession } from "@/lib/session";
 
-export async function   reauthenticate() {
+export async function reauthenticate() {
   const session = await getSession();
   const refreshToken = session?.refreshToken;
-  
+
   if (!refreshToken) {
     throw new Error("Refresh token não encontrado");
   }
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, {
-    method: 'POST',
-    body: JSON.stringify({ refreshToken }),
-    headers: { 'Content-Type': 'application/json' },
-  });
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+    {
+      method: "POST",
+      body: JSON.stringify({ refreshToken }),
+      headers: { "Content-Type": "application/json" },
+    },
+  );
 
   if (!response.ok) {
     throw new Error("Falha ao renovar o token");
@@ -29,4 +32,11 @@ export async function   reauthenticate() {
     accessToken: newAccessToken,
     refreshToken: newRefreshToken,
   });
+}
+
+export async function clearLocalSession() {
+  const { cookies } = await import("next/headers");
+  const { SESSION_COOKIE_KEY } = await import("@/constants");
+  const authCookies = await cookies();
+  authCookies.delete(SESSION_COOKIE_KEY);
 }

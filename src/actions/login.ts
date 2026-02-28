@@ -60,12 +60,12 @@ export async function loginAction({
 export async function logoutAction() {
   try {
     const session = await getSession();
-    const authCookies = await cookies();
     await api.post("/auth/logout", { refresh_token: session?.refreshToken });
-    authCookies.delete(SESSION_COOKIE_KEY);
   } catch (error) {
-    console.error("🚨 Erro ao fazer logout:", error);
+    console.error("🚨 Erro ao fazer logout remoto:", error);
   } finally {
+    const authCookies = await cookies();
+    authCookies.delete(SESSION_COOKIE_KEY);
     redirect("/auth/login");
   }
 }

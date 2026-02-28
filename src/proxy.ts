@@ -6,6 +6,7 @@ import {
   PUBLIC_ROUTES,
   SESSION_COOKIE_KEY,
 } from "./constants";
+import { decrypt } from "./lib/session";
 
 const ADMIN_DASHBOARD = "/dashboard";
 
@@ -30,14 +31,16 @@ function isAuthPage(pathname: string): boolean {
   ].includes(pathname);
 }
 
-export function proxy(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (pathname.startsWith(API_AUTH_PREFIX)) {
     return NextResponse.next();
   }
 
-  const isAuthenticated = Boolean(req.cookies.get(SESSION_COOKIE_KEY)?.value);
+  const cookieValue = req.cookies.get(SESSION_COOKIE_KEY)?.value;
+  const sessionPayload = cookieValue ? await decrypt(cookieValue) : null;
+  const isAuthenticated = Boolean(sessionPayload);
 
   const isPublic = isPublicRoute(pathname);
   const isPrivate = PRIVATE_ROUTE_PREFIXES.some((p) => pathname.startsWith(p));

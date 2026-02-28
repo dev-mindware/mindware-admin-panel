@@ -71,10 +71,16 @@ api.interceptors.response.use(
           processQueue(null, newToken);
           original.headers.Authorization = `Bearer ${newToken}`;
           return api(original);
+        } else {
+          throw new Error("Novo access token não recebido após reautenticação");
         }
       } catch (refreshError) {
         processQueue(refreshError, null);
         console.error("Erro ao renovar token:", refreshError);
+
+        const { clearLocalSession } = await import("@/actions/auth");
+        await clearLocalSession();
+
         window.location.replace("/auth/login");
         return Promise.reject(refreshError);
       } finally {
