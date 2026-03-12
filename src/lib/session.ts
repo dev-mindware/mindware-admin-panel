@@ -1,38 +1,52 @@
-import { SignJWT, jwtVerify, JWTPayload } from "jose";
+import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "@/constants";
 import { cookies } from "next/headers";
-import { User } from "@/types";
-import { SESSION_COOKIE_KEY } from "@/constants";
 
 const secretKey = process.env.SESSION_SECRET;
 
-if (!secretKey) {
-  throw new Error("SESSION_SECRET is not defined in environment variables");
-}
-
-const HOURS = 24;
 export const encodedKey = new TextEncoder().encode(secretKey);
 
-export interface SessionPayload extends JWTPayload {
-  user: User;
+export interface SessionPayload {
   accessToken: string;
   refreshToken: string;
+  expiresIn?: string; // e.g., "4m", "1h"
 }
 
 export async function createSession(payload: SessionPayload) {
-  const expiresAt = new Date(Date.now() + HOURS * 60 * 60 * 1000);
-  // const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
+  // Parse expiresIn do backend (ex: "4m")
+  let accessDurationMs = 60 * 60 * 1000; // Default: 60 min
 
-  const session = await new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime(expiresAt)
-    .sign(encodedKey);
+  if (payload.expiresIn) {
+    const match = payload.expiresIn.match(/^(\d+)([smhdw])$/);
+    if (match) {
+      const value = parseInt(match[1]);
+      const unit = match[2];
+      const multipliers: Record<string, number> = {
+        s: 1000,
+        m: 60 * 1000,
+        h: 60 * 60 * 1000,
+        d: 24 * 60 * 60 * 1000,
+        w: 7 * 24 * 60 * 60 * 1000,
+      };
+      accessDurationMs = value * multipliers[unit];
+    }
+  }
+
+  const accessExpiresAt = new Date(Date.now() + accessDurationMs);
+  const refreshExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
   const authCookies = await cookies();
-  authCookies.set(SESSION_COOKIE_KEY, session, {
+  authCookies.set(ACCESS_TOKEN_KEY, payload.accessToken, {
     httpOnly: true,
     secure: true,
-    expires: expiresAt,
+    expires: accessExpiresAt,
+    sameSite: "lax",
+    path: "/",
+  });
+
+  authCookies.set(REFRESH_TOKEN_KEY, payload.refreshToken, {
+    httpOnly: true,
+    secure: true,
+    expires: refreshExpiresAt,
     sameSite: "lax",
     path: "/",
   });
@@ -40,17 +54,15 @@ export async function createSession(payload: SessionPayload) {
 
 export async function destroySession() {
   const authCookies = await cookies();
-  authCookies.delete("session");
-}
 
-export async function decrypt(session: string): Promise<SessionPayload | null> {
-  try {
-    const { payload } = await jwtVerify(session, encodedKey, {
-      algorithms: ["HS256"],
-    });
-    return payload as SessionPayload;
-  } catch (error) {
-    console.error("Falha ao decifrar sessão:", error);
-    return null;
-  }
+  const options = {
+    path: "/",
+    maxAge: 0,
+    expires: new Date(0),
+    httpOnly: true,
+    secure: true,
+  };
+
+  authCookies.set(ACCESS_TOKEN_KEY, "", options);
+  authCookies.set(REFRESH_TOKEN_KEY, "", options);
 }

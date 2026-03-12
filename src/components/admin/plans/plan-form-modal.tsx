@@ -51,6 +51,7 @@ export function PlanFormModal() {
                 hasSuppliers: false,
                 hasAppearance: false,
                 hasPrintFormats: false,
+                hasStockReservation: false,
             },
         },
     });
@@ -74,6 +75,7 @@ export function PlanFormModal() {
                     hasSuppliers: plan.features.hasSuppliers ?? false,
                     hasAppearance: plan.features.hasAppearance ?? false,
                     hasPrintFormats: plan.features.hasPrintFormats ?? false,
+                    hasStockReservation: plan.features.hasStockReservation ?? false,
                 },
             });
         } else if (!isOpen) {
@@ -311,6 +313,18 @@ export function PlanFormModal() {
                                             <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                                         </FieldContent>
                                         <FieldLabel className="leading-none pt-1">Formatos de Impressão</FieldLabel>
+                                    </Field>
+                                )}
+                            />
+                            <Controller
+                                control={control}
+                                name="features.hasStockReservation"
+                                render={({ field }) => (
+                                    <Field orientation="horizontal" className="gap-3">
+                                        <FieldContent>
+                                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                                        </FieldContent>
+                                        <FieldLabel className="leading-none pt-1">Reserva de Stock</FieldLabel>
                                     </Field>
                                 )}
                             />

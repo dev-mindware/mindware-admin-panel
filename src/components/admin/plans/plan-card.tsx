@@ -19,6 +19,7 @@ export function PlanCard({ plan, onEdit, onDelete }: PlanCardProps) {
         { label: "Faturação", enabled: plan.features.hasInvoices },
         { label: "Relatórios", enabled: plan.features.hasReporting },
         { label: "Fornecedores", enabled: plan.features.hasSuppliers },
+        { label: "Reserva de Stock", enabled: plan.features.hasStockReservation },
     ];
 
     return (

@@ -17,6 +17,7 @@ export const PlanSchema = z.object({
     hasSuppliers: z.boolean(),
     hasAppearance: z.boolean(),
     hasPrintFormats: z.boolean(),
+    hasStockReservation: z.boolean(),
   }),
 });
 

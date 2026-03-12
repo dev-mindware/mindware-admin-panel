@@ -4,9 +4,8 @@ import {
   DEFAULT_LOGIN_REDIRECT,
   PRIVATE_ROUTE_PREFIXES,
   PUBLIC_ROUTES,
-  SESSION_COOKIE_KEY,
+  REFRESH_TOKEN_KEY,
 } from "./constants";
-import { decrypt } from "./lib/session";
 
 const ADMIN_DASHBOARD = "/dashboard";
 
@@ -38,9 +37,7 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const cookieValue = req.cookies.get(SESSION_COOKIE_KEY)?.value;
-  const sessionPayload = cookieValue ? await decrypt(cookieValue) : null;
-  const isAuthenticated = Boolean(sessionPayload);
+  const isAuthenticated = req.cookies.has(REFRESH_TOKEN_KEY);
 
   const isPublic = isPublicRoute(pathname);
   const isPrivate = PRIVATE_ROUTE_PREFIXES.some((p) => pathname.startsWith(p));

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getAccessToken } from "@/actions/token";
-import { reauthenticate } from "@/actions/auth";
 
+let accessTokenCache: string | null = null;
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (token: string) => void;
@@ -21,17 +21,23 @@ const processQueue = (error: any, token: string | null = null) => {
 };
 
 export const api = axios.create({
-  baseURL:
-    process.env.NEXT_PUBLIC_API_URL || "https://mindgest-api.onrender.com/api",
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
 api.interceptors.request.use(async (config) => {
-  const token = await getAccessToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (!accessTokenCache) {
+    accessTokenCache = await getAccessToken();
+  }
+
+  const isAuthRoute =
+    config.url?.includes("/auth/login") ||
+    config.url?.includes("/auth/refresh");
+
+  if (accessTokenCache && !isAuthRoute) {
+    config.headers.Authorization = `Bearer ${accessTokenCache}`;
   }
 
   return config;
@@ -42,7 +48,12 @@ api.interceptors.response.use(
   async (err) => {
     const original = err.config;
 
-    if (original.url.includes("/auth/") || original._retry) {
+    // Ignore routes that shouldn't trigger refresh or are already retrying
+    if (
+      original.url.includes("/auth/login") ||
+      original.url.includes("/api/auth/refresh") ||
+      original._retry
+    ) {
       return Promise.reject(err);
     }
 
@@ -64,10 +75,12 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        await reauthenticate();
-        const newToken = await getAccessToken();
+        // Internal Next.js route call which handles HttpOnly cookies
+        const response = await axios.post("/api/auth/refresh");
+        const newToken = response.data?.accessToken;
 
         if (newToken) {
+          accessTokenCache = newToken;
           processQueue(null, newToken);
           original.headers.Authorization = `Bearer ${newToken}`;
           return api(original);
@@ -75,13 +88,13 @@ api.interceptors.response.use(
           throw new Error("Novo access token não recebido após reautenticação");
         }
       } catch (refreshError) {
+        accessTokenCache = null;
         processQueue(refreshError, null);
         console.error("Erro ao renovar token:", refreshError);
 
-        const { clearLocalSession } = await import("@/actions/auth");
-        await clearLocalSession();
-
-        window.location.replace("/auth/login");
+        if (typeof window !== "undefined") {
+          window.location.replace("/auth/login");
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

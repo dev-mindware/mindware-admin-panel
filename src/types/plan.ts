@@ -7,6 +7,7 @@ export interface PlanFeatures {
   hasSuppliers: boolean;
   hasAppearance?: boolean;
   hasPrintFormats?: boolean;
+  hasStockReservation?: boolean;
 }
 
 export interface Plan {

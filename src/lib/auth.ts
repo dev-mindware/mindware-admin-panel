@@ -1,9 +1,17 @@
-import { cookies } from 'next/headers';
-import { decrypt, SessionPayload } from './session';
-import { SESSION_COOKIE_KEY } from '@/constants';
+"use server";
+import { cookies } from "next/headers";
+import { SessionPayload } from "./session";
+import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "@/constants";
 
 export async function getSession(): Promise<SessionPayload | null> {
-  const sessionCookie = (await cookies()).get(SESSION_COOKIE_KEY)?.value;
-  if (!sessionCookie) return null;
-  return await decrypt(sessionCookie);
+  const authCookies = await cookies();
+  const accessToken = authCookies.get(ACCESS_TOKEN_KEY)?.value;
+  const refreshToken = authCookies.get(REFRESH_TOKEN_KEY)?.value;
+
+  if (!refreshToken) return null;
+
+  return {
+    accessToken: accessToken ?? "",
+    refreshToken,
+  };
 }

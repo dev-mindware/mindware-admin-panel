@@ -1,12 +1,10 @@
 "use server";
 import { z } from "zod";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import { LoginResponse, User } from "@/types";
 import { loginSchema } from "@/schemas";
 import api from "@/services/api";
 import { createSession } from "@/lib/session";
-import { SESSION_COOKIE_KEY } from "@/constants";
 import { getSession } from "@/lib/auth";
 
 export async function loginAction({
@@ -31,9 +29,9 @@ export async function loginAction({
     console.log(res.data);
 
     await createSession({
-      user,
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
+      expiresIn: tokens.expiresIn,
     });
 
     const redirectPath = "/dashboard";
@@ -64,8 +62,8 @@ export async function logoutAction() {
   } catch (error) {
     console.error("🚨 Erro ao fazer logout remoto:", error);
   } finally {
-    const authCookies = await cookies();
-    authCookies.delete(SESSION_COOKIE_KEY);
+    const { destroySession } = await import("@/lib/session");
+    await destroySession();
     redirect("/auth/login");
   }
 }
