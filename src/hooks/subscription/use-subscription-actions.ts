@@ -19,7 +19,7 @@ export function useSubscriptionActions() {
     function getAvailableActions(subscription: Subscription) {
         const actions = [];
 
-        if (subscription.status === "PENDING") {
+        if (subscription.status === "PENDING" || subscription.status === "CANCELLED") {
             actions.push({
                 label: "Ativar",
                 icon: "Check" as const,
