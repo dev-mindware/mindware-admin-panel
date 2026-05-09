@@ -15,6 +15,9 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "Affiliate Management - Mindware",
   description: "Sistema de Gestão de Afiliados Mindware",
+  icons: {
+    icon: "/mindware.png",
+  },
 };
 
 import { Providers } from "@/providers";

@@ -7,8 +7,7 @@ import { adminMenuItems } from "@/constants/menu-items";
 import { useAuthStore } from "@/stores/auth/auth-store";
 import { logoutAction } from "@/actions/logout";
 
-export function AppSidebar(props: Omit<React.ComponentProps<typeof GlobalSidebar>, "user" | "teams" | "navMain" | "onLogout">) {
-  const menuItems = adminMenuItems;
+export function AppSidebar(props: Partial<React.ComponentProps<typeof GlobalSidebar>>) {
   const { user, setUser } = useAuthStore();
 
   const handleLogout = async () => {
@@ -30,11 +29,19 @@ export function AppSidebar(props: Omit<React.ComponentProps<typeof GlobalSidebar
     },
   ];
 
+  // Mapeia os itens seguindo o padrão do Mindgest para o GlobalSidebar
+  const navMain = adminMenuItems.items.map(item => ({
+    title: item.name,
+    url: item.url,
+    icon: (props: any) => item.icon,
+    items: item.items?.map(sub => ({ title: sub.name, url: sub.url }))
+  }));
+
   return (
     <GlobalSidebar
       user={userData}
       teams={teams}
-      navMain={menuItems}
+      navMain={navMain}
       onLogout={handleLogout}
       {...props}
     />

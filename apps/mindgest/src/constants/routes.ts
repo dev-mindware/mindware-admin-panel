@@ -19,6 +19,6 @@ export const PRIVATE_ROUTE_PREFIXES = [
 
 export const BASE_PATH = "/mindgest";
 export const API_AUTH_PREFIX = "/api/auth";
-export const DEFAULT_LOGIN_REDIRECT = `${BASE_PATH}/dashboard`; // Atualizado com prefixo
-export const UPGRADE_REDIRECT = `${BASE_PATH}/plans`; // Atualizado com prefixo
+export const DEFAULT_LOGIN_REDIRECT = "/dashboard";
+export const UPGRADE_REDIRECT = "/plans";
 

@@ -1,76 +1,83 @@
-import {
-  LayoutDashboard,
-  Users,
-  Bell,
-  Wallet,
-  Settings,
-  ShieldCheck,
-  FileText,
-  BadgeDollarSign,
-} from "lucide-react";
+import { Icon } from "@/components";
 
-export const adminMenuItems = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Afiliados",
-    url: "/affiliates",
-    icon: Users,
-  },
-  {
-    title: "Leads",
-    url: "/leads",
-    icon: Bell,
-  },
-  {
-    title: "Comissões",
-    url: "/commissions",
-    icon: BadgeDollarSign,
-  },
-  {
-    title: "Pagamentos",
-    url: "/withdrawals",
-    icon: Wallet,
-  },
-  {
-    title: "Serviços",
-    url: "/services",
-    icon: FileText,
-  },
-  {
-    title: "Configurações",
-    url: "/definitions",
-    icon: Settings,
-  },
-];
+export type MenuItem = {
+  name: string;
+  url: string;
+  icon?: React.ReactNode;
+  showMoreIcon?: boolean;
+  items?: MenuItem[];
+};
 
-export const affiliateMenuItems = [
-  {
-    title: "Painel",
-    url: "/affiliate/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Meus Leads",
-    url: "/affiliate/leads",
-    icon: Bell,
-  },
-  {
-    title: "Minhas Comissões",
-    url: "/affiliate/commissions",
-    icon: BadgeDollarSign,
-  },
-  {
-    title: "Carteira",
-    url: "/affiliate/wallet",
-    icon: Wallet,
-  },
-  {
-    title: "Perfil",
-    url: "/affiliate/profile",
-    icon: Settings,
-  },
-];
+export type MenuStructure = {
+  items: MenuItem[];
+};
+
+export const adminMenuItems: MenuStructure = {
+  items: [
+    {
+      name: "Dashboard",
+      url: "/dashboard",
+      icon: <Icon name="LayoutDashboard" />,
+    },
+    {
+      name: "Afiliados",
+      url: "/affiliates",
+      icon: <Icon name="Users" />,
+    },
+    {
+      name: "Leads",
+      url: "/leads",
+      icon: <Icon name="Bell" />,
+    },
+    {
+      name: "Comissões",
+      url: "/commissions",
+      icon: <Icon name="BadgeDollarSign" />,
+    },
+    {
+      name: "Pagamentos",
+      url: "/withdrawals",
+      icon: <Icon name="Wallet" />,
+    },
+    {
+      name: "Serviços",
+      url: "/services",
+      icon: <Icon name="FileText" />,
+    },
+    {
+      name: "Configurações",
+      url: "/definitions",
+      icon: <Icon name="Settings" />,
+    },
+  ],
+};
+
+export const affiliateMenuItems: MenuStructure = {
+  items: [
+    {
+      name: "Painel",
+      url: "/dashboard",
+      icon: <Icon name="LayoutDashboard" />,
+    },
+    {
+      name: "Meus Leads",
+      url: "/leads",
+      icon: <Icon name="Bell" />,
+    },
+    {
+      name: "Minhas Comissões",
+      url: "/commissions",
+      icon: <Icon name="BadgeDollarSign" />,
+    },
+    {
+      name: "Carteira",
+      url: "/wallet",
+      icon: <Icon name="Wallet" />,
+    },
+    {
+      name: "Perfil",
+      url: "/profile",
+      icon: <Icon name="Settings" />,
+    },
+  ],
+};

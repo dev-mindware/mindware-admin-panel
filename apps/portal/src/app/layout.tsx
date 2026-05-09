@@ -3,6 +3,9 @@ import "@/app/globals.css";
 export const metadata = {
   title: "Mindware Portal",
   description: "Central access to Mindware Ecosystem",
+  icons: {
+    icon: "/mindgest/logo.png",
+  },
 };
 
 export default function RootLayout({

@@ -97,7 +97,7 @@ api.interceptors.response.use(
         console.error("Erro ao renovar token:", refreshError);
 
         if (typeof window !== "undefined") {
-          window.location.replace("/mindgest/auth/login");
+          window.location.replace("/auth/login");
         }
         return Promise.reject(refreshError);
       } finally {
