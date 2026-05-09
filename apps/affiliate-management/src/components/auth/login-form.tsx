@@ -19,6 +19,7 @@ import { loginAction } from "@/actions/login";
 import { useAuthStore } from "@/stores/auth/auth-store";
 import { GoogleButton } from "./google-button";
 import { OrLine } from "./or-line";
+import { DEFAULT_LOGIN_REDIRECT } from "@/constants/routes";
 
 export function LoginForm() {
   const router = useRouter();
@@ -41,7 +42,7 @@ export function LoginForm() {
       }
 
       // The useFetchUser hook will pick up the user from the cookie
-      router.replace("/dashboard");
+      router.replace(DEFAULT_LOGIN_REDIRECT);
     } catch (error) {
       console.error(error);
       ErrorMessage("Ocorreu um erro inesperado. Tente novamente.");

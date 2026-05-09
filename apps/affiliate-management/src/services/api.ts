@@ -107,7 +107,7 @@ api.interceptors.response.use(
         processQueue(refreshError, null);
         
         if (typeof window !== "undefined") {
-          window.location.replace("/auth/login");
+          window.location.replace("/affiliate/auth/login");
         }
         return Promise.reject(refreshError);
       } finally {

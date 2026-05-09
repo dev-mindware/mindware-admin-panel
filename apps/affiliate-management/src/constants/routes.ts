@@ -17,7 +17,8 @@ export const PRIVATE_ROUTE_PREFIXES = [
   "/settings",
 ];
 
+export const BASE_PATH = "/affiliate";
 export const API_AUTH_PREFIX = "/api/auth";
-export const DEFAULT_LOGIN_REDIRECT = "/dashboard"; // Updated to /dashboard
-export const UPGRADE_REDIRECT = "/plans"; // Updated to /plans
+export const DEFAULT_LOGIN_REDIRECT = `${BASE_PATH}/dashboard`; // Atualizado com prefixo
+export const UPGRADE_REDIRECT = `${BASE_PATH}/plans`; // Atualizado com prefixo
 

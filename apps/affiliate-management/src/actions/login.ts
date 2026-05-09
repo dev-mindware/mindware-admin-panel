@@ -50,6 +50,6 @@ export async function logoutAction() {
     console.error("Logout Error:", error);
   } finally {
     await destroySession();
-    redirect("/auth/login");
+    redirect("/affiliate/auth/login");
   }
 }

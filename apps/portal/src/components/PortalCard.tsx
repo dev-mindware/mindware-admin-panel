@@ -21,7 +21,7 @@ export function PortalCard({ id, href, label, title, hoveredCard, onHover }: Por
         className={`absolute -inset-8 bg-purple-500/25 blur-[60px] rounded-[3rem] pointer-events-none transition-all duration-[1500ms] ease-out ${isHovered ? "opacity-100 scale-110" : "opacity-0 scale-90"}`} 
       />
 
-      <Link
+      <a
         href={href}
         onMouseEnter={() => onHover(id)}
         onMouseLeave={() => onHover(null)}
@@ -68,7 +68,7 @@ export function PortalCard({ id, href, label, title, hoveredCard, onHover }: Por
             {title}
           </h2>
         </div>
-      </Link>
+      </a>
     </div>
   );
 }

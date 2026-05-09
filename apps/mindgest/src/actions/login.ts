@@ -64,6 +64,6 @@ export async function logoutAction() {
   } finally {
     const { destroySession } = await import("@/lib/session");
     await destroySession();
-    redirect("/auth/login");
+    redirect("/mindgest/auth/login");
   }
 }
