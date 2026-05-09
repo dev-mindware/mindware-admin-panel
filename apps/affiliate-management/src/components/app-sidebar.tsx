@@ -17,7 +17,7 @@ export function AppSidebar(props: Omit<React.ComponentProps<typeof GlobalSidebar
   };
 
   const userData = {
-    name: user?.nome_completo || user?.email || "Admin Mindware",
+    name: (user as any)?.nome_completo || user?.email || "Admin Mindware",
     email: user?.email || "admin@mindware.ao",
     avatar: "",
   };
