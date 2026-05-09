@@ -1,2 +1,6 @@
-quando aprovar deve redirecionar automaticamente pra a tela de dashboard
-e os menus devem surgir automaticamente *(notar a mudança na api e renderizar )
+- [x] Stabilization of imports and generic logic in `@workspace/ui` and `@workspace/hooks`
+- [x] Shared AuthStore and ModalStore implementation in `@workspace/hooks`
+- [x] Resolve all build errors in `affiliate-management`
+- [x] Verify stable dashboard load
+- [x] Implement automatic redirect to dashboard upon approval
+- [x] Update menu rendering based on API changes
