@@ -12,16 +12,9 @@ export async function POST() {
   }
 
   try {
-    const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-      {},
-      {
-        headers: {
-          Cookie: `${REFRESH_TOKEN_KEY}=${refreshToken}`,
-        },
-        withCredentials: true,
-      }
-    );
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, {
+      refresh_token: refreshToken,
+    });
 
     const { access_token, refresh_token } = response.data;
 

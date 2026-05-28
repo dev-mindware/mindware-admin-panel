@@ -6,3 +6,4 @@ export * from "./service-service";
 export * from "./withdrawal-service";
 export * from "./approval-service";
 export * from "./dashboard-service";
+export * from "./partner-program-service";

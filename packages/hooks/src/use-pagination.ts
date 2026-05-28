@@ -52,6 +52,16 @@ export function usePagination<T>({
 
       const raw = response.data;
 
+      if (Array.isArray(raw)) {
+        return {
+          data: raw as T[],
+          total: raw.length,
+          page,
+          limit,
+          totalPages: 1,
+        } satisfies PaginationResponse<T>;
+      }
+
       return {
         data: raw.items ?? raw.data ?? [],
         total: raw.total ?? 0,

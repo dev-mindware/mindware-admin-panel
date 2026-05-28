@@ -21,7 +21,7 @@ export function WithdrawalModals() {
     const { mutate: approve, isPending: isApproving } = useApproveWithdrawal();
     const { mutate: reject, isPending: isRejecting } = useRejectWithdrawal();
 
-    const [file, setFile] = useState<File | null>(null);
+    const [_file, setFile] = useState<File | null>(null);
     const [notas, setNotas] = useState("");
 
     const withdrawal = modalData["approve-withdrawal"] as WithdrawalRequest || modalData["reject-withdrawal"] as WithdrawalRequest;
@@ -29,16 +29,10 @@ export function WithdrawalModals() {
     if (!withdrawal) return null;
 
     const handleApprove = () => {
-        if (!file) {
-            toast.error("Por favor, selecione o comprovativo.");
-            return;
-        }
-
-        approve({ id: withdrawal.id, file }, {
+        approve({ id: withdrawal.id, file: undefined as any }, {
             onSuccess: () => {
                 toast.success("Pagamento aprovado com sucesso!");
                 closeModal("approve-withdrawal");
-                setFile(null);
             },
             onError: (error: any) => {
                 toast.error(error.response?.data?.detail || "Erro ao aprovar pagamento.");

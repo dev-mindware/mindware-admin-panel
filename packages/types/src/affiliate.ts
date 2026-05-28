@@ -20,6 +20,25 @@ export enum CommissionStatus {
   REJECTED = "rejected",
 }
 
+export enum PartnerLevel {
+  NONE = "none",
+  SILVER = "silver",
+  GOLD = "gold",
+  ELITE = "elite",
+}
+
+export enum CertificationStatus {
+  NOT_ELIGIBLE = "not_eligible",
+  ELIGIBLE = "eligible",
+  APPROVED = "approved",
+  REJECTED = "rejected",
+}
+
+export enum PartnerType {
+  AFFILIATE = "affiliate",
+  CERTIFIED_COMMERCIAL = "certified_commercial",
+}
+
 export interface Service {
   id: number;
   nome: string;
@@ -41,11 +60,65 @@ export interface Affiliate {
   banco: string;
   codigo_afiliado: string;
   status: AffiliateStatus;
+  partner_type?: PartnerType;
+  partner_level?: PartnerLevel;
+  certification_status?: CertificationStatus;
   total_earned: number;
   total_paid: number;
   approved_at?: string;
   approved_by?: string;
   created_at: string;
+}
+
+export interface PartnerProgramPlan {
+  id: number;
+  code: "BASE" | "SMART" | "CUSTOM";
+  name: string;
+  description?: string;
+  price: number;
+  first_monthly_percent: number;
+  recurring_monthly_percent: number;
+  annual_first_percent: number;
+  minimum_custom_price?: number | null;
+  mindware_minimum_net?: number | null;
+  certified_only: boolean;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PartnerSubscription {
+  id: string;
+  affiliate_id: string;
+  plan_id: number;
+  external_payment_id: string;
+  client_name: string;
+  client_identifier: string;
+  amount_paid: number;
+  paid_at: string;
+  billing_period: "monthly_first" | "monthly_recurring" | "annual_first";
+  status: "active" | "cancelled" | "payment_failed" | "suspended" | "refunded" | "chargeback";
+  source: "manual" | "webhook";
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SubscriptionPaymentCreate {
+  external_payment_id: string;
+  affiliate_code: string;
+  client_name: string;
+  client_identifier: string;
+  plan_code: "BASE" | "SMART" | "CUSTOM";
+  amount_paid: number;
+  paid_at: string;
+  billing_period: "monthly_first" | "monthly_recurring" | "annual_first";
+  notes?: string;
+}
+
+export interface SubscriptionStatusUpdate {
+  status: PartnerSubscription["status"];
+  notes?: string;
 }
 
 export interface Lead {
@@ -92,7 +165,7 @@ export interface WithdrawalRequest {
   affiliate_nome?: string;
   valor: number;
   status: WithdrawalStatus;
-  requested_at: string;
+  created_at: string;
   processed_at?: string;
   comprovativo_url?: string;
   notas_admin?: string;

@@ -5,7 +5,7 @@ import { Commission, CommissionStatus, CommissionCreate } from "@workspace/types
 export const commissionService = {
   listCommissions: async (status?: CommissionStatus, page = 1, size = 10) => {
     return api.get<PaginatedResponse<Commission>>("/admin/commissions", {
-      params: { status, page, size }
+      params: { status, page, limit: size }
     });
   },
 
@@ -18,12 +18,7 @@ export const commissionService = {
   },
 
   rejectCommission: async (id: string, notas: string) => {
-    // Backend expects notas as form data
-    const formData = new FormData();
-    formData.append("notas", notas);
-    return api.post<Commission>(`/admin/commissions/${id}/reject`, formData, {
-      headers: { "Content-Type": "multipart/form-data" }
-    });
+    return api.post<Commission>(`/admin/commissions/${id}/reject`, { notas });
   },
 
   payCommission: async (id: string, comprovativo: File) => {

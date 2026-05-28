@@ -64,7 +64,7 @@ export function WithdrawalList() {
             header: "Data Solicitação",
             render: (_, item) => (
                 <div className="text-sm text-muted-foreground">
-                    {formatDate(item.requested_at)}
+                    {formatDate(item.created_at)}
                 </div>
             ),
         },

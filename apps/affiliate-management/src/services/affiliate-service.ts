@@ -5,7 +5,7 @@ import { Affiliate, AffiliateStatus, AffiliateUpdate } from "@workspace/types/af
 export const affiliateService = {
   listAffiliates: async (status?: AffiliateStatus, page = 1, size = 10) => {
     return api.get<PaginatedResponse<Affiliate>>("/admin/affiliates", {
-      params: { status, page, size }
+      params: { status, page, limit: size }
     });
   },
   
@@ -18,6 +18,6 @@ export const affiliateService = {
   },
 
   approveAffiliate: async (id: string) => {
-    return api.post<Affiliate>(`/admin/affiliates/${id}/approve`);
+    return api.post<Affiliate>(`/admin/approvals/${id}/approve`);
   }
 };
