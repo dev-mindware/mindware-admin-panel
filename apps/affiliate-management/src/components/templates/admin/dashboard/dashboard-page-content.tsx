@@ -6,7 +6,7 @@ export function DashboardPageContent() {
     <div className="flex flex-col gap-6">
       <TitleList
         title="Dashboard"
-        suTitle="Monitorize afiliados, leads, comissoes e pagamentos em tempo real."
+        suTitle="Monitorize afiliados, leads, comissões e pagamentos em tempo real."
       />
       <DashboardContent />
     </div>

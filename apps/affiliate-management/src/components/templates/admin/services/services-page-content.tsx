@@ -10,13 +10,13 @@ export function ServicesPageContent() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <TitleList
-          title="Servicos e Comissoes"
-          suTitle="Defina os produtos disponiveis para afiliados e as suas margens."
+          title="Serviços e Comissões"
+          suTitle="Defina os produtos disponíveis para afiliados e as suas margens."
         />
         <CreateServiceButton />
       </div>
 
-      <Suspense fallback={<div>Carregando servicos...</div>}>
+      <Suspense fallback={<div>A carregar serviços...</div>}>
         <ServiceList />
       </Suspense>
     </div>

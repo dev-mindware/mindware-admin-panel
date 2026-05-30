@@ -184,9 +184,23 @@ export interface LeadUpdate {
   status: LeadStatus;
 }
 
-export interface AffiliateUpdate {
+export interface AffiliateCreate {
+  nome_completo: string;
+  email: string;
+  telefone?: string;
+  conta_bancaria?: string;
+  banco?: string;
   status?: AffiliateStatus;
-  comissao_percentagem?: number;
+  password?: string;
+}
+
+export interface AffiliateUpdate {
+  nome_completo?: string;
+  email?: string;
+  telefone?: string;
+  conta_bancaria?: string;
+  banco?: string;
+  status?: AffiliateStatus;
 }
 
 export interface CommissionCreate {

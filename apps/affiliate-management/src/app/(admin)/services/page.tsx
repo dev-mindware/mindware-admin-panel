@@ -2,7 +2,7 @@ import { PageWrapper, ServicesPageContent } from "@/components";
 
 export default function ServicesPage() {
   return (
-    <PageWrapper subRoute="Catalogo de Servicos" routeLabel="Servicos">
+    <PageWrapper subRoute="Catálogo de Serviços" routeLabel="Serviços">
       <ServicesPageContent />
     </PageWrapper>
   );

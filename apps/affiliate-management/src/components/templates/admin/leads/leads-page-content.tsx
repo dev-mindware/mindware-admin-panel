@@ -22,7 +22,7 @@ export function LeadsPageContent() {
         </Button>
       </div>
 
-      <Suspense fallback={<div>Carregando leads...</div>}>
+      <Suspense fallback={<div>A carregar leads...</div>}>
         <LeadList />
       </Suspense>
     </div>

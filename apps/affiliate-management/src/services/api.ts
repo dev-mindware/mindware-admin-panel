@@ -92,7 +92,7 @@ api.interceptors.response.use(
         const newToken = response.data?.accessToken;
 
         if (!newToken) {
-          throw new Error("Novo access token nao recebido");
+          throw new Error("Novo token de acesso não recebido");
         }
 
         accessTokenCache = newToken;

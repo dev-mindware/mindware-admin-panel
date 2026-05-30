@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { affiliateService } from "@/services/affiliate-service";
-import { Affiliate, AffiliateStatus } from "@workspace/types/affiliate";
+import { Affiliate, AffiliateCreate, AffiliateStatus, AffiliateUpdate } from "@workspace/types/affiliate";
 import { usePagination } from "@workspace/hooks";
 import { api } from "@/services/api";
 
@@ -29,3 +29,36 @@ export function useUpdateAffiliateStatus() {
   });
 }
 
+export function useCreateAffiliate() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: AffiliateCreate) => affiliateService.createAffiliate(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["affiliates"] });
+    },
+  });
+}
+
+export function useUpdateAffiliate() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: AffiliateUpdate }) =>
+      affiliateService.updateAffiliate(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["affiliates"] });
+    },
+  });
+}
+
+export function useDeleteAffiliate() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => affiliateService.deleteAffiliate(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["affiliates"] });
+    },
+  });
+}

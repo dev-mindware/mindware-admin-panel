@@ -7,9 +7,9 @@ export function WithdrawalsPageContent() {
     <div className="flex flex-col gap-6">
       <TitleList
         title="Pagamentos"
-        suTitle="Gerencie e processe as retiradas de fundos dos afiliados."
+        suTitle="Faça a gestão e processe os levantamentos dos afiliados."
       />
-      <Suspense fallback={<div>Carregando solicitacoes...</div>}>
+      <Suspense fallback={<div>A carregar solicitações...</div>}>
         <WithdrawalList />
       </Suspense>
     </div>

@@ -6,10 +6,10 @@ export function CommissionsPageContent() {
   return (
     <div className="flex flex-col gap-6">
       <TitleList
-        title="Comissoes"
-        suTitle="Gerencie os pagamentos devidos aos seus afiliados."
+        title="Comissões"
+        suTitle="Faça a gestão dos pagamentos devidos aos seus afiliados."
       />
-      <Suspense fallback={<div>Carregando comissoes...</div>}>
+      <Suspense fallback={<div>A carregar comissões...</div>}>
         <CommissionList />
       </Suspense>
     </div>
