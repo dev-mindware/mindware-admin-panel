@@ -2,7 +2,6 @@
 import { redirect } from "next/navigation";
 import api from "@/services/api";
 import { createSession, destroySession } from "@/lib/session";
-import { BASE_PATH } from "@/constants/routes";
 
 interface LoginResponse {
   access_token: string;
@@ -35,7 +34,11 @@ export async function loginAction(data: any) {
       return { error: "Acesso restrito a administradores." };
     }
 
-    return { success: true };
+    return {
+      success: true,
+      accessToken: access_token,
+      user: userRes.data,
+    };
   } catch (error: any) {
     console.error("Login Error:", error.response?.data || error.message);
     const message = error.response?.data?.message || error.response?.data?.detail || "Erro ao realizar login. Verifique as suas credenciais.";
@@ -50,6 +53,6 @@ export async function logoutAction() {
     console.error("Logout Error:", error);
   } finally {
     await destroySession();
-    redirect(`${BASE_PATH}/auth/login`);
+    redirect("/auth/login");
   }
 }

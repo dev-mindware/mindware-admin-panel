@@ -13,6 +13,10 @@ export const resetAccessTokenCache = () => {
   accessTokenCache = null;
 };
 
+export const setAccessTokenCache = (token: string | null) => {
+  accessTokenCache = token;
+};
+
 const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach((promise) => {
     if (error) {
@@ -26,7 +30,7 @@ const processQueue = (error: unknown, token: string | null = null) => {
 };
 
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333/api",
   headers: {
     "Content-Type": "application/json",
   },

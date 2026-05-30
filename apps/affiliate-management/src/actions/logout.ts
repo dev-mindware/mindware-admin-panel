@@ -2,7 +2,6 @@
 
 import { destroySession } from "@/lib/session";
 import { redirect } from "next/navigation";
-import { BASE_PATH } from "@/constants/routes";
 import api from "@/services/api";
 
 export async function logoutAction() {
@@ -11,6 +10,6 @@ export async function logoutAction() {
   } catch {
   } finally {
     await destroySession();
-    redirect(`${BASE_PATH}/auth/login`);
+    redirect("/auth/login");
   }
 }

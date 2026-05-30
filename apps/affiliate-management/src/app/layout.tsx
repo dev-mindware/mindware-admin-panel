@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "@workspace/ui/globals.css";
 import { Outfit } from "next/font/google";
+import { Providers } from "@/providers";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -16,8 +17,6 @@ export const metadata: Metadata = {
   },
 };
 
-import { Providers } from "@/providers";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,9 +28,7 @@ export default function RootLayout({
         className="antialiased"
         style={{ fontFamily: `${outfit.style.fontFamily}` }}
       >
-          <Providers>
-            {children}
-          </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

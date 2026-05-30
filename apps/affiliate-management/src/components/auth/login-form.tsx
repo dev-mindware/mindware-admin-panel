@@ -10,12 +10,13 @@ import { LoginFormData, loginSchema } from "@/schemas";
 import { ButtonSubmit, Input } from "@workspace/ui";
 import { loginAction } from "@/actions/login";
 import { useAuthStore } from "@/stores/auth/auth-store";
+import { setAccessTokenCache } from "@/services/api";
 import { GoogleButton } from "./google-button";
 import { OrLine } from "./or-line";
 
 export function LoginForm() {
   const router = useRouter();
-  const { setUser } = useAuthStore();
+  const { setUser, setIsAuthenticating } = useAuthStore();
   const {
     register,
     handleSubmit,
@@ -33,7 +34,16 @@ export function LoginForm() {
         return;
       }
 
+      if (!res.accessToken || !res.user) {
+        ErrorMessage("Sessão iniciada, mas não foi possível carregar os dados do utilizador.");
+        return;
+      }
+
+      setAccessTokenCache(res.accessToken);
+      setUser(res.user);
+      setIsAuthenticating(false);
       router.replace("/dashboard");
+      router.refresh();
     } catch (error) {
       console.error(error);
       ErrorMessage("Ocorreu um erro inesperado. Tente novamente.");
