@@ -26,6 +26,11 @@ export const menuItems: MenuStructure = {
       icon: <Icon name="Building" />,
     },
     {
+      name: "Utilizadores",
+      url: "/users",
+      icon: <Icon name="Users" />,
+    },
+    {
       name: "Planos",
       url: "/plans",
       icon: <Icon name="Package" />,

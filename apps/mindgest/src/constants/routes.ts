@@ -11,6 +11,7 @@ export const PUBLIC_ROUTES = [
 export const PRIVATE_ROUTE_PREFIXES = [
   "/dashboard",
   "/companies",
+  "/users",
   "/plans",
   "/categories",
   "/logs",
