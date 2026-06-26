@@ -40,7 +40,9 @@ export async function createSession(payload: SessionPayload) {
     secure: true,
     expires: accessExpiresAt,
     sameSite: "lax",
-    path: "/",
+    // Use basePath so cookies are scoped to /mindgest/* and survive
+    // portal rewrites without conflicting with other apps.
+    path: "/mindgest",
   });
 
   authCookies.set(REFRESH_TOKEN_KEY, payload.refreshToken, {
@@ -48,7 +50,7 @@ export async function createSession(payload: SessionPayload) {
     secure: true,
     expires: refreshExpiresAt,
     sameSite: "lax",
-    path: "/",
+    path: "/mindgest",
   });
 }
 
@@ -56,7 +58,9 @@ export async function destroySession() {
   const authCookies = await cookies();
 
   const options = {
-    path: "/",
+    // Must match the path used in createSession, otherwise the browser
+    // won't find the cookies to delete them.
+    path: "/mindgest",
     maxAge: 0,
     expires: new Date(0),
     httpOnly: true,

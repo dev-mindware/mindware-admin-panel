@@ -26,7 +26,8 @@ export function UpdatePassword() {
       closeModal("otp-modal");
 
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      router.replace("/auth/login");
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "/mindgest";
+      window.location.replace(`${basePath}/auth/login`);
     } catch (error) {
       ErrorMessage("Ocorreu um erro ao enviar o email, Tente mais tarde.");
     }

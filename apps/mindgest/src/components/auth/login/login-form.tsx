@@ -32,7 +32,14 @@ export function LoginForm() {
       }
 
       setUser(res.user);
-      router.replace(res.redirectPath || "/");
+      // router.replace does not reliably prepend the Next.js basePath when the
+      // path comes from an external source (server action). Use window.location
+      // with an explicit basePath to guarantee the URL always has /mindgest.
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "/mindgest";
+      const destination = res.redirectPath?.startsWith("/")
+        ? `${basePath}${res.redirectPath}`
+        : `${basePath}/dashboard`;
+      window.location.replace(destination);
     } catch (error) {
       console.error(error);
       ErrorMessage("Ocorreu um erro inesperado. Tente novamente.");

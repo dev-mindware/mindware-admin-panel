@@ -78,9 +78,15 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // Internal Next.js route call which handles HttpOnly cookies
-        // Use absolute URL to avoid SSR/CSR mismatch
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`);
+        // Internal Next.js route call which handles HttpOnly cookies.
+        // Must call the internal API route (not the external backend) so that
+        // server-side cookie reading/writing works. The basePath "/mindgest" is
+        // part of the route when accessed from the browser.
+        const refreshUrl =
+          typeof window !== "undefined"
+            ? `/mindgest/api/auth/refresh`
+            : `${process.env.NEXT_PUBLIC_MINDGEST_URL ?? "http://localhost:3000"}/mindgest/api/auth/refresh`;
+        const response = await axios.post(refreshUrl);
         const newToken = response.data?.accessToken;
 
         if (newToken) {
@@ -97,7 +103,11 @@ api.interceptors.response.use(
         console.error("Erro ao renovar token:", refreshError);
 
         if (typeof window !== "undefined") {
-          window.location.replace("/auth/login");
+          // window.location does NOT respect Next.js basePath — we must include it
+          // manually. Without this the browser navigates to the portal's /auth/login
+          // instead of mindgest's /mindgest/auth/login.
+          const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "/mindgest";
+          window.location.replace(`${basePath}/auth/login`);
         }
         return Promise.reject(refreshError);
       } finally {

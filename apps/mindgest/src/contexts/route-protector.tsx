@@ -22,13 +22,18 @@ export function RouteProtector({
     // Só redireciona após autenticação completa
     if (isAuthenticating) return;
 
+    // window.location is used instead of router.replace because when this app
+    // is accessed through the portal's rewrite proxy the Next.js router may not
+    // prepend the basePath correctly, causing a redirect to the portal's routes.
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "/mindgest";
+
     if (!user) {
-      router.replace("/auth/login");
+      window.location.replace(`${basePath}/auth/login`);
       return;
     }
 
     if (!allowed.includes(user.role)) {
-      router.replace("/unauthorized");
+      window.location.replace(`${basePath}/unauthorized`);
     }
   }, [user, allowed, router, isAuthenticating]);
 
