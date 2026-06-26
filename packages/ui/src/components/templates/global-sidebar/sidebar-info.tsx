@@ -22,7 +22,7 @@ export function SidebarCompanyInfo({ teams }: SidebarCompanyInfoProps) {
     <SidebarMenu className="group-data-[collapsible=icon]:items-center">
       <SidebarMenuItem>
         <SidebarMenuButton size="lg" className="hover:bg-transparent cursor-default">
-          <div className="flex items-center justify-center rounded-lg bg-primary text-sidebar-primary-foreground aspect-square size-8">
+          <div className="flex items-center justify-center rounded-lg bg-primary/5 text-sidebar-primary-foreground aspect-square size-8">
              {typeof team.logo === 'string' ? (
                 <img src={team.logo} alt={team.name} className="size-4" />
              ) : (

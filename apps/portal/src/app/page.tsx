@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { PortalCard } from "@/components/PortalCard";
 import { SpotlightBeam } from "@/components/SpotlightBeam";
@@ -16,6 +17,14 @@ export default function PortalPage() {
       <div className="relative z-10 w-full max-w-5xl mx-auto space-y-24">
         {/* Header Section */}
         <div className={`flex flex-col items-center text-center space-y-6 transition-all duration-[1200ms] ${hoveredCard ? "opacity-20 blur-[2px] -translate-y-2" : "opacity-100"}`}>
+          <Image
+            src="/brand/mindware.png"
+            alt="Mindware"
+            width={96}
+            height={96}
+            priority
+            className="h-20 w-20 sm:h-24 sm:w-24 object-contain drop-shadow-[0_0_30px_rgba(168,85,247,0.25)]"
+          />
           <div className="rounded-full border border-white/5 bg-white/[0.02] px-4 py-1.5 text-xs text-white/50 backdrop-blur-md">
             Portal Mindware
           </div>
@@ -38,6 +47,8 @@ export default function PortalPage() {
             href="/mindgest/auth/login"
             label="GESTÃO CORPORATIVA"
             title="Mindgest"
+            logoSrc="/brand/mindgest.png"
+            logoAlt="Mindgest"
             hoveredCard={hoveredCard}
             onHover={setHoveredCard}
           />
@@ -47,6 +58,8 @@ export default function PortalPage() {
             href="/affiliate/auth/login"
             label="PARCERIAS E NEGÓCIOS"
             title="Afiliados"
+            logoSrc="/brand/mindware.png"
+            logoAlt="Mindware"
             hoveredCard={hoveredCard}
             onHover={setHoveredCard}
           />

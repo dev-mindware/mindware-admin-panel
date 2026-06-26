@@ -17,9 +17,9 @@ export function AppSidebar(props: Partial<React.ComponentProps<typeof GlobalSide
 
   const teams = [
     {
-      name: user?.company?.name || "Mindware",
-      logo: "Building2",
-      plan: "Empresa",
+      name: "Mindgest Admin Panel",
+      logo: "/mindgest/mindgest.png",
+      plan: user?.company?.name || "Wubba Lubba Dub Dub",
     },
   ];
 

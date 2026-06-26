@@ -1,16 +1,18 @@
 import { ArrowUpRight } from "lucide-react";
-import Link from "next/link";
+import Image from "next/image";
 
 interface PortalCardProps {
   id: "mindgest" | "affiliate";
   href: string;
   label: string;
   title: string;
+  logoSrc: string;
+  logoAlt: string;
   hoveredCard: "mindgest" | "affiliate" | null;
   onHover: (id: "mindgest" | "affiliate" | null) => void;
 }
 
-export function PortalCard({ id, href, label, title, hoveredCard, onHover }: PortalCardProps) {
+export function PortalCard({ id, href, label, title, logoSrc, logoAlt, hoveredCard, onHover }: PortalCardProps) {
   const isHovered = hoveredCard === id;
   const isOtherHovered = hoveredCard !== null && hoveredCard !== id;
 
@@ -59,6 +61,16 @@ export function PortalCard({ id, href, label, title, hoveredCard, onHover }: Por
           <ArrowUpRight 
             className={`w-8 h-8 font-light transition-all duration-1000 ${isHovered ? "text-white scale-110 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" : "text-white/20"}`} 
             strokeWidth={1.5} 
+          />
+        </div>
+
+        <div className="relative z-10 flex flex-1 items-center justify-center">
+          <Image
+            src={logoSrc}
+            alt={logoAlt}
+            width={160}
+            height={160}
+            className={`h-32 w-32 sm:h-36 sm:w-36 object-contain transition-all duration-1000 ${isHovered ? "opacity-95 scale-110 drop-shadow-[0_0_35px_rgba(255,255,255,0.22)]" : "opacity-35 scale-100"}`}
           />
         </div>
 

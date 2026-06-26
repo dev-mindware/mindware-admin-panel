@@ -2,8 +2,8 @@ export function Loader() {
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-background">
       <img
-        src="/mindware.png"
-        alt="Logo"
+        src="/mindgest/mindgest.png"
+        alt="Mindgest"
         className="w-20 h-20 mb-4 animate-pulse"
       />
       <div className="text-muted-foreground font-semibold">MINDGEST</div>

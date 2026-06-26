@@ -1,10 +1,18 @@
 import "@/app/globals.css";
+import type { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Mindware Portal",
   description: "Central access to Mindware Ecosystem",
   icons: {
-    icon: "/mindgest/logo.png",
+    icon: [
+      {
+        url: "/brand/mindware.png",
+        type: "image/png",
+      },
+    ],
+    shortcut: "/brand/mindware.png",
+    apple: "/brand/mindware.png",
   },
 };
 
