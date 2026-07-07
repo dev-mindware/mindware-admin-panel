@@ -9,6 +9,9 @@ export const publicApi = axios.create({
     process.env.NEXT_PUBLIC_API_URL || "https://mindgest-api.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
+    ...(process.env.NEXT_PUBLIC_API_KEY
+      ? { "x-api-key": process.env.NEXT_PUBLIC_API_KEY }
+      : {}),
   },
 });
 
