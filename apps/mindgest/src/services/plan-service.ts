@@ -11,7 +11,7 @@ export const planService = {
   },
 
   updatePlan: async (id: string, data: Partial<PlanCreateInput>) => {
-    return api.patch<Plan>(`/plans/${id}`, data);
+    return api.put<Plan>(`/plans/${id}`, data);
   },
 
   deletePlan: async (id: string) => {
