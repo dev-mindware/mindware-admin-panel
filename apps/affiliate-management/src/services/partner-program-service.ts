@@ -46,8 +46,8 @@ export const partnerProgramService = {
     return api.get(`/admin/partner-program/affiliates/${affiliateId}/program-summary`);
   },
 
-  approveCertification: async (affiliateId: string, notes?: string) => {
-    return api.post(`/admin/partner-program/affiliates/${affiliateId}/certification/approve`, { notes });
+  approveCertification: async (affiliateId: string, notes?: string, force?: boolean) => {
+    return api.post(`/admin/partner-program/affiliates/${affiliateId}/certification/approve`, { notes, force });
   },
 
   rejectCertification: async (affiliateId: string, notes?: string) => {

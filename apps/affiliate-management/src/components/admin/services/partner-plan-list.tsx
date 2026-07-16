@@ -49,8 +49,13 @@ export function PartnerPlanList() {
     },
     {
       key: "annual_first_percent",
-      header: "Anual",
+      header: "Anual (1º)",
       render: (_, item) => <span className="text-sm font-medium">{item.annual_first_percent}%</span>,
+    },
+    {
+      key: "annual_recurring_percent",
+      header: "Anual (recorrente)",
+      render: (_, item) => <span className="text-sm font-medium">{item.annual_recurring_percent ?? 0}%</span>,
     },
     {
       key: "certified_only",

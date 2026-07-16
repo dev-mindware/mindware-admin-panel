@@ -24,6 +24,7 @@ export enum PartnerLevel {
   NONE = "none",
   SILVER = "silver",
   GOLD = "gold",
+  PLATINUM = "platinum",
   ELITE = "elite",
 }
 
@@ -70,15 +71,20 @@ export interface Affiliate {
   created_at: string;
 }
 
+export type PartnerPlanCode = "BASE" | "SMART" | "PRO" | "CUSTOM";
+
+export type BillingPeriod = "monthly_first" | "monthly_recurring" | "annual_first" | "annual_recurring";
+
 export interface PartnerProgramPlan {
   id: number;
-  code: "BASE" | "SMART" | "CUSTOM";
+  code: PartnerPlanCode;
   name: string;
   description?: string;
   price: number;
   first_monthly_percent: number;
   recurring_monthly_percent: number;
   annual_first_percent: number;
+  annual_recurring_percent?: number;
   minimum_custom_price?: number | null;
   mindware_minimum_net?: number | null;
   certified_only: boolean;
@@ -90,13 +96,17 @@ export interface PartnerProgramPlan {
 export interface PartnerSubscription {
   id: string;
   affiliate_id: string;
+  affiliate_nome?: string;
+  affiliate_codigo?: string;
   plan_id: number;
+  plan_code?: PartnerPlanCode;
+  plan_name?: string;
   external_payment_id: string;
   client_name: string;
   client_identifier: string;
   amount_paid: number;
   paid_at: string;
-  billing_period: "monthly_first" | "monthly_recurring" | "annual_first";
+  billing_period: BillingPeriod;
   status: "active" | "cancelled" | "payment_failed" | "suspended" | "refunded" | "chargeback";
   source: "manual" | "webhook";
   notes?: string;
@@ -109,16 +119,29 @@ export interface SubscriptionPaymentCreate {
   affiliate_code: string;
   client_name: string;
   client_identifier: string;
-  plan_code: "BASE" | "SMART" | "CUSTOM";
+  plan_code: PartnerPlanCode;
   amount_paid: number;
   paid_at: string;
-  billing_period: "monthly_first" | "monthly_recurring" | "annual_first";
+  billing_period: BillingPeriod;
   notes?: string;
 }
 
 export interface SubscriptionStatusUpdate {
   status: PartnerSubscription["status"];
   notes?: string;
+}
+
+export interface AffiliateProgramSummary {
+  active_clients: number;
+  partner_type: string;
+  certification_status: string;
+  partner_level: string;
+  next_level: string | null;
+  clients_to_next_level: number;
+  recurring_bonus_percent: number;
+  benefits: string[];
+  certified_benefits: string[];
+  withdrawal_minimum: number;
 }
 
 export interface Lead {

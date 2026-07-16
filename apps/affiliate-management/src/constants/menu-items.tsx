@@ -25,9 +25,14 @@ export const adminMenuItems: MenuStructure = {
       icon: <Icon name="Users" />,
     },
     {
-      name: "Leads",
-      url: "/leads",
-      icon: <Icon name="Bell" />,
+      name: "Planos",
+      url: "/plans",
+      icon: <Icon name="Layers" />,
+    },
+    {
+      name: "Subscrições",
+      url: "/subscriptions",
+      icon: <Icon name="CreditCard" />,
     },
     {
       name: "Comissões",
@@ -38,11 +43,6 @@ export const adminMenuItems: MenuStructure = {
       name: "Pagamentos",
       url: "/withdrawals",
       icon: <Icon name="Wallet" />,
-    },
-    {
-      name: "Serviços",
-      url: "/services",
-      icon: <Icon name="FileText" />,
     },
     {
       name: "Configurações",

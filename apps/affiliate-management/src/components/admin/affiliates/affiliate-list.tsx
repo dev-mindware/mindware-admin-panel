@@ -8,6 +8,7 @@ import {
   useUpdateAffiliateStatus,
 } from "@/hooks/affiliate";
 import {
+  Badge,
   ButtonOnlyAction,
   Column,
   FilterBar,
@@ -19,9 +20,30 @@ import {
 import { Affiliate, AffiliateStatus } from "@workspace/types/affiliate";
 import { formatCurrency, formatDate } from "@workspace/utils";
 import { useModalStore } from "@workspace/hooks";
-import { AffiliateDetailsModal } from "./affiliate-details-modal";
+import { useApproveCertification } from "@/hooks/affiliate/use-partner-program";
+import { toast } from "sonner";
 import { AffiliateFormModal } from "./affiliate-form-modal";
 import { DeleteAffiliateModal } from "./delete-affiliate-modal";
+
+const certificationLabels: Record<string, string> = {
+  not_eligible: "Não elegível",
+  eligible: "Elegível",
+  approved: "Certificado",
+  rejected: "Rejeitado",
+};
+
+function certificationBadgeVariant(status?: string) {
+  switch (status) {
+    case "approved":
+      return "success" as const;
+    case "eligible":
+      return "default" as const;
+    case "rejected":
+      return "destructive" as const;
+    default:
+      return "outline" as const;
+  }
+}
 
 export function AffiliateList() {
   const [status, setStatus] = useState<AffiliateStatus | undefined>();
@@ -42,6 +64,7 @@ export function AffiliateList() {
   const { mutate: updateStatus } = useUpdateAffiliateStatus();
   const { mutate: approveAffiliate } = useApproveAffiliate();
   const { mutate: rejectAffiliate } = useRejectAffiliate();
+  const { mutate: approveCertification } = useApproveCertification();
 
   const columns: Column<Affiliate>[] = [
     {
@@ -72,6 +95,15 @@ export function AffiliateList() {
       key: "status",
       header: "Estado",
       render: (_, item) => <ItemStatusBadge status={item.status} />,
+    },
+    {
+      key: "certification_status",
+      header: "Certificação",
+      render: (_, item) => (
+        <Badge variant={certificationBadgeVariant(item.certification_status)}>
+          {certificationLabels[item.certification_status ?? "not_eligible"] ?? item.certification_status}
+        </Badge>
+      ),
     },
     {
       key: "total_earned",
@@ -136,6 +168,23 @@ export function AffiliateList() {
                   },
                 ] as any)
               : []),
+            ...(item.certification_status === "eligible"
+              ? ([
+                  {
+                    label: "Certificar (PRO)",
+                    icon: "Award",
+                    onClick: (current: Affiliate) =>
+                      approveCertification(
+                        { affiliateId: current.id },
+                        {
+                          onSuccess: () => toast.success("Afiliado certificado como Parceiro Comercial (PRO)."),
+                          onError: (error: any) =>
+                            toast.error(error.response?.data?.detail || "Erro ao certificar afiliado."),
+                        },
+                      ),
+                  },
+                ] as any)
+              : []),
             { type: "separator" },
             {
               label: "Eliminar",
@@ -184,7 +233,6 @@ export function AffiliateList() {
         emptyIcon="Users"
       />
 
-      <AffiliateDetailsModal />
       <AffiliateFormModal />
       <DeleteAffiliateModal />
     </div>

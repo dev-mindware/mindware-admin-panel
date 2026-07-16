@@ -1,10 +1,11 @@
 "use client";
 
-import { 
-    WithdrawalModals, 
-    CommissionModals, 
-    LeadDetailsModal, 
-    AffiliateDetailsModal 
+import {
+    WithdrawalModals,
+    CommissionModals,
+    LeadDetailsModal,
+    AffiliateDetailsModal,
+    SubscriptionModals
 } from "./";
 
 export function AdminModalProvider() {
@@ -14,6 +15,7 @@ export function AdminModalProvider() {
             <CommissionModals />
             <LeadDetailsModal />
             <AffiliateDetailsModal />
+            <SubscriptionModals />
         </>
     );
 }

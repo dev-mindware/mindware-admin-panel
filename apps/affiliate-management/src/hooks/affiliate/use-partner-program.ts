@@ -1,11 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { partnerProgramService } from "@/services/partner-program-service";
-import { SubscriptionPaymentCreate, SubscriptionStatusUpdate } from "@workspace/types/affiliate";
+import { AffiliateProgramSummary, SubscriptionPaymentCreate, SubscriptionStatusUpdate } from "@workspace/types/affiliate";
 
 export function useAdminPartnerPlans() {
   return useQuery({
     queryKey: ["admin-partner-program", "plans"],
     queryFn: async () => (await partnerProgramService.listPlans()).data,
+  });
+}
+
+export function useAffiliateProgramSummary(affiliateId?: string) {
+  return useQuery({
+    queryKey: ["admin-partner-program", "program-summary", affiliateId],
+    enabled: !!affiliateId,
+    queryFn: async () => (await partnerProgramService.getAffiliateProgramSummary(affiliateId as string)).data as AffiliateProgramSummary,
   });
 }
 
@@ -61,10 +69,11 @@ export function useReleaseValidatedCommissions() {
 export function useApproveCertification() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ affiliateId, notes }: { affiliateId: string; notes?: string }) =>
-      partnerProgramService.approveCertification(affiliateId, notes),
+    mutationFn: ({ affiliateId, notes, force }: { affiliateId: string; notes?: string; force?: boolean }) =>
+      partnerProgramService.approveCertification(affiliateId, notes, force),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["affiliates"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-partner-program"] });
     },
   });
 }
