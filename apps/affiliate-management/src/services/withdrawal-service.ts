@@ -9,7 +9,14 @@ export const withdrawalService = {
     });
   },
 
-  approveWithdrawal: async (id: string, _file?: File) => {
+  approveWithdrawal: async (id: string, file?: File) => {
+    if (file) {
+      const fd = new FormData();
+      fd.append("file", file);
+      return api.post<WithdrawalRequest>(`/admin/withdrawals/${id}/approve`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+    }
     return api.post<WithdrawalRequest>(`/admin/withdrawals/${id}/approve`);
   },
 

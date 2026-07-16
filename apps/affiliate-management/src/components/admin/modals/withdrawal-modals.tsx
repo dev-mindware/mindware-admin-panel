@@ -29,10 +29,11 @@ export function WithdrawalModals() {
     if (!withdrawal) return null;
 
     const handleApprove = () => {
-        approve({ id: withdrawal.id, file: undefined as any }, {
+        approve({ id: withdrawal.id, file: _file ?? undefined }, {
             onSuccess: () => {
                 toast.success("Pagamento aprovado com sucesso!");
                 closeModal("approve-withdrawal");
+                setFile(null);
             },
             onError: (error: any) => {
                 toast.error(error.response?.data?.detail || "Erro ao aprovar pagamento.");
@@ -67,7 +68,7 @@ export function WithdrawalModals() {
             >
                 <div className="space-y-6">
                     <Field>
-                        <FieldLabel>Comprovativo de Transferência</FieldLabel>
+                        <FieldLabel>Comprovativo de Transferência (opcional)</FieldLabel>
                         <FieldContent>
                             <Input 
                                 id="proof" 
