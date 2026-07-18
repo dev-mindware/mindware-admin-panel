@@ -1,13 +1,11 @@
 "use client";
 import Logo from "@/assets/brand.png";
 import { ButtonSubmit, Input } from "@/components";
-import { useModal } from "@/stores/modal/use-modal-store";
 import { ForgotPasswordFormData } from "@/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { forgotPasswordSchema } from "@/schemas";
 import { ErrorMessage } from "@/utils/messages";
-import { OTPModal } from "./otp-modal";
 import { AuthHeader, BackToLogin } from "../_components";
 import { cn } from "@/lib";
 import Image from "next/image";
@@ -15,25 +13,19 @@ import { useState } from "react";
 import { authService } from "@/services/auth-service";
 
 export function RecoveryPassword() {
-  const { openModal } = useModal();
   const [message, setMessage] = useState("");
   const {
     register,
     handleSubmit,
-    getValues,
     formState: { errors, isSubmitting },
   } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
   });
-  const email = getValues("email");
-
-  
 
   async function onSubmit(data: ForgotPasswordFormData) {
     try {
-      const res = await authService.forgotPassword(email);
+      const res = await authService.forgotPassword(data.email);
       setMessage(res.message);
-      //openModal("otp-modal");
     } catch (error) {
       ErrorMessage("Ocorreu um erro ao enviar o email. Tente mais tarde.");
     }
@@ -71,14 +63,15 @@ export function RecoveryPassword() {
             {isSubmitting ? "Enviando..." : "Verificar"}
           </ButtonSubmit>
 
-          <code>
-            {JSON.stringify(message)}
-          </code>
+          {message && (
+            <p className="rounded-md border border-green-300 bg-green-50 p-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-950/30 dark:text-green-200">
+              {message}
+            </p>
+          )}
 
           <BackToLogin />
         </div>
       </form>
-      <OTPModal email={email} />
     </>
   );
 }

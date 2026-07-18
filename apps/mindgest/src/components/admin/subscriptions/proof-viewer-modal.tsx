@@ -27,7 +27,8 @@ export function ProofViewerModal() {
                     <span>Comprovativo de Pagamento</span>
                 </div>
             }
-            className="w-full max-w-5xl h-[95vh]"
+            size="xl"
+            className="h-[95vh]"
             footer={
                 <div className="flex justify-end gap-2">
                     {proofUrl && (

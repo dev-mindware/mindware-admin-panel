@@ -12,10 +12,10 @@ const roleLabels: Record<UserRole, string> = {
 };
 
 export function UserDetailsModal() {
-  const { modalData, closeModal } = useModal();
+  const { open, modalData, closeModal } = useModal();
   const user = modalData["view-user-details"] as User | undefined;
 
-  if (!user) return null;
+  if (!open["view-user-details"] || !user) return null;
 
   const handleClose = () => closeModal("view-user-details");
 
@@ -23,7 +23,8 @@ export function UserDetailsModal() {
     <GlobalModal
       id="view-user-details"
       title="Detalhes do utilizador"
-      className="max-h-[80vh] overflow-y-auto !w-max !max-w-[80vw]"
+      size="xl"
+      className="max-h-[80vh] overflow-y-auto"
       footer={
         <div className="flex justify-end">
           <Button variant="outline" onClick={handleClose}>
@@ -32,7 +33,7 @@ export function UserDetailsModal() {
         </div>
       }
     >
-      <div className="w-[920px] max-w-[90vw] space-y-6 py-4">
+      <div className="space-y-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 items-center gap-4">
             <div className="flex size-16 shrink-0 items-center justify-center rounded-lg border bg-muted">

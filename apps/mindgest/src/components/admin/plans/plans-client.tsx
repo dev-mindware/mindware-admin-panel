@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
     useAdminPlans,
     useDeletePlan
@@ -9,15 +8,9 @@ import { Plan } from "@/types/plan";
 import {
     Button,
     Icon,
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+    ConfirmModal,
 } from "@/components";
+import { CONFIRM_MODAL_ID } from "@/components/custom/confirm-modal";
 import { PlanList } from "./plan-list";
 import { PlanFormModal } from "./plan-form-modal";
 import { SucessMessage, ErrorMessage } from "@/utils/messages";
@@ -26,10 +19,7 @@ import { useModal } from "@/stores/modal/use-modal-store";
 export function PlansClient() {
     const { plans, isLoading } = useAdminPlans();
     const deleteMutation = useDeletePlan();
-    const { openModal, closeModal } = useModal();
-
-    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-    const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+    const { openModal } = useModal();
 
     const handleCreate = () => {
         openModal("manage-plan");
@@ -40,19 +30,22 @@ export function PlansClient() {
     };
 
     const handleDelete = (plan: Plan) => {
-        setSelectedPlan(plan);
-        setIsDeleteOpen(true);
-    };
-
-    const onConfirmDelete = async () => {
-        if (!selectedPlan) return;
-        try {
-            await deleteMutation.mutateAsync(selectedPlan.id);
-            SucessMessage("Plano eliminado com sucesso!");
-            setIsDeleteOpen(false);
-        } catch (error: any) {
-            ErrorMessage(error?.response?.data?.message || "Erro ao eliminar o plano");
-        }
+        openModal(CONFIRM_MODAL_ID, {
+            title: "Tem a certeza?",
+            description: `Esta ação não pode ser desfeita. O plano "${plan.name}" será permanentemente removido do sistema.`,
+            confirmLabel: "Eliminar Plano",
+            loadingLabel: "A eliminar...",
+            destructive: true,
+            onConfirm: async () => {
+                try {
+                    await deleteMutation.mutateAsync(plan.id);
+                    SucessMessage("Plano eliminado com sucesso!");
+                } catch (error: any) {
+                    ErrorMessage(error?.response?.data?.message || "Erro ao eliminar o plano");
+                    throw error;
+                }
+            },
+        });
     };
 
     return (
@@ -85,29 +78,7 @@ export function PlansClient() {
             <PlanFormModal />
 
             {/* Delete Confirmation */}
-            <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle className="flex items-center gap-2">
-                            <Icon name="BadgeAlert" className="w-5 h-5 text-destructive" />
-                            Tem a certeza?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Esta ação não pode ser desfeita. O plano <strong>{selectedPlan?.name}</strong> será permanentemente removido do sistema.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={onConfirmDelete}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            disabled={deleteMutation.isPending}
-                        >
-                            {deleteMutation.isPending ? "A eliminar..." : "Eliminar Plano"}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <ConfirmModal />
         </div>
     );
 }

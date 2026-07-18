@@ -13,6 +13,16 @@ import { IconCheckSucessfull } from "./icon-success";
 import { IconWarning } from "./icon-warning";
 import { useModalStore } from "@workspace/hooks";
 
+type ModalSize = "sm" | "md" | "lg" | "xl" | "full";
+
+const SIZE_CLASSES: Record<ModalSize, string> = {
+  sm: "sm:max-w-[425px]",
+  md: "sm:max-w-2xl",
+  lg: "sm:max-w-3xl",
+  xl: "sm:max-w-5xl",
+  full: "sm:max-w-[95vw]",
+};
+
 interface ModalProps {
   id: string;
   title: ReactNode;
@@ -21,6 +31,7 @@ interface ModalProps {
   className?: string;
   footer?: ReactNode;
   type?: "default" | "success" | "warning";
+  size?: ModalSize;
 }
 
 export function GlobalModal({
@@ -31,13 +42,14 @@ export function GlobalModal({
   className,
   footer,
   type = "default",
+  size = "sm",
 }: ModalProps) {
   const { open, closeModal } = useModalStore();
   const isOpen = !!open[id];
 
   return (
     <Dialog open={isOpen} onOpenChange={() => closeModal(id)}>
-      <DialogContent className={cn("sm:max-w-[425px]", className)}>
+      <DialogContent className={cn(SIZE_CLASSES[size], className)}>
         <DialogHeader>
           {type === "success" && (
             <div className="flex justify-center mb-4">

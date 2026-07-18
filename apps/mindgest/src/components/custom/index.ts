@@ -1,4 +1,5 @@
 export * from "./select-input";
+export * from "./confirm-modal";
 export * from "./price-input";
 export * from "./input-password-normal";
 export * from "./valid-input-password";

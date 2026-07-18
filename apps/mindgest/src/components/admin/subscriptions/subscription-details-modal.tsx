@@ -8,14 +8,14 @@ import {
     Button,
 } from "@/components";
 import { Subscription } from "@/types";
-import { formatDateTime } from "@/utils";
+import { formatDateTime, formatPrice } from "@/utils";
 import { useModal } from "@/stores/modal/use-modal-store";
 
 export function SubscriptionDetailsModal() {
-    const { modalData, closeModal } = useModal();
-    const subscription = modalData["view-subscription-details"] as Subscription;
+    const { open, modalData, closeModal } = useModal();
+    const subscription = modalData["view-subscription-details"] as Subscription | undefined;
 
-    if (!subscription) return null;
+    if (!open["view-subscription-details"] || !subscription) return null;
 
     const handleCloseModal = () => {
         closeModal("view-subscription-details");
@@ -25,7 +25,7 @@ export function SubscriptionDetailsModal() {
         <GlobalModal
             id="view-subscription-details"
             title="Detalhes da Subscrição"
-            className="w-max"
+            size="lg"
             footer={
                 <div className="flex justify-end">
                     <Button variant="outline" onClick={handleCloseModal}>
@@ -34,7 +34,7 @@ export function SubscriptionDetailsModal() {
                 </div>
             }
         >
-            <div className="space-y-6 py-4">
+            <div className="space-y-6">
                 {/* General Info and Status */}
                 <div className="flex justify-between items-start">
                     <div className="space-y-1">
@@ -56,9 +56,9 @@ export function SubscriptionDetailsModal() {
                         </h4>
                         <div className="space-y-2 p-3 rounded-lg border bg-muted/30">
                             <DetailRow label="Nome" value={subscription.company.name} />
-                            <DetailRow label="NIF" value={(subscription.company as any).taxNumber} />
-                            <DetailRow label="Email" value={(subscription.company as any).email} />
-                            <DetailRow label="Telefone" value={(subscription.company as any).phone} />
+                            <DetailRow label="NIF" value={subscription.company.taxNumber?.toString()} />
+                            <DetailRow label="Email" value={subscription.company.email} />
+                            <DetailRow label="Telefone" value={subscription.company.phone} />
                         </div>
                     </div>
 
@@ -70,7 +70,7 @@ export function SubscriptionDetailsModal() {
                         </h4>
                         <div className="space-y-2 p-3 rounded-lg border bg-muted/30">
                             <DetailRow label="Nome" value={subscription.plan.name} />
-                            <DetailRow label="Preço" value={`$${subscription.plan.priceMonthly}/mês`} />
+                            <DetailRow label="Preço" value={`${formatPrice(Number(subscription.plan.priceMonthly))}/mês`} />
                             <DetailRow label="Utilizadores Máx." value={subscription.plan.maxUsers} />
                             <DetailRow label="Lojas Máx." value={subscription.plan.maxStores} />
                         </div>

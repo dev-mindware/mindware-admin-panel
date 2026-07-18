@@ -12,10 +12,10 @@ import { formatDateTime } from "@/utils";
 import { useModal } from "@/stores/modal/use-modal-store";
 
 export function CompanyDetailsModal() {
-    const { modalData, closeModal } = useModal();
-    const company = modalData["view-company-details"] as Company;
+    const { open, modalData, closeModal } = useModal();
+    const company = modalData["view-company-details"] as Company | undefined;
 
-    if (!company) return null;
+    if (!open["view-company-details"] || !company) return null;
 
     const handleCloseModal = () => {
         closeModal("view-company-details");
@@ -25,16 +25,16 @@ export function CompanyDetailsModal() {
         <GlobalModal
             id="view-company-details"
             title="Detalhes da Empresa"
-            className="w-2/3 max-w-4xl"
+            size="xl"
             footer={
-                <div className="flex justify-end pt-4">
+                <div className="flex justify-end">
                     <Button variant="outline" onClick={handleCloseModal}>
                         Fechar
                     </Button>
                 </div>
             }
         >
-            <div className="space-y-6 py-4">
+            <div className="space-y-6">
                 {/* Header Info */}
                 <div className="flex justify-between items-start">
                     <div className="flex gap-4 items-center">

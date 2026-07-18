@@ -8,6 +8,7 @@ import {
     Icon,
     Button,
     Input,
+    InputCurrency,
     Checkbox,
     Switch,
     Field,
@@ -113,7 +114,7 @@ export function PlanFormModal() {
                     {plan ? `Editar Plano: ${plan.name}` : "Criar Novo Plano"}
                 </div>
             }
-            className="max-w-3xl"
+            size="lg"
             footer={
                 <div className="flex justify-end gap-3">
                     <Button variant="outline" onClick={handleClose}>Cancelar</Button>
@@ -127,8 +128,7 @@ export function PlanFormModal() {
                 </div>
             }
         >
-            <div className="py-4">
-                <form id="plan-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form id="plan-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <Controller
                             control={control}
@@ -151,7 +151,14 @@ export function PlanFormModal() {
                                 <Field>
                                     <FieldLabel>Preço Mensal (AOA)</FieldLabel>
                                     <FieldContent>
-                                        <Input type="number" step="0.01" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                                        <InputCurrency
+                                            name={field.name}
+                                            value={field.value}
+                                            onValueChange={(value) => field.onChange(value)}
+                                            onBlur={field.onBlur}
+                                            suffix=" AOA"
+                                            placeholder="0,00 AOA"
+                                        />
                                         <FieldError errors={[fieldState.error]} />
                                     </FieldContent>
                                 </Field>
@@ -342,7 +349,6 @@ export function PlanFormModal() {
                         </FieldGroup>
                     </div>
                 </form>
-            </div>
         </GlobalModal>
     );
 }
