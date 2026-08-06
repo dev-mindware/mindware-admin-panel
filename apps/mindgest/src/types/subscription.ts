@@ -85,3 +85,16 @@ export interface PrintFormats {
 
 
 export type SubscriptionStatus = "ACTIVE" | "CANCELLED" | "TRIALING" | "PAST_DUE" | "PENDING" | "EXPIRED";
+
+export interface SubscriptionPlanStats {
+  planId: string;
+  planName: string;
+  count: number;
+}
+
+export interface SubscriptionStats {
+  totalSubscriptions: number;
+  totalCompanies: number;
+  byStatus: Record<SubscriptionStatus, number>;
+  byPlan: SubscriptionPlanStats[];
+}

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { subscriptionService } from "@/services/subscription-service";
-import { Subscription, SubscriptionStatus } from "@/types";
+import { Subscription, SubscriptionStats, SubscriptionStatus } from "@/types";
 import { usePagination } from "@workspace/hooks";
 import { api } from "@/services/api";
 
@@ -19,20 +19,12 @@ export function useSubscriptions(filters?: {
   });
 }
 
-export function useAllSubscriptions() {
-  return useQuery<Subscription[]>({
-    queryKey: ["subscriptions", "all"],
+export function useSubscriptionStats() {
+  return useQuery<SubscriptionStats>({
+    queryKey: ["subscriptions", "stats"],
     queryFn: async () => {
-      const response = await subscriptionService.getSubscriptions();
-      const raw = response.data;
-
-      if (Array.isArray(raw)) return raw;
-
-      const dataKey = Object.keys(raw).find((key) =>
-        Array.isArray((raw as any)[key]),
-      );
-
-      return (dataKey ? (raw as any)[dataKey] : []) as Subscription[];
+      const response = await subscriptionService.getSubscriptionStats();
+      return response.data;
     },
   });
 }
@@ -48,6 +40,7 @@ export function useUpdateSubscriptionStatus() {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["subscriptions", "stats"] });
     },
   });
 }

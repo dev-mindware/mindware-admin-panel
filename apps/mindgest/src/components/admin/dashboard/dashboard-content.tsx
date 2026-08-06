@@ -1,6 +1,6 @@
 "use client";
 
-import { useAllSubscriptions } from "@/hooks/subscription";
+import { useSubscriptionStats } from "@/hooks/subscription";
 import { DynamicMetricCard } from "@workspace/ui";
 import {
     ChartContainer,
@@ -11,24 +11,51 @@ import {
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Cell } from "recharts";
 import { useMemo } from "react";
 import { Skeleton } from "@workspace/ui";
+import { icons } from "lucide-react";
+import type { SubscriptionStatus } from "@/types";
+
+const STATUS_ORDER: SubscriptionStatus[] = [
+    "ACTIVE",
+    "TRIALING",
+    "PENDING",
+    "PAST_DUE",
+    "EXPIRED",
+    "CANCELLED",
+];
+
+const STATUS_CONFIG: Record<
+    SubscriptionStatus,
+    { label: string; colorKey: string }
+> = {
+    ACTIVE: { label: "Ativo", colorKey: "active" },
+    TRIALING: { label: "Trial", colorKey: "trialing" },
+    PENDING: { label: "Pendente", colorKey: "pending" },
+    PAST_DUE: { label: "Atrasado", colorKey: "past_due" },
+    EXPIRED: { label: "Expirado", colorKey: "expired" },
+    CANCELLED: { label: "Cancelado", colorKey: "cancelled" },
+};
+
+const PLAN_ICONS: Record<string, keyof typeof icons> = {
+    base: "ShieldCheck",
+    smart: "Zap",
+    pro: "Trophy",
+    flex: "Layers",
+};
+
+function planIcon(planName: string): keyof typeof icons {
+    const lower = planName.toLowerCase();
+    for (const [key, icon] of Object.entries(PLAN_ICONS)) {
+        if (lower.includes(key)) return icon;
+    }
+    return "Package";
+}
 
 export function DashboardContent() {
-    const { data: subscriptions, isLoading } = useAllSubscriptions();
-
-    const metrics = useMemo(() => {
-        if (!subscriptions) return null;
-
-        const total = subscriptions.length;
-        const base = subscriptions.filter(s => s.plan?.name?.toLowerCase().includes("base")).length;
-        const smart = subscriptions.filter(s => s.plan?.name?.toLowerCase().includes("smart")).length;
-        const pro = subscriptions.filter(s => s.plan?.name?.toLowerCase().includes("pro")).length;
-
-        return { total, base, smart, pro };
-    }, [subscriptions]);
+    const { data: stats, isLoading, isError, refetch } = useSubscriptionStats();
 
     const chartConfig = {
         count: {
-            label: "Empresas",
+            label: "Subscrições",
         },
         active: {
             label: "Ativo",
@@ -57,31 +84,17 @@ export function DashboardContent() {
     } satisfies ChartConfig;
 
     const chartData = useMemo(() => {
-        if (!subscriptions) return [];
+        if (!stats?.byStatus) return [];
 
-        const statusCounts: Record<string, number> = {
-            active: 0,
-            trialing: 0,
-            pending: 0,
-            past_due: 0,
-            expired: 0,
-            cancelled: 0,
-        };
-
-        subscriptions.forEach(s => {
-            const status = s.status.toLowerCase();
-            statusCounts[status] = (statusCounts[status] || 0) + 1;
-        });
-
-        return Object.entries(statusCounts).map(([status, count]) => {
-            const config = chartConfig[status as keyof typeof chartConfig];
+        return STATUS_ORDER.map((status) => {
+            const config = STATUS_CONFIG[status];
             return {
-                status: config?.label || status,
-                count,
-                fill: `var(--color-${status})`,
+                status: config.label,
+                count: stats.byStatus[status] ?? 0,
+                fill: `var(--color-${config.colorKey})`,
             };
         });
-    }, [subscriptions]);
+    }, [stats]);
 
     if (isLoading) {
         return (
@@ -96,41 +109,59 @@ export function DashboardContent() {
         );
     }
 
+    if (isError || !stats) {
+        return (
+            <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                <p className="text-muted-foreground">
+                    Não foi possível carregar os indicadores.
+                </p>
+                <button
+                    type="button"
+                    onClick={() => refetch()}
+                    className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                >
+                    Tentar novamente
+                </button>
+            </div>
+        );
+    }
+
+    const planCards = stats.byPlan;
+
     return (
         <div className="space-y-10 animate-in slide-in-from-bottom-4 duration-700">
-            {/* Metric Cards - Clean aligned grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div
+                className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
+                    planCards.length >= 3
+                        ? "lg:grid-cols-4"
+                        : planCards.length === 2
+                          ? "lg:grid-cols-3"
+                          : "lg:grid-cols-2"
+                }`}
+            >
                 <DynamicMetricCard
-                    title={metrics?.total || 0}
+                    title={stats.totalCompanies}
                     subtitle="Total de Empresas"
-                    description="Total de empresas atualmente registradas no sistema."
+                    description="Total de empresas registadas no sistema."
                     icon="Building2"
                 />
-                <DynamicMetricCard
-                    title={metrics?.base || 0}
-                    subtitle="Plano Base"
-                    description="Empresas que utilizam as funcionalidades essenciais."
-                    icon="ShieldCheck"
-                />
-                <DynamicMetricCard
-                    title={metrics?.smart || 0}
-                    subtitle="Plano Smart"
-                    description="Crescimento acelerado com automação e gestão inteligente."
-                    icon="Zap"
-                />
-                <DynamicMetricCard
-                    title={metrics?.pro || 0}
-                    subtitle="Plano Pro"
-                    description="Ecossistema completo para alta performance e escala."
-                    icon="Trophy"
-                />
+                {planCards.map((plan) => (
+                    <DynamicMetricCard
+                        key={plan.planId}
+                        title={plan.count}
+                        subtitle={plan.planName.startsWith("Plano ") ? plan.planName : `Plano ${plan.planName}`}
+                        description={`${plan.count} ${plan.count === 1 ? "subscrição" : "subscrições"} neste plano.`}
+                        icon={planIcon(plan.planName)}
+                    />
+                ))}
             </div>
 
-            {/* Chart Section - Refined look */}
             <div className="bg-card border rounded-lg p-6 shadow-sm">
                 <div className="mb-6 space-y-1">
-                    <h3 className="text-xl font-bold tracking-tight">Evolução por Status</h3>
-                    <p className="text-muted-foreground text-sm">Distribuição detalhada de todas as subscrições</p>
+                    <h3 className="text-xl font-bold tracking-tight">Distribuição por Status</h3>
+                    <p className="text-muted-foreground text-sm">
+                        Distribuição de todas as {stats.totalSubscriptions} subscrições
+                    </p>
                 </div>
 
                 <div className="h-[350px] w-full">
@@ -143,6 +174,7 @@ export function DashboardContent() {
                                 axisLine={{ stroke: 'hsl(var(--border))' }}
                             />
                             <YAxis
+                                allowDecimals={false}
                                 tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                                 axisLine={{ stroke: 'hsl(var(--border))' }}
                             />

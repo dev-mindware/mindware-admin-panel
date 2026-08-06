@@ -9,6 +9,7 @@ export function useCreateSubscription() {
     mutationFn: (data: SubscriptionFormData) => subscriptionService.createSubscription(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["subscriptions", "stats"] });
       queryClient.invalidateQueries({ queryKey: ["current-subscription"] });
     },
   });

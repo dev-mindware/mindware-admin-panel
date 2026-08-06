@@ -39,14 +39,14 @@ export function SubscriptionList() {
             key: "company",
             header: "Empresa",
             render: (_, item) => (
-                <div className="font-medium text-foreground">{item.company.name}</div>
+                <div className="font-medium text-foreground">{item.company?.name || "Sem Empresa"}</div>
             ),
         },
         {
             key: "plan",
             header: "Plano",
             render: (_, item) => (
-                <div className="text-sm text-foreground">{item.plan.name}</div>
+                <div className="text-sm text-foreground">{item.plan?.name || "Sem Plano"}</div>
             ),
         },
         {

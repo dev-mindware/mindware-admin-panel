@@ -1,6 +1,6 @@
 import { api } from "./api";
 import { SubscriptionFormData } from "@/schemas";
-import { Subscription, SubscriptionStatus } from "@/types";
+import { Subscription, SubscriptionStats, SubscriptionStatus } from "@/types";
 
 type Data = Pick<SubscriptionFormData, "planId" | "frequency" | "proofPayment">;
 
@@ -32,6 +32,9 @@ export const subscriptionService = {
   },
   getSubscriptions: async () => {
     return api.get<Subscription[]>("/subscriptions");
+  },
+  getSubscriptionStats: async () => {
+    return api.get<SubscriptionStats>("/subscriptions/stats");
   },
   updateSubscriptionStatus: async (id: string, status: SubscriptionStatus) => {
     return api.patch<SubscriptionResponse>(`/subscriptions/${id}`, { status });

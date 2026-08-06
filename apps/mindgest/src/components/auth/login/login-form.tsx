@@ -1,18 +1,15 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import Logo from "@/assets/brand.png";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import { ErrorMessage } from "@/utils/messages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginFormData, loginSchema } from "@/schemas";
-import { ButtonSubmit, GoogleButton, Input, OrLine } from "@/components";
+import { ButtonSubmit, Input } from "@/components";
 import { loginAction } from "@/actions/login";
 import { useAuthStore } from "@workspace/hooks";
 
 export function LoginForm() {
-  const router = useRouter();
   const { setUser } = useAuthStore();
   const {
     register,
@@ -47,29 +44,49 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(handleLogin)} className="flex flex-col gap-6">
-      <div className="flex flex-col items-center gap-2 text-center">
-        <Image src={Logo} alt="Logo" className="size-20" />
-        <h1 className="text-2xl font-bold">Bem-vindo de volta</h1>
+    <form onSubmit={handleSubmit(handleLogin)} className="flex flex-col gap-8">
+      <div className="flex flex-col items-center gap-4 text-center">
+        <div className="relative size-20 overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border shadow-sm">
+          <Image
+            src="/mindgest.png"
+            alt="Mindgest"
+            fill
+            className="object-contain p-2"
+            sizes="80px"
+            priority
+          />
+        </div>
+        <div className="space-y-1.5">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+            Mindgest
+          </p>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Painel Administrativo
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Entre com as suas credenciais de administrador
+          </p>
+        </div>
       </div>
 
-      <div className="grid gap-6">
+      <div className="grid gap-5">
         <Input
           type="email"
           label="Email"
           startIcon="AtSign"
-          placeholder="Endereço de email"
+          placeholder="admin@empresa.com"
           {...register("email")}
           error={errors?.email && errors?.email?.message}
           autoComplete="email"
         />
-        <div className="flex flex-col space-y-2 items-center">
+        <div className="flex flex-col space-y-2">
           <Input
             label="Senha"
             startIcon="Lock"
             type="password"
             placeholder="Insira a senha"
             {...register("password")}
+            error={errors?.password && errors?.password?.message}
             autoComplete="current-password"
           />
           <Link
@@ -81,20 +98,8 @@ export function LoginForm() {
         </div>
 
         <ButtonSubmit isLoading={isSubmitting}>
-          {isSubmitting ? "" : "Entrar"}
+          {isSubmitting ? "" : "Entrar no painel"}
         </ButtonSubmit>
-
-        <OrLine />
-        <GoogleButton />
-      </div>
-      <div className="text-sm text-center">
-        Não tem uma conta?{" "}
-        <Link
-          href="/auth/register"
-          className="font-medium text-primary hover:underline underline-offset-4"
-        >
-          Crie nova
-        </Link>
       </div>
     </form>
   );
