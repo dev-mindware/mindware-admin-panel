@@ -52,6 +52,15 @@ export function CompanyList() {
             render: (value) => <div className="text-sm text-foreground">{value}</div>,
         },
         {
+            key: "affiliateCode",
+            header: "Afiliado",
+            render: (value) => (
+                <div className="text-sm text-foreground font-mono">
+                    {value || "—"}
+                </div>
+            ),
+        },
+        {
             key: "isActive",
             header: "Status",
             render: (value) => (

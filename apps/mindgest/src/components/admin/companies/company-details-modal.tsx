@@ -1,25 +1,48 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
     GlobalModal,
     DetailRow,
     ItemStatusBadge,
     Icon,
     Button,
+    Input,
 } from "@/components";
 import { Company } from "@/types";
 import { formatDateTime } from "@/utils";
 import { useModal } from "@/stores/modal/use-modal-store";
+import { useCompanyActions } from "@/hooks/company";
 
 export function CompanyDetailsModal() {
     const { open, modalData, closeModal } = useModal();
     const company = modalData["view-company-details"] as Company | undefined;
+    const { assignAffiliateCodeAsync, isAssigningAffiliate } = useCompanyActions();
+    const [affiliateCode, setAffiliateCode] = useState("");
+
+    useEffect(() => {
+        setAffiliateCode(company?.affiliateCode ?? "");
+    }, [company?.id, company?.affiliateCode]);
 
     if (!open["view-company-details"] || !company) return null;
 
     const handleCloseModal = () => {
         closeModal("view-company-details");
     };
+
+    const handleSaveAffiliate = async () => {
+        const next = affiliateCode.trim();
+        await assignAffiliateCodeAsync(company.id, next === "" ? null : next);
+    };
+
+    const handleRemoveAffiliate = async () => {
+        setAffiliateCode("");
+        await assignAffiliateCodeAsync(company.id, null);
+    };
+
+    const currentCode = company.affiliateCode?.trim() || null;
+    const hasChanges =
+        (affiliateCode.trim() || null) !== (currentCode || null);
 
     return (
         <GlobalModal
@@ -35,7 +58,6 @@ export function CompanyDetailsModal() {
             }
         >
             <div className="space-y-6">
-                {/* Header Info */}
                 <div className="flex justify-between items-start">
                     <div className="flex gap-4 items-center">
                         {company.logo ? (
@@ -57,7 +79,6 @@ export function CompanyDetailsModal() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Contact Info */}
                     <div className="space-y-3">
                         <h4 className="font-medium text-sm flex items-center gap-2 text-primary uppercase tracking-wider">
                             <Icon name="Contact" className="size-4" />
@@ -71,7 +92,6 @@ export function CompanyDetailsModal() {
                         </div>
                     </div>
 
-                    {/* Address & Timeline */}
                     <div className="space-y-3">
                         <h4 className="font-medium text-sm flex items-center gap-2 text-primary uppercase tracking-wider">
                             <Icon name="MapPin" className="size-4" />
@@ -85,7 +105,48 @@ export function CompanyDetailsModal() {
                     </div>
                 </div>
 
-                {/* Stores Section */}
+                <div className="space-y-3">
+                    <h4 className="font-medium text-sm flex items-center gap-2 text-primary uppercase tracking-wider">
+                        <Icon name="Handshake" className="size-4" />
+                        Afiliado
+                    </h4>
+                    <div className="space-y-4 p-4 rounded-xl border bg-muted/20">
+                        <DetailRow
+                            label="Código actual"
+                            value={currentCode || "Sem código"}
+                        />
+                        <div className="space-y-3">
+                            <Input
+                                label="Código de afiliado"
+                                placeholder="Ex: MWD-AO-1234"
+                                value={affiliateCode}
+                                onChange={(e) => setAffiliateCode(e.target.value)}
+                                startIcon="Tag"
+                                disabled={isAssigningAffiliate}
+                            />
+                            <div className="flex flex-wrap gap-2 justify-end">
+                                {currentCode && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        disabled={isAssigningAffiliate}
+                                        onClick={handleRemoveAffiliate}
+                                    >
+                                        Remover
+                                    </Button>
+                                )}
+                                <Button
+                                    type="button"
+                                    disabled={isAssigningAffiliate || !hasChanges}
+                                    onClick={handleSaveAffiliate}
+                                >
+                                    {isAssigningAffiliate ? "A guardar..." : "Guardar código"}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {company.stores && company.stores.length > 0 && (
                     <div className="space-y-3">
                         <h4 className="font-medium text-sm flex items-center gap-2 text-primary uppercase tracking-wider">

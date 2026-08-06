@@ -14,6 +14,7 @@ export interface Company {
   createdAt: string;
   updatedAt: string;
   subscription: Subscription;
+  affiliateCode?: string | null;
 }
 
 export interface Store {
@@ -34,6 +35,10 @@ export type CompanyData = {
   phone: string;
   company: Omit<
     Company,
-    "id" | "isActive" | "createdAt" | "updatedAt" | "subscription" | "stores"
+    "id" | "isActive" | "createdAt" | "updatedAt" | "subscription" | "stores" | "affiliateCode"
   >;
+};
+
+export type UpdateCompanyPayload = {
+  affiliateCode?: string | null;
 };
