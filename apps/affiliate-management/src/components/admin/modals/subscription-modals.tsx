@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Button,
   Field,
@@ -11,11 +11,12 @@ import {
   Textarea,
 } from "@workspace/ui";
 import { useModalStore } from "@workspace/hooks";
+import { useAffiliates } from "@/hooks/affiliate";
 import {
   useRegisterSubscriptionPayment,
   useUpdateSubscriptionStatus,
 } from "@/hooks/affiliate/use-partner-program";
-import { PartnerPlanCode, PartnerSubscription, BillingPeriod } from "@workspace/types/affiliate";
+import { PartnerPlanCode, PartnerSubscription, BillingPeriod, AffiliateStatus, Affiliate } from "@workspace/types/affiliate";
 import { toast } from "sonner";
 
 const statusOptions: { value: PartnerSubscription["status"]; label: string; variant?: "destructive" | "outline" }[] = [
@@ -42,8 +43,11 @@ export function SubscriptionModals() {
   const { modalData, closeModal } = useModalStore();
   const { mutate: updateStatus, isPending: isUpdating } = useUpdateSubscriptionStatus();
   const { mutate: registerPayment, isPending: isRegistering } = useRegisterSubscriptionPayment();
+  const { data: affiliates } = useAffiliates({ status: AffiliateStatus.ACTIVE });
 
   const subscription = modalData["update-subscription-status"] as PartnerSubscription | undefined;
+  const registerModalData = modalData["register-subscription-payment"] as (Affiliate & { codigo_afiliado?: string }) | undefined;
+  const initialAffiliateCode = registerModalData?.codigo_afiliado || "";
 
   const [notes, setNotes] = useState("");
   const [form, setForm] = useState({
@@ -57,6 +61,12 @@ export function SubscriptionModals() {
     billing_period: "monthly_first" as BillingPeriod,
     notes: "",
   });
+
+  useEffect(() => {
+    if (initialAffiliateCode) {
+      setForm((prev) => ({ ...prev, affiliate_code: initialAffiliateCode }));
+    }
+  }, [initialAffiliateCode]);
 
   const setField = (key: keyof typeof form, value: string) => setForm((prev) => ({ ...prev, [key]: value }));
 
@@ -149,8 +159,8 @@ export function SubscriptionModals() {
 
       <GlobalModal
         id="register-subscription-payment"
-        title="Registar pagamento manual"
-        description="Cria/estende uma subscrição e processa a respetiva comissão do afiliado."
+        title="Atribuir Subscrição Mindgest a Afiliado"
+        description="Regista o pagamento de um cliente Mindgest e atribui a comissão ao afiliado correspondente."
       >
         <div className="max-h-[65vh] space-y-4 overflow-y-auto pr-1">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -162,7 +172,21 @@ export function SubscriptionModals() {
             </Field>
             <Field>
               <FieldLabel>Código do afiliado *</FieldLabel>
-              <FieldContent>
+              <FieldContent className="space-y-2">
+                {affiliates && affiliates.length > 0 && (
+                  <select
+                    className={selectClass}
+                    value={affiliates.some((a) => a.codigo_afiliado === form.affiliate_code) ? form.affiliate_code : ""}
+                    onChange={(e) => setField("affiliate_code", e.target.value)}
+                  >
+                    <option value="">Selecionar da lista...</option>
+                    {affiliates.map((aff) => (
+                      <option key={aff.id} value={aff.codigo_afiliado}>
+                        {aff.nome_completo} ({aff.codigo_afiliado})
+                      </option>
+                    ))}
+                  </select>
+                )}
                 <Input value={form.affiliate_code} onChange={(e) => setField("affiliate_code", e.target.value)} placeholder="MWD-AO-..." />
               </FieldContent>
             </Field>

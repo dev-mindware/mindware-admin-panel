@@ -132,6 +132,16 @@ export function AffiliateList() {
               icon: "Pencil",
               onClick: (current) => openModal("edit-affiliate", current),
             },
+            {
+              label: "Atribuir cliente (Subscrição)",
+              icon: "CreditCard",
+              onClick: (current) => openModal("register-subscription-payment", current),
+            },
+            {
+              label: "Atribuir cliente (Lead)",
+              icon: "UserPlus",
+              onClick: (current) => openModal("create-lead", current),
+            },
             ...(item.status === AffiliateStatus.PENDING_APPROVAL
               ? ([
                   {

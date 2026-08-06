@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -19,8 +20,8 @@ import {
     ButtonSubmit,
     Button
 } from "@workspace/ui";
-import { useCreateLeadAdmin, useAllServices } from "@/hooks/affiliate";
-import { LeadAdminCreate } from "@workspace/types/affiliate";
+import { useCreateLeadAdmin, useAllServices, useAffiliates } from "@/hooks/affiliate";
+import { LeadAdminCreate, AffiliateStatus } from "@workspace/types/affiliate";
 import { toast } from "sonner";
 
 const formSchema = z.object({
@@ -32,18 +33,21 @@ const formSchema = z.object({
 });
 
 interface RegisterLeadFormProps {
+    initialAffiliateCode?: string;
     onSuccess?: () => void;
     onCancel?: () => void;
 }
 
-export function RegisterLeadForm({ onSuccess, onCancel }: RegisterLeadFormProps) {
-    const { data: services, isLoading: loadingServices } = useAllServices();
+export function RegisterLeadForm({ initialAffiliateCode, onSuccess, onCancel }: RegisterLeadFormProps) {
+    const { data: services } = useAllServices();
+    const { data: affiliates } = useAffiliates({ status: AffiliateStatus.ACTIVE });
     const { mutate: createLead, isPending } = useCreateLeadAdmin();
 
     const {
         control,
         handleSubmit,
         reset,
+        setValue,
         formState: { errors }
     } = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -51,10 +55,16 @@ export function RegisterLeadForm({ onSuccess, onCancel }: RegisterLeadFormProps)
             client_nome: "",
             client_telefone: "",
             service_id: "",
-            affiliate_code: "",
+            affiliate_code: initialAffiliateCode || "",
             notas: "",
         },
     });
+
+    useEffect(() => {
+        if (initialAffiliateCode) {
+            setValue("affiliate_code", initialAffiliateCode);
+        }
+    }, [initialAffiliateCode, setValue]);
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         const payload: LeadAdminCreate = {
@@ -64,7 +74,7 @@ export function RegisterLeadForm({ onSuccess, onCancel }: RegisterLeadFormProps)
 
         createLead(payload, {
             onSuccess: () => {
-                toast.success("Lead registrado com sucesso!");
+                toast.success("Cliente/Lead atribuído com sucesso!");
                 reset();
                 onSuccess?.();
             },
@@ -82,7 +92,7 @@ export function RegisterLeadForm({ onSuccess, onCancel }: RegisterLeadFormProps)
                     name="client_nome"
                     render={({ field, fieldState }) => (
                         <Field>
-                            <FieldLabel>Nome do Cliente</FieldLabel>
+                            <FieldLabel>Nome do Cliente *</FieldLabel>
                             <FieldContent>
                                 <Input placeholder="Ex: João Lourenço" {...field} />
                                 <FieldError errors={[fieldState.error]} />
@@ -95,7 +105,7 @@ export function RegisterLeadForm({ onSuccess, onCancel }: RegisterLeadFormProps)
                     name="client_telefone"
                     render={({ field, fieldState }) => (
                         <Field>
-                            <FieldLabel>Telefone</FieldLabel>
+                            <FieldLabel>Telefone *</FieldLabel>
                             <FieldContent>
                                 <Input placeholder="Ex: 923 000 000" {...field} />
                                 <FieldError errors={[fieldState.error]} />
@@ -111,9 +121,9 @@ export function RegisterLeadForm({ onSuccess, onCancel }: RegisterLeadFormProps)
                     name="service_id"
                     render={({ field, fieldState }) => (
                         <Field>
-                            <FieldLabel>Serviço</FieldLabel>
+                            <FieldLabel>Serviço Mindgest *</FieldLabel>
                             <FieldContent>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value || undefined}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Selecione um serviço" />
                                     </SelectTrigger>
@@ -135,9 +145,26 @@ export function RegisterLeadForm({ onSuccess, onCancel }: RegisterLeadFormProps)
                     name="affiliate_code"
                     render={({ field, fieldState }) => (
                         <Field>
-                            <FieldLabel>Código do Afiliado</FieldLabel>
-                            <FieldContent>
-                                <Input placeholder="Ex: MW-12345" {...field} />
+                            <FieldLabel>Afiliado Responsável *</FieldLabel>
+                            <FieldContent className="space-y-2">
+                                {affiliates && affiliates.length > 0 && (
+                                    <Select 
+                                        onValueChange={(val) => field.onChange(val)} 
+                                        value={affiliates.some(a => a.codigo_afiliado === field.value) ? field.value : undefined}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecionar das opções..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {affiliates.map((aff) => (
+                                                <SelectItem key={aff.id} value={aff.codigo_afiliado}>
+                                                    {aff.nome_completo} ({aff.codigo_afiliado})
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                )}
+                                <Input placeholder="Código do Afiliado (ex: MWD-AO-1234)" {...field} />
                                 <FieldError errors={[fieldState.error]} />
                             </FieldContent>
                         </Field>
@@ -153,7 +180,7 @@ export function RegisterLeadForm({ onSuccess, onCancel }: RegisterLeadFormProps)
                         <FieldLabel>Notas (Opcional)</FieldLabel>
                         <FieldContent>
                             <Textarea 
-                                placeholder="Detalhes adicionais sobre o lead..." 
+                                placeholder="Detalhes adicionais sobre a atribuição do cliente..." 
                                 className="resize-none"
                                 {...field} 
                             />
@@ -173,9 +200,10 @@ export function RegisterLeadForm({ onSuccess, onCancel }: RegisterLeadFormProps)
                     Cancelar
                 </Button>
                 <ButtonSubmit isLoading={isPending} className="w-full md:w-auto">
-                    Registrar Lead
+                    Atribuir Cliente
                 </ButtonSubmit>
             </div>
         </form>
     );
 }
+

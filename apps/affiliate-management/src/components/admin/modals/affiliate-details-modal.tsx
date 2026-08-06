@@ -60,7 +60,7 @@ function certificationBadgeVariant(status?: string) {
 }
 
 export function AffiliateDetailsModal() {
-  const { modalData, closeModal } = useModalStore();
+  const { modalData, openModal, closeModal } = useModalStore();
   const affiliate = modalData["view-affiliate-details"] as Affiliate | undefined;
 
   const { mutate: updateStatus, isPending: isStatusPending } = useUpdateAffiliateStatus();
@@ -250,6 +250,24 @@ export function AffiliateDetailsModal() {
             Ações administrativas
           </h4>
           <div className="flex flex-wrap gap-2">
+            <Button
+              variant="default"
+              onClick={() => {
+                closeModal("view-affiliate-details");
+                openModal("register-subscription-payment", affiliate);
+              }}
+            >
+              Atribuir subscrição Mindgest
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                closeModal("view-affiliate-details");
+                openModal("create-lead", affiliate);
+              }}
+            >
+              Atribuir lead Mindgest
+            </Button>
             {affiliate.status === AffiliateStatus.PENDING_APPROVAL && (
               <>
                 <Button loading={isStatusPending} onClick={() => handleStatus(AffiliateStatus.ACTIVE)}>
