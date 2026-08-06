@@ -1,9 +1,9 @@
 "use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import Logo from "@/assets/brand.png";
 import { useForm } from "react-hook-form";
-import { useRouter } from "next/navigation";
 import { ErrorMessage } from "@/utils/messages";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginFormData, loginSchema } from "@/schemas";
@@ -11,11 +11,9 @@ import { ButtonSubmit, Input } from "@workspace/ui";
 import { loginAction } from "@/actions/login";
 import { useAuthStore } from "@/stores/auth/auth-store";
 import { setAccessTokenCache } from "@/services/api";
-import { GoogleButton } from "./google-button";
-import { OrLine } from "./or-line";
+import { BASE_PATH } from "@/constants/routes";
 
 export function LoginForm() {
-  const router = useRouter();
   const { setUser, setIsAuthenticating } = useAuthStore();
   const {
     register,
@@ -42,8 +40,10 @@ export function LoginForm() {
       setAccessTokenCache(res.accessToken);
       setUser(res.user);
       setIsAuthenticating(false);
-      router.replace("/dashboard");
-      router.refresh();
+
+      // window.location / full navigation must include basePath (/affiliate).
+      // router.replace is fine for in-app paths, but full replace is safer after login.
+      window.location.replace(`${BASE_PATH}/dashboard`);
     } catch (error) {
       console.error(error);
       ErrorMessage("Ocorreu um erro inesperado. Tente novamente.");
@@ -51,54 +51,61 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(handleLogin)} className="flex flex-col gap-6">
-      <div className="flex flex-col items-center gap-2 text-center">
-        <Image src={Logo} alt="Logo" className="size-20" />
-        <h1 className="text-2xl font-bold">Bem-vindo de volta</h1>
-        <p className="text-muted-foreground text-sm">Acesso ao painel de administração</p>
+    <form onSubmit={handleSubmit(handleLogin)} className="flex flex-col gap-8">
+      <div className="flex flex-col items-center gap-4 text-center">
+        <div className="relative size-20 overflow-hidden rounded-2xl bg-muted/40 shadow-sm ring-1 ring-border">
+          <Image
+            src={Logo}
+            alt="Mindware Affiliate"
+            fill
+            className="object-contain p-2"
+            sizes="80px"
+            priority
+          />
+        </div>
+        <div className="space-y-1.5">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+            Mindware Affiliate
+          </p>
+          <h1 className="text-2xl font-bold tracking-tight">Painel Administrativo</h1>
+          <p className="text-sm text-muted-foreground">
+            Entre com as suas credenciais de administrador
+          </p>
+        </div>
       </div>
 
-      <div className="grid gap-6">
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium">Email</label>
-          <Input
-            type="email"
-            placeholder="exemplo@mindware.ao"
-            {...register("email")}
-            autoComplete="email"
-          />
-          {errors.email && (
-            <p className="text-xs text-destructive">{errors.email.message}</p>
-          )}
-        </div>
+      <div className="grid gap-5">
+        <Input
+          type="email"
+          label="Email"
+          startIcon="AtSign"
+          placeholder="admin@mindware.ao"
+          {...register("email")}
+          error={errors.email?.message}
+          autoComplete="email"
+        />
 
         <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">Senha</label>
-            <Link
-              href="/auth/forgot-password"
-              className="text-sm text-primary underline-offset-4 hover:underline"
-            >
-              Esqueceu sua senha?
-            </Link>
-          </div>
           <Input
             type="password"
+            label="Senha"
+            startIcon="Lock"
             placeholder="Insira a senha"
             {...register("password")}
+            error={errors.password?.message}
             autoComplete="current-password"
           />
-          {errors.password && (
-            <p className="text-xs text-destructive">{errors.password.message}</p>
-          )}
+          <Link
+            href="/auth/forgot-password"
+            className="ml-auto text-sm text-primary underline-offset-4 hover:underline"
+          >
+            Esqueceu sua senha?
+          </Link>
         </div>
 
         <ButtonSubmit isLoading={isSubmitting}>
-          {isSubmitting ? "" : "Entrar"}
+          {isSubmitting ? "" : "Entrar no painel"}
         </ButtonSubmit>
-
-        <OrLine />
-        <GoogleButton />
       </div>
     </form>
   );
