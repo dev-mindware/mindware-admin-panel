@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { partnerProgramService } from "@/services/partner-program-service";
-import { AffiliateProgramSummary, SubscriptionPaymentCreate, SubscriptionStatusUpdate } from "@workspace/types/affiliate";
+import { AffiliateProgramSummary, SubscriptionStatusUpdate } from "@workspace/types/affiliate";
 
 export function useAdminPartnerPlans() {
   return useQuery({
@@ -29,17 +29,6 @@ export function useAdminPartnerSubscriptions(filters?: {
   return useQuery({
     queryKey: ["admin-partner-program", "subscriptions", filters],
     queryFn: async () => (await partnerProgramService.listSubscriptions(filters)).data,
-  });
-}
-
-export function useRegisterSubscriptionPayment() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (data: SubscriptionPaymentCreate) => partnerProgramService.registerSubscriptionPayment(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-partner-program"] });
-      queryClient.invalidateQueries({ queryKey: ["commissions"] });
-    },
   });
 }
 
@@ -85,6 +74,7 @@ export function useRejectCertification() {
       partnerProgramService.rejectCertification(affiliateId, notes),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["affiliates"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-partner-program"] });
     },
   });
 }

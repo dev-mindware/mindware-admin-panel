@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { leadService } from "@/services/lead-service";
-import { Lead, LeadAdminCreate, LeadUpdate, LeadStatus } from "@workspace/types/affiliate";
+import { Lead, LeadStatus } from "@workspace/types/affiliate";
 import { usePagination } from "@workspace/hooks";
 import { api } from "@/services/api";
 
@@ -14,17 +14,6 @@ export function useLeads(filters?: {
       status: filters?.status || undefined,
     },
     api,
-  });
-}
-
-export function useCreateLeadAdmin() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: LeadAdminCreate) => leadService.registerLead(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["leads"] });
-    },
   });
 }
 

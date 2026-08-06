@@ -114,18 +114,6 @@ export interface PartnerSubscription {
   updated_at: string;
 }
 
-export interface SubscriptionPaymentCreate {
-  external_payment_id: string;
-  affiliate_code: string;
-  client_name: string;
-  client_identifier: string;
-  plan_code: PartnerPlanCode;
-  amount_paid: number;
-  paid_at: string;
-  billing_period: BillingPeriod;
-  notes?: string;
-}
-
 export interface SubscriptionStatusUpdate {
   status: PartnerSubscription["status"];
   notes?: string;
@@ -195,14 +183,6 @@ export interface WithdrawalRequest {
 }
 
 // DTOs
-export interface LeadAdminCreate {
-  client_nome: string;
-  client_telefone: string;
-  service_id: number;
-  notas?: string;
-  affiliate_code: string;
-}
-
 export interface LeadUpdate {
   status: LeadStatus;
 }

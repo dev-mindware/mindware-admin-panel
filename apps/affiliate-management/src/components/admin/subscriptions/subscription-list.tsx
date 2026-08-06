@@ -167,7 +167,6 @@ export function SubscriptionList() {
           <Button variant="outline" loading={isReleasing} onClick={handleRelease}>
             Libertar comissões validadas
           </Button>
-          <Button onClick={() => openModal("register-subscription-payment", {})}>Registar pagamento</Button>
         </div>
       </div>
 

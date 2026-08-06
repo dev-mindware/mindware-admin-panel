@@ -14,7 +14,7 @@ export default function LoginPage() {
             logoSrc: logo,
             title: "Controle total do programa de afiliados.",
             subtitle:
-              "Aprove cadastros, atribua subscrições Mindgest, acompanhe comissões e libere pagamentos num único painel.",
+              "Aprove cadastros, acompanhe comissões e libere pagamentos num único painel.",
             pills: ["Afiliados", "Subscrições", "Comissões", "Levantamentos"],
             footer: "Mindware · Programa de Afiliados",
           }}

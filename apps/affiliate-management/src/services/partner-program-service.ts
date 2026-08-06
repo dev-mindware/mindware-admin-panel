@@ -3,7 +3,6 @@ import { PaginatedResponse } from "@workspace/types";
 import {
   PartnerProgramPlan,
   PartnerSubscription,
-  SubscriptionPaymentCreate,
   SubscriptionStatusUpdate,
 } from "@workspace/types/affiliate";
 
@@ -14,10 +13,6 @@ export const partnerProgramService = {
 
   createPlan: async (data: Partial<PartnerProgramPlan>) => {
     return api.post<PartnerProgramPlan>("/admin/partner-program/plans", data);
-  },
-
-  registerSubscriptionPayment: async (data: SubscriptionPaymentCreate) => {
-    return api.post("/admin/partner-program/subscription-payments", data);
   },
 
   listSubscriptions: async (filters?: {

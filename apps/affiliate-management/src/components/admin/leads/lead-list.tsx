@@ -14,7 +14,6 @@ import {
 import { Lead, LeadStatus } from "@workspace/types/affiliate";
 import { formatDate } from "@workspace/utils";
 import { useModalStore } from "@workspace/hooks";
-import { LeadFormModal } from "./lead-form-modal";
 import { MobileCard } from "@/components/shared/mobile-card";
 
 export function LeadList() {
@@ -142,7 +141,6 @@ export function LeadList() {
         />
       </div>
 
-      <LeadFormModal />
     </div>
   );
 }

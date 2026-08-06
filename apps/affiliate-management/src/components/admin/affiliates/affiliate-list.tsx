@@ -69,16 +69,6 @@ function buildAffiliateActions(
       icon: "Pencil" as const,
       onClick: (current: Affiliate) => openModal("edit-affiliate", current),
     },
-    {
-      label: "Atribuir cliente (Subscrição)",
-      icon: "CreditCard" as const,
-      onClick: (current: Affiliate) => openModal("register-subscription-payment", current),
-    },
-    {
-      label: "Atribuir cliente (Lead)",
-      icon: "UserPlus" as const,
-      onClick: (current: Affiliate) => openModal("create-lead", current),
-    },
     ...(item.status === AffiliateStatus.PENDING_APPROVAL
       ? ([
           {
