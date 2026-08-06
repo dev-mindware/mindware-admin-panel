@@ -24,6 +24,7 @@ import { useApproveCertification } from "@/hooks/affiliate/use-partner-program";
 import { toast } from "sonner";
 import { AffiliateFormModal } from "./affiliate-form-modal";
 import { DeleteAffiliateModal } from "./delete-affiliate-modal";
+import { MobileCard } from "@/components/shared/mobile-card";
 
 const certificationLabels: Record<string, string> = {
   not_eligible: "Não elegível",
@@ -43,6 +44,102 @@ function certificationBadgeVariant(status?: string) {
     default:
       return "outline" as const;
   }
+}
+
+function buildAffiliateActions(
+  item: Affiliate,
+  helpers: {
+    openModal: (id: string, data?: any) => void;
+    approveAffiliate: (id: string) => void;
+    rejectAffiliate: (id: string) => void;
+    updateStatus: (args: { id: string; status: AffiliateStatus }) => void;
+    approveCertification: (args: { affiliateId: string }, opts?: any) => void;
+  },
+) {
+  const { openModal, approveAffiliate, rejectAffiliate, updateStatus, approveCertification } = helpers;
+
+  return [
+    {
+      label: "Ver detalhes",
+      icon: "Info" as const,
+      onClick: (current: Affiliate) => openModal("view-affiliate-details", current),
+    },
+    {
+      label: "Editar",
+      icon: "Pencil" as const,
+      onClick: (current: Affiliate) => openModal("edit-affiliate", current),
+    },
+    {
+      label: "Atribuir cliente (Subscrição)",
+      icon: "CreditCard" as const,
+      onClick: (current: Affiliate) => openModal("register-subscription-payment", current),
+    },
+    {
+      label: "Atribuir cliente (Lead)",
+      icon: "UserPlus" as const,
+      onClick: (current: Affiliate) => openModal("create-lead", current),
+    },
+    ...(item.status === AffiliateStatus.PENDING_APPROVAL
+      ? ([
+          {
+            label: "Aprovar afiliado",
+            icon: "CircleCheck",
+            onClick: (current: Affiliate) => approveAffiliate(current.id),
+          },
+          {
+            label: "Rejeitar afiliado",
+            icon: "CircleX",
+            variant: "destructive",
+            onClick: (current: Affiliate) => rejectAffiliate(current.id),
+          },
+        ] as any)
+      : []),
+    ...(item.status === AffiliateStatus.INACTIVE || item.status === AffiliateStatus.SUSPENDED
+      ? ([
+          {
+            label: "Ativar",
+            icon: "CirclePlay",
+            onClick: (current: Affiliate) =>
+              updateStatus({ id: current.id, status: AffiliateStatus.ACTIVE }),
+          },
+        ] as any)
+      : []),
+    ...(item.status === AffiliateStatus.ACTIVE
+      ? ([
+          {
+            label: "Suspender",
+            icon: "TriangleAlert",
+            variant: "destructive",
+            onClick: (current: Affiliate) =>
+              updateStatus({ id: current.id, status: AffiliateStatus.SUSPENDED }),
+          },
+        ] as any)
+      : []),
+    ...(item.certification_status === "eligible"
+      ? ([
+          {
+            label: "Certificar (PRO)",
+            icon: "Award",
+            onClick: (current: Affiliate) =>
+              approveCertification(
+                { affiliateId: current.id },
+                {
+                  onSuccess: () => toast.success("Afiliado certificado como Parceiro Comercial (PRO)."),
+                  onError: (error: any) =>
+                    toast.error(error.response?.data?.detail || "Erro ao certificar afiliado."),
+                },
+              ),
+          },
+        ] as any)
+      : []),
+    { type: "separator" as const },
+    {
+      label: "Eliminar",
+      icon: "Trash2" as const,
+      variant: "destructive" as const,
+      onClick: (current: Affiliate) => openModal("delete-affiliate", current),
+    },
+  ];
 }
 
 export function AffiliateList() {
@@ -65,6 +162,14 @@ export function AffiliateList() {
   const { mutate: approveAffiliate } = useApproveAffiliate();
   const { mutate: rejectAffiliate } = useRejectAffiliate();
   const { mutate: approveCertification } = useApproveCertification();
+
+  const actionHelpers = {
+    openModal,
+    approveAffiliate: (id: string) => approveAffiliate(id),
+    rejectAffiliate: (id: string) => rejectAffiliate(id),
+    updateStatus: (args: { id: string; status: AffiliateStatus }) => updateStatus(args),
+    approveCertification: (args: { affiliateId: string }, opts?: any) => approveCertification(args, opts),
+  };
 
   const columns: Column<Affiliate>[] = [
     {
@@ -119,91 +224,7 @@ export function AffiliateList() {
       key: "action",
       header: "Ações",
       render: (_, item) => (
-        <ButtonOnlyAction
-          data={item}
-          actions={[
-            {
-              label: "Ver detalhes",
-              icon: "Info",
-              onClick: (current) => openModal("view-affiliate-details", current),
-            },
-            {
-              label: "Editar",
-              icon: "Pencil",
-              onClick: (current) => openModal("edit-affiliate", current),
-            },
-            {
-              label: "Atribuir cliente (Subscrição)",
-              icon: "CreditCard",
-              onClick: (current) => openModal("register-subscription-payment", current),
-            },
-            {
-              label: "Atribuir cliente (Lead)",
-              icon: "UserPlus",
-              onClick: (current) => openModal("create-lead", current),
-            },
-            ...(item.status === AffiliateStatus.PENDING_APPROVAL
-              ? ([
-                  {
-                    label: "Aprovar afiliado",
-                    icon: "CircleCheck",
-                    onClick: (current: Affiliate) => approveAffiliate(current.id),
-                  },
-                  {
-                    label: "Rejeitar afiliado",
-                    icon: "CircleX",
-                    variant: "destructive",
-                    onClick: (current: Affiliate) => rejectAffiliate(current.id),
-                  },
-                ] as any)
-              : []),
-            ...(item.status === AffiliateStatus.INACTIVE || item.status === AffiliateStatus.SUSPENDED
-              ? ([
-                  {
-                    label: "Ativar",
-                    icon: "CirclePlay",
-                    onClick: (current: Affiliate) =>
-                      updateStatus({ id: current.id, status: AffiliateStatus.ACTIVE }),
-                  },
-                ] as any)
-              : []),
-            ...(item.status === AffiliateStatus.ACTIVE
-              ? ([
-                  {
-                    label: "Suspender",
-                    icon: "TriangleAlert",
-                    variant: "destructive",
-                    onClick: (current: Affiliate) =>
-                      updateStatus({ id: current.id, status: AffiliateStatus.SUSPENDED }),
-                  },
-                ] as any)
-              : []),
-            ...(item.certification_status === "eligible"
-              ? ([
-                  {
-                    label: "Certificar (PRO)",
-                    icon: "Award",
-                    onClick: (current: Affiliate) =>
-                      approveCertification(
-                        { affiliateId: current.id },
-                        {
-                          onSuccess: () => toast.success("Afiliado certificado como Parceiro Comercial (PRO)."),
-                          onError: (error: any) =>
-                            toast.error(error.response?.data?.detail || "Erro ao certificar afiliado."),
-                        },
-                      ),
-                  },
-                ] as any)
-              : []),
-            { type: "separator" },
-            {
-              label: "Eliminar",
-              icon: "Trash2",
-              variant: "destructive",
-              onClick: (current) => openModal("delete-affiliate", current),
-            },
-          ]}
-        />
+        <ButtonOnlyAction data={item} actions={buildAffiliateActions(item, actionHelpers)} />
       ),
     },
   ];
@@ -213,6 +234,8 @@ export function AffiliateList() {
   if (isError) {
     return <RequestError refetch={refetch} message="Erro ao carregar afiliados." />;
   }
+
+  const items = data || [];
 
   return (
     <div className="space-y-4">
@@ -229,19 +252,52 @@ export function AffiliateList() {
         ]}
       />
 
-      <GenericTable<Affiliate>
-        data={data || []}
-        columns={columns}
-        page={page}
-        total={total}
-        totalPages={totalPages}
-        setPage={setPage}
-        goToNextPage={goToNextPage}
-        goToPreviousPage={goToPreviousPage}
-        emptyTitle="Nenhum afiliado encontrado"
-        emptyDescription="Ainda não existem afiliados registados ou com este estado."
-        emptyIcon="Users"
-      />
+      <div className="block space-y-3 sm:hidden">
+        {items.length === 0 ? (
+          <div className="rounded-2xl border bg-card px-4 py-8 text-center text-xs text-muted-foreground">
+            Ainda não existem afiliados registados ou com este estado.
+          </div>
+        ) : (
+          items.map((item) => (
+            <MobileCard
+              key={item.id}
+              title={item.nome_completo}
+              subtitle={item.codigo_afiliado || "Sem código"}
+              icon="Users"
+              badge={<ItemStatusBadge status={item.status} />}
+              fields={[
+                { label: "Email", value: item.email },
+                { label: "Ganhos", value: formatCurrency(item.total_earned) },
+                {
+                  label: "Certificação",
+                  value: certificationLabels[item.certification_status ?? "not_eligible"] ?? "-",
+                },
+                { label: "Aderiu", value: formatDate(item.created_at) },
+              ]}
+              footerAction={
+                <ButtonOnlyAction data={item} actions={buildAffiliateActions(item, actionHelpers)} />
+              }
+              onClick={() => openModal("view-affiliate-details", item)}
+            />
+          ))
+        )}
+      </div>
+
+      <div className="hidden sm:block">
+        <GenericTable<Affiliate>
+          data={items}
+          columns={columns}
+          page={page}
+          total={total}
+          totalPages={totalPages}
+          setPage={setPage}
+          goToNextPage={goToNextPage}
+          goToPreviousPage={goToPreviousPage}
+          emptyTitle="Nenhum afiliado encontrado"
+          emptyDescription="Ainda não existem afiliados registados ou com este estado."
+          emptyIcon="Users"
+        />
+      </div>
 
       <AffiliateFormModal />
       <DeleteAffiliateModal />

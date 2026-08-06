@@ -93,7 +93,7 @@ export function PageWrapper({
         </div>
       </header>
       <div className={`flex flex-col flex-1 ${variant === "counter" ? "w-full max-w-[98%]" : "w-full"} mx-auto space-y-4 md:space-y-6`}>
-        <div className={`@container/main flex flex-1 ${variant === "counter" ? "p-4" : "p-12"} flex-col gap-2`}>
+        <div className={`@container/main flex flex-1 ${variant === "counter" ? "p-4" : "px-4 py-8 md:px-10"} flex-col gap-2`}>
           {children}
         </div>
       </div>

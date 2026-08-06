@@ -15,6 +15,7 @@ import { Lead, LeadStatus } from "@workspace/types/affiliate";
 import { formatDate } from "@workspace/utils";
 import { useModalStore } from "@workspace/hooks";
 import { LeadFormModal } from "./lead-form-modal";
+import { MobileCard } from "@/components/shared/mobile-card";
 
 export function LeadList() {
   const [status, setStatus] = useState<LeadStatus | undefined>();
@@ -22,6 +23,32 @@ export function LeadList() {
     useLeads({ status });
   const { openModal } = useModalStore();
   const { mutate: updateStatus } = useUpdateLeadStatus();
+
+  const buildActions = (item: Lead) => [
+    {
+      label: "Ver detalhes",
+      icon: "Info" as const,
+      onClick: (current: Lead) => openModal("view-lead-details", current),
+    },
+    ...(item.status === LeadStatus.NEW
+      ? ([
+          {
+            label: "Marcar como contactado",
+            icon: "Phone",
+            onClick: (current: Lead) => updateStatus({ id: current.id, status: LeadStatus.CONTACTED }),
+          },
+        ] as any)
+      : []),
+    ...(item.status === LeadStatus.CONTACTED
+      ? ([
+          {
+            label: "Converter em venda",
+            icon: "Check",
+            onClick: (current: Lead) => updateStatus({ id: current.id, status: LeadStatus.CONVERTED }),
+          },
+        ] as any)
+      : []),
+  ];
 
   const columns: Column<Lead>[] = [
     {
@@ -52,41 +79,14 @@ export function LeadList() {
     {
       key: "action",
       header: "Ações",
-      render: (_, item) => (
-        <ButtonOnlyAction
-          data={item}
-          actions={[
-            {
-              label: "Ver detalhes",
-              icon: "Info",
-              onClick: (current) => openModal("view-lead-details", current),
-            },
-            ...(item.status === LeadStatus.NEW
-              ? ([
-                  {
-                    label: "Marcar como contactado",
-                    icon: "Phone",
-                    onClick: (current: Lead) => updateStatus({ id: current.id, status: LeadStatus.CONTACTED }),
-                  },
-                ] as any)
-              : []),
-            ...(item.status === LeadStatus.CONTACTED
-              ? ([
-                  {
-                    label: "Converter em venda",
-                    icon: "Check",
-                    onClick: (current: Lead) => updateStatus({ id: current.id, status: LeadStatus.CONVERTED }),
-                  },
-                ] as any)
-              : []),
-          ]}
-        />
-      ),
+      render: (_, item) => <ButtonOnlyAction data={item} actions={buildActions(item)} />,
     },
   ];
 
   if (isLoading) return <ListSkeleton />;
   if (isError) return <RequestError refetch={refetch} message="Erro ao carregar leads." />;
+
+  const items = data || [];
 
   return (
     <div className="space-y-4">
@@ -102,19 +102,45 @@ export function LeadList() {
         ]}
       />
 
-      <GenericTable<Lead>
-        data={data || []}
-        columns={columns}
-        page={page}
-        total={total}
-        totalPages={totalPages}
-        setPage={setPage}
-        goToNextPage={goToNextPage}
-        goToPreviousPage={goToPreviousPage}
-        emptyTitle="Nenhum lead encontrado"
-        emptyDescription="Não existem leads registados com este estado."
-        emptyIcon="UserPlus"
-      />
+      <div className="block space-y-3 sm:hidden">
+        {items.length === 0 ? (
+          <div className="rounded-2xl border bg-card px-4 py-8 text-center text-xs text-muted-foreground">
+            Não existem leads registados com este estado.
+          </div>
+        ) : (
+          items.map((item) => (
+            <MobileCard
+              key={item.id}
+              title={item.client_nome}
+              subtitle={item.affiliate_nome || "Sem afiliado"}
+              icon="UserPlus"
+              badge={<ItemStatusBadge status={item.status} />}
+              fields={[
+                { label: "Contacto", value: item.client_telefone || "-" },
+                { label: "Criado", value: formatDate(item.created_at) },
+              ]}
+              footerAction={<ButtonOnlyAction data={item} actions={buildActions(item)} />}
+              onClick={() => openModal("view-lead-details", item)}
+            />
+          ))
+        )}
+      </div>
+
+      <div className="hidden sm:block">
+        <GenericTable<Lead>
+          data={items}
+          columns={columns}
+          page={page}
+          total={total}
+          totalPages={totalPages}
+          setPage={setPage}
+          goToNextPage={goToNextPage}
+          goToPreviousPage={goToPreviousPage}
+          emptyTitle="Nenhum lead encontrado"
+          emptyDescription="Não existem leads registados com este estado."
+          emptyIcon="UserPlus"
+        />
+      </div>
 
       <LeadFormModal />
     </div>
