@@ -7,6 +7,23 @@ import api from "@/services/api";
 import { createSession } from "@/lib/session";
 import { getSession } from "@/lib/auth";
 
+function toClientUser(user: LoginResponse["user"]): BaseUser {
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    phone: user.phone ?? "",
+    role: user.role,
+    company: user.company
+      ? {
+          id: (user.company as { id?: string }).id,
+          name: (user.company as { name?: string }).name,
+        }
+      : undefined,
+    avatar: (user as { avatar?: string }).avatar,
+  };
+}
+
 export async function loginAction({
   email,
   password,
@@ -26,7 +43,10 @@ export async function loginAction({
     if (!user) {
       throw new Error("Usuário não autorizado");
     }
-    console.log(res.data);
+
+    if (!tokens?.accessToken || !tokens?.refreshToken) {
+      throw new Error("Resposta de autenticação incompleta");
+    }
 
     await createSession({
       accessToken: tokens.accessToken,
@@ -34,15 +54,23 @@ export async function loginAction({
       expiresIn: tokens.expiresIn,
     });
 
-    const redirectPath = "/dashboard";
-    console.log(`Login bem-sucedido! Redirecionando para: ${redirectPath}`);
-
-    return { message, user, redirectPath };
-  } catch (error: any) {
+    return {
+      message,
+      user: toClientUser(user),
+      redirectPath: "/dashboard",
+    };
+  } catch (error: unknown) {
     let messageError = "Ocorreu um erro desconhecido!";
 
-    if (error?.response?.data?.message) {
-      messageError = error.response.data.message;
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "response" in error &&
+      typeof (error as { response?: { data?: { message?: string } } }).response
+        ?.data?.message === "string"
+    ) {
+      messageError = (error as { response: { data: { message: string } } })
+        .response.data.message;
     } else if (error instanceof Error) {
       messageError = error.message;
     }

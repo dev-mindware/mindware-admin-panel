@@ -11,14 +11,32 @@ export interface SessionPayload {
   expiresIn?: string; // e.g., "4m", "1h"
 }
 
+function cookieOptions(expires: Date) {
+  // path "/" so cookies are visible to middleware and all routes under basePath
+  // after reverse-proxy rewrites (hosts that share cookies across apps should isolate by name).
+  const isSecure = process.env.NODE_ENV === "production";
+
+  return {
+    httpOnly: true,
+    secure: isSecure,
+    expires,
+    sameSite: "lax" as const,
+    path: "/",
+  };
+}
+
 export async function createSession(payload: SessionPayload) {
-  // Parse expiresIn do backend (ex: "4m")
+  if (!payload.accessToken || !payload.refreshToken) {
+    throw new Error("Tokens de sessão inválidos");
+  }
+
+  // Parse expiresIn do backend (ex: "4m", "24h")
   let accessDurationMs = 60 * 60 * 1000; // Default: 60 min
 
   if (payload.expiresIn) {
     const match = payload.expiresIn.match(/^(\d+)([smhdw])$/);
     if (match) {
-      const value = parseInt(match[1]);
+      const value = parseInt(match[1], 10);
       const unit = match[2];
       const multipliers: Record<string, number> = {
         s: 1000,
@@ -27,47 +45,30 @@ export async function createSession(payload: SessionPayload) {
         d: 24 * 60 * 60 * 1000,
         w: 7 * 24 * 60 * 60 * 1000,
       };
-      accessDurationMs = value * multipliers[unit];
+      accessDurationMs = value * (multipliers[unit] ?? multipliers.h);
     }
   }
 
   const accessExpiresAt = new Date(Date.now() + accessDurationMs);
   const refreshExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-  const isSecure = process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_APP_URL?.startsWith("https") === true;
-  const cookiePath = process.env.NEXT_PUBLIC_BASE_PATH || "/";
-
   const authCookies = await cookies();
-  authCookies.set(ACCESS_TOKEN_KEY, payload.accessToken, {
-    httpOnly: true,
-    secure: isSecure,
-    expires: accessExpiresAt,
-    sameSite: "lax",
-    path: cookiePath,
-  });
-
-  authCookies.set(REFRESH_TOKEN_KEY, payload.refreshToken, {
-    httpOnly: true,
-    secure: isSecure,
-    expires: refreshExpiresAt,
-    sameSite: "lax",
-    path: cookiePath,
-  });
+  authCookies.set(
+    ACCESS_TOKEN_KEY,
+    payload.accessToken,
+    cookieOptions(accessExpiresAt),
+  );
+  authCookies.set(
+    REFRESH_TOKEN_KEY,
+    payload.refreshToken,
+    cookieOptions(refreshExpiresAt),
+  );
 }
 
 export async function destroySession() {
   const authCookies = await cookies();
-  const isSecure = process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_APP_URL?.startsWith("https") === true;
-  const cookiePath = process.env.NEXT_PUBLIC_BASE_PATH || "/";
+  const cleared = cookieOptions(new Date(0));
 
-  const options = {
-    path: cookiePath,
-    maxAge: 0,
-    expires: new Date(0),
-    httpOnly: true,
-    secure: isSecure,
-  };
-
-  authCookies.set(ACCESS_TOKEN_KEY, "", options);
-  authCookies.set(REFRESH_TOKEN_KEY, "", options);
+  authCookies.set(ACCESS_TOKEN_KEY, "", { ...cleared, maxAge: 0 });
+  authCookies.set(REFRESH_TOKEN_KEY, "", { ...cleared, maxAge: 0 });
 }

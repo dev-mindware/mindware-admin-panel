@@ -1,7 +1,7 @@
 export const PUBLIC_ROUTES = [
   "/",
   "/auth/login",
-  "/auth/register", // Keep register if Admin needs to register? or maybe remove if super admin only creates. Keeping for now to be safe.
+  "/auth/register",
   "/auth/forgot-password",
   "/auth/reset-password",
   "/unauthorized",
@@ -13,13 +13,20 @@ export const PRIVATE_ROUTE_PREFIXES = [
   "/companies",
   "/users",
   "/plans",
-  "/categories",
+  "/subscriptions",
   "/logs",
+  "/definitions",
   "/settings",
+  "/categories",
 ];
 
 export const BASE_PATH = "/mindgest";
 export const API_AUTH_PREFIX = "/api/auth";
-export const DEFAULT_LOGIN_REDIRECT = "/dashboard";
-export const UPGRADE_REDIRECT = "/plans";
 
+/** Where unauthenticated users are sent (middleware). */
+export const DEFAULT_LOGIN_REDIRECT = "/auth/login";
+
+/** Where authenticated users leave auth pages (middleware). */
+export const DEFAULT_AUTHENTICATED_REDIRECT = "/dashboard";
+
+export const UPGRADE_REDIRECT = "/plans";
