@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Button,
   Field,
@@ -8,10 +8,15 @@ import {
   FieldLabel,
   GlobalModal,
   Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
   Textarea,
 } from "@workspace/ui";
 import { useModalStore } from "@workspace/hooks";
-import { useAffiliates } from "@/hooks/affiliate";
+import { useAffiliates, useMindgestClientsByAffiliate } from "@/hooks/affiliate";
 import {
   useRegisterSubscriptionPayment,
   useUpdateSubscriptionStatus,
@@ -36,8 +41,18 @@ const billingPeriods: { value: BillingPeriod; label: string }[] = [
   { value: "annual_recurring", label: "Anual (recorrente)" },
 ];
 
-const selectClass =
-  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+const emptyForm = {
+  external_payment_id: "",
+  affiliate_code: "",
+  client_id: "",
+  client_name: "",
+  client_identifier: "",
+  plan_code: "BASE" as PartnerPlanCode,
+  amount_paid: "",
+  paid_at: "",
+  billing_period: "monthly_first" as BillingPeriod,
+  notes: "",
+};
 
 export function SubscriptionModals() {
   const { modalData, closeModal } = useModalStore();
@@ -50,25 +65,65 @@ export function SubscriptionModals() {
   const initialAffiliateCode = registerModalData?.codigo_afiliado || "";
 
   const [notes, setNotes] = useState("");
-  const [form, setForm] = useState({
-    external_payment_id: "",
-    affiliate_code: "",
-    client_name: "",
-    client_identifier: "",
-    plan_code: "BASE" as PartnerPlanCode,
-    amount_paid: "",
-    paid_at: "",
-    billing_period: "monthly_first" as BillingPeriod,
-    notes: "",
-  });
+  const [form, setForm] = useState(emptyForm);
 
   useEffect(() => {
     if (initialAffiliateCode) {
-      setForm((prev) => ({ ...prev, affiliate_code: initialAffiliateCode }));
+      setForm((prev) => ({ ...prev, affiliate_code: initialAffiliateCode, client_id: "", client_name: "", client_identifier: "" }));
     }
   }, [initialAffiliateCode]);
 
-  const setField = (key: keyof typeof form, value: string) => setForm((prev) => ({ ...prev, [key]: value }));
+  const selectedAffiliate = useMemo(() => {
+    const fromList = (affiliates || []).find((a) => a.codigo_afiliado === form.affiliate_code);
+    if (fromList) return fromList;
+    if (registerModalData?.id && registerModalData.codigo_afiliado === form.affiliate_code) {
+      return registerModalData;
+    }
+    return undefined;
+  }, [affiliates, form.affiliate_code, registerModalData]);
+
+  const {
+    data: clients = [],
+    isLoading: isLoadingClients,
+    isError: isClientsError,
+  } = useMindgestClientsByAffiliate(selectedAffiliate?.id);
+
+  const setField = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
+    setForm((prev) => ({ ...prev, [key]: value }));
+
+  const handleAffiliateChange = (code: string) => {
+    setForm((prev) => ({
+      ...prev,
+      affiliate_code: code,
+      client_id: "",
+      client_name: "",
+      client_identifier: "",
+    }));
+  };
+
+  const handleClientChange = (clientId: string) => {
+    const client = clients.find((c) => c.id === clientId);
+    if (!client) {
+      setForm((prev) => ({
+        ...prev,
+        client_id: "",
+        client_name: "",
+        client_identifier: "",
+      }));
+      return;
+    }
+
+    const plan = (client.current_plan || "").toUpperCase() as PartnerPlanCode;
+    const plan_code = planCodes.includes(plan) ? plan : form.plan_code;
+
+    setForm((prev) => ({
+      ...prev,
+      client_id: client.id,
+      client_name: client.company_name || client.name || "",
+      client_identifier: client.company_tax_number || client.tax_number || "",
+      plan_code,
+    }));
+  };
 
   const handleUpdate = (status: PartnerSubscription["status"]) => {
     if (!subscription) return;
@@ -90,6 +145,10 @@ export function SubscriptionModals() {
       toast.error("Preencha os campos obrigatórios.");
       return;
     }
+    if (!form.client_id) {
+      toast.error("Selecione um cliente Mindgest.");
+      return;
+    }
     registerPayment(
       {
         external_payment_id: form.external_payment_id,
@@ -106,22 +165,23 @@ export function SubscriptionModals() {
         onSuccess: () => {
           toast.success("Pagamento registado e comissão processada.");
           closeModal("register-subscription-payment");
-          setForm({
-            external_payment_id: "",
-            affiliate_code: "",
-            client_name: "",
-            client_identifier: "",
-            plan_code: "BASE",
-            amount_paid: "",
-            paid_at: "",
-            billing_period: "monthly_first",
-            notes: "",
-          });
+          setForm(emptyForm);
         },
         onError: (error: any) => toast.error(error.response?.data?.detail || "Erro ao registar o pagamento."),
       },
     );
   };
+
+  const affiliateOptions = useMemo(() => {
+    const map = new Map<string, Affiliate>();
+    for (const aff of affiliates || []) {
+      if (aff.codigo_afiliado) map.set(aff.codigo_afiliado, aff);
+    }
+    if (registerModalData?.codigo_afiliado && registerModalData.id) {
+      map.set(registerModalData.codigo_afiliado, registerModalData);
+    }
+    return Array.from(map.values());
+  }, [affiliates, registerModalData]);
 
   return (
     <>
@@ -167,84 +227,157 @@ export function SubscriptionModals() {
             <Field>
               <FieldLabel>ID de pagamento externo *</FieldLabel>
               <FieldContent>
-                <Input value={form.external_payment_id} onChange={(e) => setField("external_payment_id", e.target.value)} placeholder="pay_..." />
+                <Input
+                  value={form.external_payment_id}
+                  onChange={(e) => setField("external_payment_id", e.target.value)}
+                  placeholder="pay_..."
+                />
               </FieldContent>
             </Field>
+
             <Field>
-              <FieldLabel>Código do afiliado *</FieldLabel>
-              <FieldContent className="space-y-2">
-                {affiliates && affiliates.length > 0 && (
-                  <select
-                    className={selectClass}
-                    value={affiliates.some((a) => a.codigo_afiliado === form.affiliate_code) ? form.affiliate_code : ""}
-                    onChange={(e) => setField("affiliate_code", e.target.value)}
-                  >
-                    <option value="">Selecionar da lista...</option>
-                    {affiliates.map((aff) => (
-                      <option key={aff.id} value={aff.codigo_afiliado}>
+              <FieldLabel>Afiliado *</FieldLabel>
+              <FieldContent>
+                <Select
+                  value={form.affiliate_code || undefined}
+                  onValueChange={handleAffiliateChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecionar afiliado..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {affiliateOptions.map((aff) => (
+                      <SelectItem key={aff.id} value={aff.codigo_afiliado}>
                         {aff.nome_completo} ({aff.codigo_afiliado})
-                      </option>
+                      </SelectItem>
                     ))}
-                  </select>
+                  </SelectContent>
+                </Select>
+              </FieldContent>
+            </Field>
+
+            <Field className="sm:col-span-2">
+              <FieldLabel>Cliente Mindgest *</FieldLabel>
+              <FieldContent>
+                <Select
+                  value={form.client_id || undefined}
+                  onValueChange={handleClientChange}
+                  disabled={!selectedAffiliate?.id || isLoadingClients}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue
+                      placeholder={
+                        !selectedAffiliate
+                          ? "Selecione o afiliado primeiro"
+                          : isLoadingClients
+                            ? "A carregar clientes..."
+                            : isClientsError
+                              ? "Erro ao carregar clientes"
+                              : clients.length === 0
+                                ? "Nenhum cliente Mindgest encontrado"
+                                : "Selecionar cliente..."
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients.map((client) => {
+                      const label =
+                        client.company_name || client.name || "Cliente sem nome";
+                      const nif = client.company_tax_number || client.tax_number || "Sem NIF";
+                      return (
+                        <SelectItem key={client.id} value={client.id}>
+                          {label} — {nif}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+                {form.client_name && (
+                  <p className="mt-1.5 text-xs text-muted-foreground">
+                    {form.client_name}
+                    {form.client_identifier ? ` · NIF ${form.client_identifier}` : ""}
+                  </p>
                 )}
-                <Input value={form.affiliate_code} onChange={(e) => setField("affiliate_code", e.target.value)} placeholder="MWD-AO-..." />
               </FieldContent>
             </Field>
-            <Field>
-              <FieldLabel>Nome do cliente *</FieldLabel>
-              <FieldContent>
-                <Input value={form.client_name} onChange={(e) => setField("client_name", e.target.value)} />
-              </FieldContent>
-            </Field>
-            <Field>
-              <FieldLabel>Identificador do cliente (NIF) *</FieldLabel>
-              <FieldContent>
-                <Input value={form.client_identifier} onChange={(e) => setField("client_identifier", e.target.value)} />
-              </FieldContent>
-            </Field>
+
             <Field>
               <FieldLabel>Plano</FieldLabel>
               <FieldContent>
-                <select className={selectClass} value={form.plan_code} onChange={(e) => setField("plan_code", e.target.value)}>
-                  {planCodes.map((code) => (
-                    <option key={code} value={code}>
-                      {code}
-                    </option>
-                  ))}
-                </select>
+                <Select
+                  value={form.plan_code}
+                  onValueChange={(value) => setField("plan_code", value as PartnerPlanCode)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Plano" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {planCodes.map((code) => (
+                      <SelectItem key={code} value={code}>
+                        {code}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FieldContent>
             </Field>
+
             <Field>
               <FieldLabel>Período de faturação</FieldLabel>
               <FieldContent>
-                <select className={selectClass} value={form.billing_period} onChange={(e) => setField("billing_period", e.target.value)}>
-                  {billingPeriods.map((bp) => (
-                    <option key={bp.value} value={bp.value}>
-                      {bp.label}
-                    </option>
-                  ))}
-                </select>
+                <Select
+                  value={form.billing_period}
+                  onValueChange={(value) => setField("billing_period", value as BillingPeriod)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Período" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {billingPeriods.map((bp) => (
+                      <SelectItem key={bp.value} value={bp.value}>
+                        {bp.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FieldContent>
             </Field>
+
             <Field>
               <FieldLabel>Valor pago (Kz) *</FieldLabel>
               <FieldContent>
-                <Input type="number" step="0.01" value={form.amount_paid} onChange={(e) => setField("amount_paid", e.target.value)} />
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={form.amount_paid}
+                  onChange={(e) => setField("amount_paid", e.target.value)}
+                />
               </FieldContent>
             </Field>
+
             <Field>
               <FieldLabel>Pago em</FieldLabel>
               <FieldContent>
-                <Input type="date" value={form.paid_at} onChange={(e) => setField("paid_at", e.target.value)} />
+                <Input
+                  type="date"
+                  value={form.paid_at}
+                  onChange={(e) => setField("paid_at", e.target.value)}
+                />
               </FieldContent>
             </Field>
           </div>
+
           <Field>
             <FieldLabel>Notas (opcional)</FieldLabel>
             <FieldContent>
-              <Textarea value={form.notes} onChange={(e) => setField("notes", e.target.value)} className="min-h-[60px]" />
+              <Textarea
+                value={form.notes}
+                onChange={(e) => setField("notes", e.target.value)}
+                className="min-h-[60px]"
+              />
             </FieldContent>
           </Field>
+
           <div className="flex justify-end gap-3 border-t pt-4">
             <Button variant="outline" onClick={() => closeModal("register-subscription-payment")}>
               Cancelar

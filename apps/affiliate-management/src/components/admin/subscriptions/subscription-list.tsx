@@ -20,6 +20,7 @@ import { PartnerSubscription } from "@workspace/types/affiliate";
 import { formatCurrency, formatDate } from "@workspace/utils";
 import { useModalStore } from "@workspace/hooks";
 import { toast } from "sonner";
+import { MobileCard } from "@/components/shared/mobile-card";
 
 const billingPeriodLabels: Record<string, string> = {
   monthly_first: "Mensal (1º)",
@@ -53,6 +54,14 @@ export function SubscriptionList() {
       onError: (error: any) => toast.error(error.response?.data?.detail || "Erro ao libertar comissões."),
     });
   };
+
+  const statusActions = (item: PartnerSubscription) => [
+    {
+      label: "Mudar estado",
+      icon: "RefreshCw" as const,
+      onClick: (current: PartnerSubscription) => openModal("update-subscription-status", current),
+    },
+  ];
 
   const columns: Column<PartnerSubscription>[] = [
     {
@@ -114,18 +123,7 @@ export function SubscriptionList() {
     {
       key: "action",
       header: "Ações",
-      render: (_, item) => (
-        <ButtonOnlyAction
-          data={item}
-          actions={[
-            {
-              label: "Mudar estado",
-              icon: "RefreshCw",
-              onClick: (current) => openModal("update-subscription-status", current),
-            },
-          ]}
-        />
-      ),
+      render: (_, item) => <ButtonOnlyAction data={item} actions={statusActions(item)} />,
     },
   ];
 
@@ -165,7 +163,7 @@ export function SubscriptionList() {
             ]}
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Button variant="outline" loading={isReleasing} onClick={handleRelease}>
             Libertar comissões validadas
           </Button>
@@ -173,19 +171,49 @@ export function SubscriptionList() {
         </div>
       </div>
 
-      <GenericTable<PartnerSubscription>
-        data={items}
-        columns={columns}
-        page={page}
-        total={total}
-        totalPages={totalPages}
-        setPage={setPage}
-        goToNextPage={() => setPage((p) => Math.min(totalPages, p + 1))}
-        goToPreviousPage={() => setPage((p) => Math.max(1, p - 1))}
-        emptyTitle="Nenhuma subscrição encontrada"
-        emptyDescription="Ainda não existem subscrições registadas ou com estes filtros."
-        emptyIcon="CreditCard"
-      />
+      <div className="block space-y-3 sm:hidden">
+        {items.length === 0 ? (
+          <div className="rounded-2xl border bg-card px-4 py-8 text-center text-xs text-muted-foreground">
+            Ainda não existem subscrições registadas ou com estes filtros.
+          </div>
+        ) : (
+          items.map((item) => (
+            <MobileCard
+              key={item.id}
+              title={item.client_name}
+              subtitle={item.affiliate_nome || item.affiliate_codigo || "Sem afiliado"}
+              icon="CreditCard"
+              badge={<ItemStatusBadge status={item.status} />}
+              fields={[
+                { label: "Plano", value: item.plan_code || item.plan_name || "-" },
+                { label: "Valor", value: formatCurrency(item.amount_paid) },
+                {
+                  label: "Período",
+                  value: billingPeriodLabels[item.billing_period] ?? item.billing_period,
+                },
+                { label: "Data", value: formatDate(item.paid_at || item.created_at) },
+              ]}
+              footerAction={<ButtonOnlyAction data={item} actions={statusActions(item)} />}
+            />
+          ))
+        )}
+      </div>
+
+      <div className="hidden sm:block">
+        <GenericTable<PartnerSubscription>
+          data={items}
+          columns={columns}
+          page={page}
+          total={total}
+          totalPages={totalPages}
+          setPage={setPage}
+          goToNextPage={() => setPage((p) => Math.min(totalPages, p + 1))}
+          goToPreviousPage={() => setPage((p) => Math.max(1, p - 1))}
+          emptyTitle="Nenhuma subscrição encontrada"
+          emptyDescription="Ainda não existem subscrições registadas ou com estes filtros."
+          emptyIcon="CreditCard"
+        />
+      </div>
     </div>
   );
 }

@@ -14,12 +14,28 @@ import {
 import { Commission, CommissionStatus } from "@workspace/types/affiliate";
 import { formatCurrency, formatDate } from "@workspace/utils";
 import { useModalStore } from "@workspace/hooks";
+import { MobileCard } from "@/components/shared/mobile-card";
 
 export function CommissionList() {
   const [status, setStatus] = useState<CommissionStatus | undefined>();
   const { data, isLoading, isError, refetch, page, total, totalPages, setPage, goToNextPage, goToPreviousPage } =
     useCommissions({ status });
   const { openModal } = useModalStore();
+
+  const buildActions = (item: Commission) => [
+    { label: "Ver detalhes", icon: "Info" as const, onClick: (current: Commission) => openModal("view-commission-details", current) },
+    ...(item.status === CommissionStatus.PENDING
+      ? ([
+          { label: "Aprovar comissão", icon: "Check", onClick: (current: Commission) => openModal("approve-commission", current) },
+          {
+            label: "Rejeitar",
+            icon: "X",
+            variant: "destructive",
+            onClick: (current: Commission) => openModal("reject-commission", current),
+          },
+        ] as any)
+      : []),
+  ];
 
   const columns: Column<Commission>[] = [
     { key: "client_nome", header: "Cliente", render: (_, item) => <div className="font-medium">{item.client_nome}</div> },
@@ -51,30 +67,14 @@ export function CommissionList() {
     {
       key: "action",
       header: "Ações",
-      render: (_, item) => (
-        <ButtonOnlyAction
-          data={item}
-          actions={[
-            { label: "Ver detalhes", icon: "Info", onClick: (current) => openModal("view-commission-details", current) },
-            ...(item.status === CommissionStatus.PENDING
-              ? ([
-                  { label: "Aprovar comissão", icon: "Check", onClick: (current: Commission) => openModal("approve-commission", current) },
-                  {
-                    label: "Rejeitar",
-                    icon: "X",
-                    variant: "destructive",
-                    onClick: (current: Commission) => openModal("reject-commission", current),
-                  },
-                ] as any)
-              : []),
-          ]}
-        />
-      ),
+      render: (_, item) => <ButtonOnlyAction data={item} actions={buildActions(item)} />,
     },
   ];
 
   if (isLoading) return <ListSkeleton />;
   if (isError) return <RequestError refetch={refetch} message="Erro ao carregar comissões." />;
+
+  const items = data || [];
 
   return (
     <div className="space-y-4">
@@ -90,19 +90,46 @@ export function CommissionList() {
         ]}
       />
 
-      <GenericTable<Commission>
-        data={data || []}
-        columns={columns}
-        page={page}
-        total={total}
-        totalPages={totalPages}
-        setPage={setPage}
-        goToNextPage={goToNextPage}
-        goToPreviousPage={goToPreviousPage}
-        emptyTitle="Nenhuma comissão encontrada"
-        emptyDescription="Não existem comissões registadas no momento."
-        emptyIcon="Coins"
-      />
+      <div className="block space-y-3 sm:hidden">
+        {items.length === 0 ? (
+          <div className="rounded-2xl border bg-card px-4 py-8 text-center text-xs text-muted-foreground">
+            Não existem comissões registadas no momento.
+          </div>
+        ) : (
+          items.map((item) => (
+            <MobileCard
+              key={item.id}
+              title={item.client_nome}
+              subtitle={item.affiliate_nome || "Sem afiliado"}
+              icon="Coins"
+              badge={<ItemStatusBadge status={item.status} />}
+              fields={[
+                { label: "Venda", value: formatCurrency(item.valor_servico) },
+                { label: "Comissão", value: formatCurrency(item.valor_comissao) },
+                { label: "Data", value: formatDate(item.created_at) },
+              ]}
+              footerAction={<ButtonOnlyAction data={item} actions={buildActions(item)} />}
+              onClick={() => openModal("view-commission-details", item)}
+            />
+          ))
+        )}
+      </div>
+
+      <div className="hidden sm:block">
+        <GenericTable<Commission>
+          data={items}
+          columns={columns}
+          page={page}
+          total={total}
+          totalPages={totalPages}
+          setPage={setPage}
+          goToNextPage={goToNextPage}
+          goToPreviousPage={goToPreviousPage}
+          emptyTitle="Nenhuma comissão encontrada"
+          emptyDescription="Não existem comissões registadas no momento."
+          emptyIcon="Coins"
+        />
+      </div>
     </div>
   );
 }
