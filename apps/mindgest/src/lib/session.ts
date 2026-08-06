@@ -34,37 +34,38 @@ export async function createSession(payload: SessionPayload) {
   const accessExpiresAt = new Date(Date.now() + accessDurationMs);
   const refreshExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
+  const isSecure = process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_APP_URL?.startsWith("https") === true;
+  const cookiePath = process.env.NEXT_PUBLIC_BASE_PATH || "/";
+
   const authCookies = await cookies();
   authCookies.set(ACCESS_TOKEN_KEY, payload.accessToken, {
     httpOnly: true,
-    secure: true,
+    secure: isSecure,
     expires: accessExpiresAt,
     sameSite: "lax",
-    // Use basePath so cookies are scoped to /mindgest/* and survive
-    // portal rewrites without conflicting with other apps.
-    path: "/mindgest",
+    path: cookiePath,
   });
 
   authCookies.set(REFRESH_TOKEN_KEY, payload.refreshToken, {
     httpOnly: true,
-    secure: true,
+    secure: isSecure,
     expires: refreshExpiresAt,
     sameSite: "lax",
-    path: "/mindgest",
+    path: cookiePath,
   });
 }
 
 export async function destroySession() {
   const authCookies = await cookies();
+  const isSecure = process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_APP_URL?.startsWith("https") === true;
+  const cookiePath = process.env.NEXT_PUBLIC_BASE_PATH || "/";
 
   const options = {
-    // Must match the path used in createSession, otherwise the browser
-    // won't find the cookies to delete them.
-    path: "/mindgest",
+    path: cookiePath,
     maxAge: 0,
     expires: new Date(0),
     httpOnly: true,
-    secure: true,
+    secure: isSecure,
   };
 
   authCookies.set(ACCESS_TOKEN_KEY, "", options);
