@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
+import Logo from "@/assets/mindgest.png";
 import { useForm } from "react-hook-form";
 import { ErrorMessage } from "@/utils/messages";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -48,7 +49,7 @@ export function LoginForm() {
       <div className="flex flex-col items-center gap-4 text-center">
         <div className="relative size-20 overflow-hidden rounded-2xl bg-muted/40 ring-1 ring-border shadow-sm">
           <Image
-            src="/mindgest.png"
+            src={Logo}
             alt="Mindgest"
             fill
             className="object-contain p-2"

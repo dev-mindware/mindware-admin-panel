@@ -1,13 +1,13 @@
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 
 type HeroImageSideProps = {
-  source: string;
+  source: string | StaticImageData;
   /** cover fills the panel (photos); contain keeps illustration letterboxed */
   fit?: "cover" | "contain";
   alt?: string;
   /** Brand mark and titles overlaid on photo heroes */
   brand?: {
-    logoSrc: string;
+    logoSrc: string | StaticImageData;
     title: string;
     subtitle?: string;
   };
@@ -40,13 +40,14 @@ export function HeroImageSide({
       {brand && (
         <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col gap-4 p-10 text-white">
           <div className="flex items-center gap-3">
-            <div className="relative size-12 overflow-hidden rounded-xl bg-white/10 ring-1 ring-white/20 backdrop-blur-sm">
+            <div className="relative size-12 shrink-0 overflow-hidden rounded-xl bg-white/10 ring-1 ring-white/20 backdrop-blur-sm">
               <Image
                 src={brand.logoSrc}
                 alt={brand.title}
                 fill
                 className="object-contain p-1.5"
                 sizes="48px"
+                priority
               />
             </div>
             <span className="text-lg font-semibold tracking-tight">
