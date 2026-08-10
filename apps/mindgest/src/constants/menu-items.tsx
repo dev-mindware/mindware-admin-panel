@@ -41,6 +41,17 @@ export const menuItems: MenuStructure = {
       icon: <Icon name="Wallet" />,
     },
     {
+      name: "Email Marketing",
+      url: "/email-marketing/dashboard",
+      icon: <Icon name="Mail" />,
+      items: [
+        { name: "Dashboard", url: "/email-marketing/dashboard" },
+        { name: "Campanhas", url: "/email-marketing/campaigns" },
+        { name: "Templates", url: "/email-marketing/templates" },
+        { name: "Automações", url: "/email-marketing/automations" },
+      ],
+    },
+    {
       name: "Logs do Sistema",
       url: "/logs",
       icon: <Icon name="FileSearch" />,
@@ -52,3 +63,4 @@ export const menuItems: MenuStructure = {
     },
   ],
 };
+

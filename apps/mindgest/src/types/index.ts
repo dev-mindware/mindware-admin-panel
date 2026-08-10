@@ -16,4 +16,6 @@ export * from "./dashboard";
 export * from "./tax";
 export * from "./cash-session";
 export * from "./user";
+export * from "./email-center";
+
 
