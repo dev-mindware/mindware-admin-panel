@@ -31,17 +31,22 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use(async (config) => {
-  // Only fetch from cookie once (or after explicit cache invalidation)
-  if (accessTokenCache === null) {
-    accessTokenCache = await getAccessToken();
+  let token: string | null = null;
+  if (typeof window === "undefined") {
+    token = await getAccessToken();
+  } else {
+    if (accessTokenCache === null) {
+      accessTokenCache = await getAccessToken();
+    }
+    token = accessTokenCache;
   }
 
   const isAuthRoute =
     config.url?.includes("/auth/login") ||
     config.url?.includes("/auth/refresh");
 
-  if (accessTokenCache && !isAuthRoute) {
-    config.headers.Authorization = `Bearer ${accessTokenCache}`;
+  if (token && !isAuthRoute) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
 
   return config;

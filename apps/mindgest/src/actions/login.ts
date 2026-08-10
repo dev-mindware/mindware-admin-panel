@@ -65,12 +65,14 @@ export async function loginAction({
     if (
       typeof error === "object" &&
       error !== null &&
-      "response" in error &&
-      typeof (error as { response?: { data?: { message?: string } } }).response
-        ?.data?.message === "string"
+      "response" in error
     ) {
-      messageError = (error as { response: { data: { message: string } } })
-        .response.data.message;
+      const responseData = (error as { response?: { data?: { message?: string | string[] } } }).response?.data;
+      if (typeof responseData?.message === "string") {
+        messageError = responseData.message;
+      } else if (Array.isArray(responseData?.message)) {
+        messageError = responseData.message.join(", ");
+      }
     } else if (error instanceof Error) {
       messageError = error.message;
     }
