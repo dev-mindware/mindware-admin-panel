@@ -28,16 +28,11 @@ const DUNNING_STEPS = [
   {
     day: "+7 dias",
     event: "Último Aviso",
-    template: "Último Aviso antes da Suspensão",
+    template: "Último Aviso",
     status: "active" as const,
   },
-  {
-    day: "+8 dias",
-    event: "Suspensão de Conta",
-    template: "Conta Suspensa",
-    status: "warning" as const,
-  },
 ];
+
 
 const PAYMENT_STEPS = [
   { event: "Pagamento Confirmado", template: "Pagamento Confirmado", note: "Sequência interrompida automaticamente" },
@@ -69,11 +64,7 @@ export default function AutomationsPage() {
               <div key={step.day} className="flex gap-4">
                 {/* Timeline connector */}
                 <div className="flex flex-col items-center">
-                  <div className={`w-3 h-3 rounded-full border-2 mt-4 shrink-0 ${
-                    step.status === "warning"
-                      ? "border-destructive bg-destructive/20"
-                      : "border-primary bg-primary/20"
-                  }`} />
+                  <div className="w-3 h-3 rounded-full border-2 border-primary bg-primary/20 mt-4 shrink-0" />
                   {idx < DUNNING_STEPS.length - 1 && (
                     <div className="w-px flex-1 bg-border mt-1" />
                   )}
@@ -81,15 +72,12 @@ export default function AutomationsPage() {
                 {/* Step Content */}
                 <div className="pb-6 flex-1 min-w-0">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                    <span className={`text-xs font-mono font-medium px-2 py-0.5 rounded-md w-fit ${
-                      step.status === "warning"
-                        ? "bg-destructive/10 text-destructive"
-                        : "bg-primary/10 text-primary"
-                    }`}>
+                    <span className="text-xs font-mono font-medium px-2 py-0.5 rounded-md w-fit bg-primary/10 text-primary">
                       {step.day}
                     </span>
                     <span className="text-sm font-semibold text-foreground">{step.event}</span>
                   </div>
+
                   <p className="text-xs text-muted-foreground mt-1">
                     Template: <span className="text-foreground font-medium">{step.template}</span>
                   </p>

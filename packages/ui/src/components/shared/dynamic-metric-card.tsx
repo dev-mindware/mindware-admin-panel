@@ -38,41 +38,42 @@ export function DynamicMetricCard({
                 className
             )}
         >
-            <CardContent className="p-4 flex justify-between items-start">
-                <div className="flex flex-col h-full flex-1">
-                    <div className="space-y-1">
-                        <div className="flex justify-between">
+            <CardContent className="p-3 sm:p-4 flex justify-between items-start">
+                <div className="flex flex-col h-full flex-1 min-w-0">
+                    <div className="space-y-0.5 sm:space-y-1">
+                        <div className="flex justify-between items-start gap-1">
                             <h2 className={cn(
-                                "text-2xl font-bold tracking-tight",
+                                "text-lg sm:text-2xl font-bold tracking-tight truncate",
                                 variant === "action" && (isDestructive ? "text-destructive" : "text-primary")
                             )}>
                                 {title}
                             </h2>
                             {icon && (
                                 <div className={cn(
-                                    "p-2 rounded-md shrink-0",
+                                    "p-1.5 sm:p-2 rounded-md shrink-0",
                                     variant === "action"
                                         ? (isDestructive ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary")
                                         : "bg-muted text-muted-foreground"
                                 )}>
-                                    <Icon name={icon as any} className="w-4 h-4" />
+                                    <Icon name={icon as any} className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                 </div>
                             )}
                         </div>
                         <p className={cn(
-                            "text-lg text-foreground",
-                            variant === "action" && (isDestructive ? "text-destructive font-medium" : "text-primary font-medium")
+                            "text-xs sm:text-base text-foreground line-clamp-1 font-semibold",
+                            variant === "action" && (isDestructive ? "text-destructive" : "text-primary")
                         )}>
                             {subtitle}
                         </p>
                     </div>
                     {description && (
-                        <p className="text-sm text-muted-foreground w-full font-medium mt-2">
+                        <p className="text-[10px] sm:text-xs text-muted-foreground w-full font-medium mt-1 sm:mt-2 line-clamp-1">
                             {description}
                         </p>
                     )}
                 </div>
             </CardContent>
+
         </Card>
     );
 }

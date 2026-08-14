@@ -125,8 +125,9 @@ export function EmailKpiCards() {
   return (
     <div className="space-y-6">
       {/* ─── 1. Primary Email KPI Cards ───────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         <DynamicMetricCard
+
           title={kpis.totalSent.toLocaleString("pt-AO")}
           subtitle="Emails Enviados"
           description="Total de emails despachados pela plataforma"

@@ -76,7 +76,9 @@ export interface EmailLog {
   convertedAt?: string;
   recoveredAmount?: number;
   errorMessage?: string;
+  sentAt?: string;
   createdAt: string;
+
   campaign?: { name: string; type: CampaignType } | null;
 }
 
@@ -126,7 +128,9 @@ export interface CampaignAnalyticsResponse {
   type: CampaignType;
   status: CampaignStatus;
   metrics: CampaignAnalyticsMetrics;
+  logs?: Partial<EmailLog>[];
 }
+
 
 export interface CreateCampaignPayload {
   name: string;

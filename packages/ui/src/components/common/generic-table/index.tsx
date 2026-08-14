@@ -30,7 +30,6 @@ export interface Column<T> {
   sortable?: boolean;
 }
 
-
 export interface DataTableProps<T> {
   data: T[];
   columns: Column<T>[];
@@ -78,8 +77,9 @@ export function GenericTable<T extends { id: string | number }>({
   };
 
   return (
-    <div className={cn("w-full", className)}>
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+    <div className={cn("w-full space-y-4", className)}>
+      {/* DESKTOP VIEW: Traditional HTML Table in Card Box (Hidden on Mobile) */}
+      <div className="hidden md:block rounded-2xl border border-border/80 bg-card overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -92,7 +92,7 @@ export function GenericTable<T extends { id: string | number }>({
                       column.className
                     )}
                   >
-                    {column.header}
+                    {column.header || "—"}
                   </TableHead>
                 ))}
               </TableRow>
@@ -109,7 +109,7 @@ export function GenericTable<T extends { id: string | number }>({
                         title={emptyTitle}
                         description={emptyDescription}
                         icon={emptyIcon}
-                        className="border-0 bg-transparent py-20"
+                        className="border-0 bg-transparent py-16"
                     />
                   </TableCell>
                 </TableRow>
@@ -120,7 +120,7 @@ export function GenericTable<T extends { id: string | number }>({
                     className={cn(
                       "hover:bg-muted/50 transition-colors",
                       route && "cursor-pointer",
-                      item.id === newId && "animate-pulse-twice"
+                      String(item.id) === newId && "animate-pulse-twice"
                     )}
                     onDoubleClick={() => handleRowDoubleClick(item)}
                   >
@@ -143,65 +143,157 @@ export function GenericTable<T extends { id: string | number }>({
             </TableBody>
           </Table>
         </div>
+      </div>
 
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-border bg-muted/20">
-            <div className="text-sm text-muted-foreground">
-              Página {page} de {totalPages} — Total: {total}
-            </div>
+      {/* MOBILE VIEW: Full-Width Apple/Mindgest Card Stack (Hidden on Desktop) */}
+      <div className="block md:hidden w-full space-y-3">
+        {data.length === 0 ? (
+          <div className="rounded-2xl border border-border/80 bg-card text-center text-muted-foreground py-10 text-sm">
+            <EmptyState 
+                title={emptyTitle}
+                description={emptyDescription}
+                icon={emptyIcon}
+                className="border-0 bg-transparent py-6"
+            />
+          </div>
+        ) : (
+          data.map((item, rowIndex) => {
+            // Find header column (first column) and action column
+            const headerCol = columns[0];
+            const actionCol = columns.find(
+              (c) =>
+                String(c.header).toLowerCase().includes("acção") ||
+                String(c.header).toLowerCase().includes("ação") ||
+                String(c.header).toLowerCase().includes("action") ||
+                String(c.header).toLowerCase().includes("ações") ||
+                String(c.key).toLowerCase() === "action" ||
+                String(c.key).toLowerCase() === "id"
+            );
 
-            <Pagination className="w-max">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      goToPreviousPage();
-                    }}
-                    aria-disabled={page === 1}
-                  />
-                </PaginationItem>
+            // Secondary columns for card body (exclude action column)
+            const bodyCols = columns.slice(1).filter((c) => c !== actionCol);
 
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .slice(Math.max(0, page - 3), Math.min(totalPages, page + 2))
-                  .map((pageNumber) => (
-                    <PaginationItem key={pageNumber}>
-                      <PaginationLink
-                        // className="data-active:bg-primary data-active:text-primary-foreground"
-                        href="#"
-                        isActive={page === pageNumber}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setPage(pageNumber);
-                        }}
-                      >
-                        {pageNumber}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
+            return (
+              <div
+                key={rowIndex}
+                onClick={() => handleRowDoubleClick(item)}
+                className={cn(
+                  "relative rounded-xl border border-border/80 bg-card p-4 shadow-xs transition-all active:scale-[0.98]",
+                  route && "cursor-pointer",
+                  String(item.id) === newId && "ring-2 ring-primary animate-pulse"
+                )}
+              >
+                {/* Card Header: Main Title & Action Button/Badge */}
+                <div className="flex items-start justify-between gap-2 pb-2">
+                  <div className="font-bold text-sm text-foreground flex-1 line-clamp-1">
+                    {headerCol?.render
+                      ? headerCol.render(getValue(item, headerCol.key), item)
+                      : getValue(item, headerCol?.key || "")}
+                  </div>
+                  {actionCol && (
+                    <div className="shrink-0">
+                      {actionCol.render
+                        ? actionCol.render(getValue(item, actionCol.key), item)
+                        : getValue(item, actionCol.key)}
+                    </div>
+                  )}
+                </div>
 
-                {totalPages > page + 2 && (
-                  <PaginationItem>
-                    <PaginationEllipsis />
-                  </PaginationItem>
+                {/* Divider */}
+                {bodyCols.length > 0 && (
+                  <div className="my-2 border-t border-border/50" />
                 )}
 
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      goToNextPage();
-                    }}
-                    aria-disabled={page === totalPages}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
+                {/* Card Body Sub-Grid: 2 Columns Key-Value Pairs */}
+                {bodyCols.length > 0 && (
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+                    {bodyCols.map((col, cIdx) => {
+                      const val = col.render
+                        ? col.render(getValue(item, col.key), item)
+                        : getValue(item, col.key);
+                      if (val === undefined || val === null || val === "")
+                        return null;
+
+                      return (
+                        <div key={cIdx} className="flex flex-col space-y-0.5">
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+                            {col.header}
+                          </span>
+                          <div className="text-xs font-medium text-foreground truncate">
+                            {val}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
+
+
+
+      {/* PAGINATION FOOTER: Touch-Friendly Responsive Layout */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3.5 rounded-2xl border border-border/80 bg-card shadow-xs text-xs sm:text-sm">
+          <div className="text-muted-foreground text-center sm:text-left">
+            Página <strong className="text-foreground">{page}</strong> de{" "}
+            <strong className="text-foreground">{totalPages}</strong> — Total:{" "}
+            <strong className="text-foreground">{total}</strong>
+          </div>
+
+          <Pagination className="w-max mx-0">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    goToPreviousPage();
+                  }}
+                  aria-disabled={page === 1}
+                />
+              </PaginationItem>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .slice(Math.max(0, page - 2), Math.min(totalPages, page + 1))
+                .map((pageNumber) => (
+                  <PaginationItem key={pageNumber}>
+                    <PaginationLink
+                      href="#"
+                      isActive={page === pageNumber}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(pageNumber);
+                      }}
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+
+              {totalPages > page + 1 && (
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+              )}
+
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    goToNextPage();
+                  }}
+                  aria-disabled={page === totalPages}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </div>
   );
 }

@@ -9,9 +9,9 @@ export function SubscriptionStats() {
 
     if (isLoading) {
         return (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2.5 sm:gap-4 mb-8">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <Skeleton key={i} className="h-32 w-full rounded-xl" />
+                    <Skeleton key={i} className="h-28 sm:h-32 w-full rounded-xl" />
                 ))}
             </div>
         );
@@ -19,7 +19,7 @@ export function SubscriptionStats() {
 
     if (isError || !stats) {
         return (
-            <div className="mb-8 flex flex-col items-center justify-center gap-2 py-8 text-center">
+            <div className="mb-8 flex flex-col items-center justify-center gap-2 py-8 text-center bg-card border border-border rounded-xl">
                 <p className="text-sm text-muted-foreground">
                     Não foi possível carregar os indicadores de subscrições.
                 </p>
@@ -37,7 +37,7 @@ export function SubscriptionStats() {
     const { byStatus } = stats;
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2.5 sm:gap-4 mb-8">
             <DynamicMetricCard
                 title={byStatus.ACTIVE ?? 0}
                 subtitle="Ativas"
@@ -55,8 +55,8 @@ export function SubscriptionStats() {
             <DynamicMetricCard
                 title={byStatus.TRIALING ?? 0}
                 subtitle="Em Teste"
-                description="Subscrições em teste"
-                icon="TriangleAlert"
+                description="Período de avaliação"
+                icon="Zap"
                 colors="default"
                 variant="action"
             />
@@ -70,7 +70,7 @@ export function SubscriptionStats() {
             <DynamicMetricCard
                 title={byStatus.EXPIRED ?? 0}
                 subtitle="Expiradas"
-                description="Subscrições encerradas"
+                description="Encerradas por prazo"
                 icon="CircleAlert"
                 colors="destructive"
                 variant="action"
@@ -86,3 +86,4 @@ export function SubscriptionStats() {
         </div>
     );
 }
+

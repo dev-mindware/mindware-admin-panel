@@ -52,10 +52,16 @@ export const menuItems: MenuStructure = {
       ],
     },
     {
+      name: "Product Analytics",
+      url: "/analytics",
+      icon: <Icon name="ChartBar" />,
+    },
+    {
       name: "Logs do Sistema",
       url: "/logs",
       icon: <Icon name="FileSearch" />,
     },
+
     {
       name: "Definições",
       url: "/definitions",

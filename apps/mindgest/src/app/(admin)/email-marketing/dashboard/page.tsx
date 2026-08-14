@@ -7,21 +7,22 @@ export default function EmailMarketingPage() {
   return (
     <PageWrapper subRoute="Dashboard" routeLabel="Email Marketing / Dashboard">
       <TitleList title="Email Marketing" suTitle="Centro de Email Marketing e Cobrança">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
           <Link href="/email-marketing/campaigns/new?segment=EXPIRED">
-            <Button className="shadow-lg shadow-primary/20">
-              <Icon name="Mail" className="w-4 h-4 mr-2" />
+            <Button className="shadow-lg shadow-primary/20 text-xs sm:text-sm">
+              <Icon name="Mail" className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
               Enviar aos Expirados
             </Button>
           </Link>
           <Link href="/email-marketing/campaigns/new">
-            <Button variant="outline">
-              <Icon name="Plus" className="w-4 h-4 mr-2" />
+            <Button variant="outline" className="text-xs sm:text-sm">
+              <Icon name="Plus" className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
               Nova Campanha
             </Button>
           </Link>
         </div>
       </TitleList>
+
 
       <Suspense fallback={<div>Carregando indicadores...</div>}>
         <EmailKpiCards />

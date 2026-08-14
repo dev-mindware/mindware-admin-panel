@@ -3,6 +3,7 @@ import { emailCenterService } from "@/services/email-center-service";
 import type {
   CreateCampaignPayload,
   SendTestEmailPayload,
+  EmailTemplate,
 } from "@/types";
 
 // ─── Dashboard ──────────────────────────────────────────────────────────────
@@ -123,6 +124,39 @@ export function useEmailTemplates() {
     queryFn: async () => {
       const res = await emailCenterService.getTemplates();
       return res.data;
+    },
+  });
+}
+
+export function useCreateTemplate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: Partial<EmailTemplate>) =>
+      emailCenterService.createTemplate(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["email-center", "templates"] });
+    },
+  });
+}
+
+export function useUpdateTemplate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: Partial<EmailTemplate> }) =>
+      emailCenterService.updateTemplate(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["email-center", "templates"] });
+    },
+  });
+}
+
+
+export function useDeleteTemplate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => emailCenterService.deleteTemplate(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["email-center", "templates"] });
     },
   });
 }

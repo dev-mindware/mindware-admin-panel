@@ -49,6 +49,15 @@ export const emailCenterService = {
   // Templates
   getTemplates: () => api.get<EmailTemplate[]>("/email-center/templates"),
 
+  getTemplate: (id: string) =>
+    api.get<EmailTemplate>(`/email-center/templates/${id}`),
+
   createTemplate: (payload: Partial<EmailTemplate>) =>
     api.post<EmailTemplate>("/email-center/templates", payload),
+
+  updateTemplate: (id: string, payload: Partial<EmailTemplate>) =>
+    api.put<EmailTemplate>(`/email-center/templates/${id}`, payload),
+
+  deleteTemplate: (id: string) =>
+    api.delete<void>(`/email-center/templates/${id}`),
 };

@@ -151,6 +151,32 @@ export function CampaignList() {
           });
         }
 
+        if (item.status === "FAILED") {
+          actions.push({
+
+            label: "Tentar Novamente (Retry)",
+            icon: "RotateCcw",
+            onClick: (data: EmailCampaign) => {
+              openModal(CONFIRM_MODAL_ID, {
+                title: "Tentar reenvio de campanha",
+                description: `Esta ação tentará novamente o disparo da campanha "${data.name}".`,
+                confirmLabel: "Tentar Novamente",
+                loadingLabel: "A reprocessar...",
+                onConfirm: async () => {
+                  try {
+                    const res = await sendNow(data.id);
+                    SucessMessage(`Reenvio concluído: ${res.data.sent} emails despachados.`);
+                  } catch (error: any) {
+                    ErrorMessage(error?.response?.data?.message || "Erro ao tentar reenviar a campanha");
+                    throw error;
+                  }
+                },
+              });
+            },
+          });
+        }
+
+
         if (item.status !== "SENDING" && item.status !== "SENT") {
           actions.push({ type: "separator" });
           actions.push({
