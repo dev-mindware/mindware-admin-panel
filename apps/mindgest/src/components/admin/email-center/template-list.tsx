@@ -282,7 +282,7 @@ export function TemplateList() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Ex: Aviso de Vencimento 5 Dias"
+                    placeholder="Ex: Lembrete de Vencimento 5 Dias"
                     className="w-full px-3 py-2 text-sm border border-input rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>

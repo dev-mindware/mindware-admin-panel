@@ -15,28 +15,28 @@ const DUNNING_STEPS = [
   },
   {
     day: "+1 dia",
-    event: "1.º Aviso",
-    template: "Pagamento em Atraso",
+    event: "1.º Lembrete",
+    template: "Primeiro Lembrete de Pagamento",
     status: "active" as const,
   },
   {
     day: "+4 dias",
-    event: "2.º Aviso",
-    template: "Segundo Aviso de Cobrança",
+    event: "2.º Lembrete",
+    template: "Segundo Lembrete de Pagamento",
     status: "active" as const,
   },
   {
     day: "+7 dias",
-    event: "Último Aviso",
-    template: "Último Aviso",
+    event: "Último Lembrete",
+    template: "Último Lembrete de Renovação",
     status: "active" as const,
   },
 ];
 
 
 const PAYMENT_STEPS = [
-  { event: "Pagamento Confirmado", template: "Pagamento Confirmado", note: "Sequência interrompida automaticamente" },
-  { event: "Conta Reactivada", template: "Conta Reactivada", note: "Email de confirmação enviado" },
+  { event: "Pagamento Confirmado", template: "Pagamento Confirmado", note: "Sequência de lembretes interrompida automaticamente" },
+  { event: "Subscrição Renovada", template: "Subscrição Renovada", note: "Email de confirmação enviado" },
 ];
 
 export default function AutomationsPage() {
