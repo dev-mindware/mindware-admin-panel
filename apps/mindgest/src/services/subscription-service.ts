@@ -39,5 +39,8 @@ export const subscriptionService = {
   updateSubscriptionStatus: async (id: string, status: SubscriptionStatus) => {
     return api.patch<SubscriptionResponse>(`/subscriptions/${id}`, { status });
   },
+  checkExpirations: async () => {
+    return api.post<{ message: string }>("/subscriptions/check-expirations");
+  },
 };
 

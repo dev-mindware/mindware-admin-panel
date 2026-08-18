@@ -44,3 +44,16 @@ export function useUpdateSubscriptionStatus() {
     },
   });
 }
+
+export function useCheckSubscriptionExpirations() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => subscriptionService.checkExpirations(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["subscriptions", "stats"] });
+      queryClient.invalidateQueries({ queryKey: ["analytics"] });
+    },
+  });
+}
