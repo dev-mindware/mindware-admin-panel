@@ -1,15 +1,15 @@
-import { ArrowUpRight } from "lucide-react";
+﻿import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 
 interface PortalCardProps {
-  id: "mindgest" | "affiliate";
+  id: "mindgest" | "affiliate" | "docgen";
   href: string;
   label: string;
   title: string;
   logoSrc: string;
   logoAlt: string;
-  hoveredCard: "mindgest" | "affiliate" | null;
-  onHover: (id: "mindgest" | "affiliate" | null) => void;
+  hoveredCard: "mindgest" | "affiliate" | "docgen" | null;
+  onHover: (id: "mindgest" | "affiliate" | "docgen" | null) => void;
 }
 
 export function PortalCard({ id, href, label, title, logoSrc, logoAlt, hoveredCard, onHover }: PortalCardProps) {
@@ -17,7 +17,7 @@ export function PortalCard({ id, href, label, title, logoSrc, logoAlt, hoveredCa
   const isOtherHovered = hoveredCard !== null && hoveredCard !== id;
 
   return (
-    <div className="relative group w-full sm:w-[400px]">
+    <div className="relative group w-full sm:w-[360px]">
       {/* Background Glow Aura */}
       <div 
         className={`absolute -inset-8 bg-purple-500/25 blur-[60px] rounded-[3rem] pointer-events-none transition-all duration-[1500ms] ease-out ${isHovered ? "opacity-100 scale-110" : "opacity-0 scale-90"}`} 
@@ -28,7 +28,7 @@ export function PortalCard({ id, href, label, title, logoSrc, logoAlt, hoveredCa
         onMouseEnter={() => onHover(id)}
         onMouseLeave={() => onHover(null)}
         className={`
-          block relative w-full h-[400px] rounded-[2rem] overflow-hidden 
+          block relative w-full h-[380px] rounded-[2rem] overflow-hidden 
           bg-[#0A0512] flex flex-col justify-between p-8 
           transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)]
           ${isHovered 
@@ -41,10 +41,8 @@ export function PortalCard({ id, href, label, title, logoSrc, logoAlt, hoveredCa
       >
         {/* Internal Light Surface Hit */}
         <div className={`absolute inset-0 transition-opacity duration-[1200ms] pointer-events-none ${isHovered ? "opacity-100" : "opacity-0"}`}>
-          {/* Natural Light landing on top edge */}
           <div className="absolute top-0 left-0 right-0 h-[50%] bg-gradient-to-b from-purple-300/15 via-purple-500/5 to-transparent" />
           
-          {/* Harsh Noise Texture Revealed by Light */}
           <div 
             className="absolute inset-0 opacity-70 mix-blend-color-dodge"
             style={{
@@ -55,11 +53,11 @@ export function PortalCard({ id, href, label, title, logoSrc, logoAlt, hoveredCa
 
         {/* Card Header Content */}
         <div className="flex justify-between items-start relative z-10">
-          <span className={`text-sm tracking-widest font-medium transition-colors duration-1000 ${isHovered ? "text-purple-200/90 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" : "text-white/30"}`}>
+          <span className={`text-xs tracking-widest font-medium transition-colors duration-1000 ${isHovered ? "text-purple-200/90 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" : "text-white/30"}`}>
             {label}
           </span>
           <ArrowUpRight 
-            className={`w-8 h-8 font-light transition-all duration-1000 ${isHovered ? "text-white scale-110 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" : "text-white/20"}`} 
+            className={`w-7 h-7 font-light transition-all duration-1000 ${isHovered ? "text-white scale-110 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" : "text-white/20"}`} 
             strokeWidth={1.5} 
           />
         </div>
@@ -68,15 +66,15 @@ export function PortalCard({ id, href, label, title, logoSrc, logoAlt, hoveredCa
           <Image
             src={logoSrc}
             alt={logoAlt}
-            width={160}
-            height={160}
-            className={`h-32 w-32 sm:h-36 sm:w-36 object-contain transition-all duration-1000 ${isHovered ? "opacity-95 scale-110 drop-shadow-[0_0_35px_rgba(255,255,255,0.22)]" : "opacity-35 scale-100"}`}
+            width={140}
+            height={140}
+            className={`h-28 w-28 sm:h-32 sm:w-32 object-contain transition-all duration-1000 ${isHovered ? "opacity-95 scale-110 drop-shadow-[0_0_35px_rgba(255,255,255,0.22)]" : "opacity-35 scale-100"}`}
           />
         </div>
 
         {/* Card Footer Content */}
         <div className="relative z-10 mt-auto">
-          <h2 className={`text-5xl sm:text-6xl font-light tracking-tight transition-all duration-1000 ${isHovered ? "text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]" : "text-white/40"}`}>
+          <h2 className={`text-4xl sm:text-5xl font-light tracking-tight transition-all duration-1000 ${isHovered ? "text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]" : "text-white/40"}`}>
             {title}
           </h2>
         </div>

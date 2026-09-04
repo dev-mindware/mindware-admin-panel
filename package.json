@@ -5,9 +5,11 @@
     "dev": "turbo dev",
     "dev:mindgest": "turbo dev --filter=mindgest",
     "dev:affiliate": "turbo dev --filter=affiliate-management",
+    "dev:docs": "turbo dev --filter=doc-generator",
     "build": "turbo build",
     "build:mindgest": "turbo build --filter=mindgest",
     "build:affiliate": "turbo build --filter=affiliate-management",
+    "build:docs": "turbo build --filter=doc-generator",
     "lint": "turbo lint",
     "type-check": "turbo type-check"
   },
