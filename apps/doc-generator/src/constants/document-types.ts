@@ -11,6 +11,10 @@ export interface DocumentTypeConfig {
   prefix: string;
   category: string;
   defaultDeliverableDays: number;
+  gender: "m" | "f";
+  contractedArticle: string;
+  newLabel: string;
+  emitLabel: string;
 }
 
 export const DOCUMENT_TYPES: DocumentTypeConfig[] = [
@@ -25,6 +29,10 @@ export const DOCUMENT_TYPES: DocumentTypeConfig[] = [
     prefix: "PROP",
     category: "Comercial",
     defaultDeliverableDays: 30,
+    gender: "f",
+    contractedArticle: "da",
+    newLabel: "Nova Proposta",
+    emitLabel: "Emitir Nova Proposta",
   },
   {
     slug: "contract",
@@ -37,6 +45,10 @@ export const DOCUMENT_TYPES: DocumentTypeConfig[] = [
     prefix: "CONT",
     category: "Jurídico",
     defaultDeliverableDays: 60,
+    gender: "m",
+    contractedArticle: "do",
+    newLabel: "Novo Contrato",
+    emitLabel: "Emitir Novo Contrato",
   },
   {
     slug: "letter",
@@ -49,6 +61,10 @@ export const DOCUMENT_TYPES: DocumentTypeConfig[] = [
     prefix: "CART",
     category: "Institucional",
     defaultDeliverableDays: 15,
+    gender: "f",
+    contractedArticle: "da",
+    newLabel: "Nova Carta",
+    emitLabel: "Emitir Nova Carta",
   },
   {
     slug: "opinion",
@@ -61,6 +77,10 @@ export const DOCUMENT_TYPES: DocumentTypeConfig[] = [
     prefix: "PARC",
     category: "Técnico",
     defaultDeliverableDays: 20,
+    gender: "m",
+    contractedArticle: "do",
+    newLabel: "Novo Parecer",
+    emitLabel: "Emitir Novo Parecer",
   },
   {
     slug: "official",
@@ -73,6 +93,10 @@ export const DOCUMENT_TYPES: DocumentTypeConfig[] = [
     prefix: "OFIC",
     category: "Institucional",
     defaultDeliverableDays: 15,
+    gender: "m",
+    contractedArticle: "do",
+    newLabel: "Novo Ofício",
+    emitLabel: "Emitir Novo Ofício",
   },
   {
     slug: "nda",
@@ -85,6 +109,10 @@ export const DOCUMENT_TYPES: DocumentTypeConfig[] = [
     prefix: "NDA",
     category: "Jurídico",
     defaultDeliverableDays: 365,
+    gender: "m",
+    contractedArticle: "do",
+    newLabel: "Novo Acordo de Confidencialidade",
+    emitLabel: "Emitir Novo Acordo de Confidencialidade",
   },
 ];
 

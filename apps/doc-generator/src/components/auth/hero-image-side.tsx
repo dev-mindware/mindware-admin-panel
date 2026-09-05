@@ -8,7 +8,7 @@ interface HeroImageSideProps {
 }
 
 export function HeroImageSide({
-  source = "/login-hero.webp",
+  source = "/doc-generator/login-hero.webp",
   title = "Gestão e geração de propostas para empresas e profissionais.",
   subtitle = "Uma forma inteligente de orçamentar, controlar a atividade e gerar documentos oficiais da Mindware.",
   badge = "MINDWARE - Document Generator",
@@ -30,7 +30,7 @@ export function HeroImageSide({
       <div className="relative z-20 w-full p-10 md:p-14">
         <div className="relative h-12 w-48">
           <Image
-            src="/mindware.png"
+            src="/doc-generator/mindware.png"
             fill
             alt="Logótipo da Mindware"
             className="object-contain object-left"

@@ -3,10 +3,12 @@ import path from "node:path";
 
 const rawMindgestUrl = process.env.MINDGEST_URL || "http://localhost:3000";
 const rawAffiliateUrl = process.env.AFFILIATE_URL || "http://localhost:3002";
+const rawDocgenUrl = process.env.DOC_GENERATOR_URL || "http://localhost:3008";
 
 // Clean base URLs by removing trailing slashes and redundant subpaths if misconfigured in env vars
 const MINDGEST_URL = rawMindgestUrl.replace(/\/mindgest\/?$/, "").replace(/\/$/, "");
 const AFFILIATE_URL = rawAffiliateUrl.replace(/\/affiliate\/?$/, "").replace(/\/$/, "");
+const DOC_GENERATOR_URL = rawDocgenUrl.replace(/\/doc-generator\/?$/, "").replace(/\/$/, "");
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@workspace/ui", "@workspace/utils", "@workspace/types", "@workspace/hooks"],
@@ -43,6 +45,14 @@ const nextConfig: NextConfig = {
       {
         source: "/affiliate/:path*",
         destination: `${AFFILIATE_URL}/affiliate/:path*`,
+      },
+      {
+        source: "/doc-generator",
+        destination: `${DOC_GENERATOR_URL}/doc-generator`,
+      },
+      {
+        source: "/doc-generator/:path*",
+        destination: `${DOC_GENERATOR_URL}/doc-generator/:path*`,
       },
     ];
   },

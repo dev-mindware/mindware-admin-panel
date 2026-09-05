@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: "Doc Generator - Mindware",
   description: "Gerador de Documentos e Relatórios em Tempo Real Mindware",
   icons: {
-    icon: "/brand/mindware.png",
+    icon: "/doc-generator/brand/mindware.png",
   },
 };
 

@@ -20,9 +20,9 @@ export function AppSidebar(props: Partial<React.ComponentProps<typeof GlobalSide
 
   const teams = [
     {
-      name: "Doc Generator",
-      logo: "FileText",
-      plan: "Document Engine",
+      name: "Mindware",
+      logo: "/doc-generator/mindware.png",
+      plan: "Doc Generator",
     },
   ];
 

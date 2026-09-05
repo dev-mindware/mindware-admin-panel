@@ -305,7 +305,7 @@ export function DocumentCategoryView({ typeConfig }: DocumentCategoryViewProps) 
           <Link href={`/documents/${typeConfig.slug}/add`}>
             <Button className="gap-2 cursor-pointer shadow-sm">
               <Icon name="Plus" size={15} />
-              <span>Criar Novo(a) {typeConfig.name}</span>
+              <span>Criar Novo Documento</span>
             </Button>
           </Link>
         </div>
@@ -375,7 +375,7 @@ export function DocumentCategoryView({ typeConfig }: DocumentCategoryViewProps) 
             setPage={(p: number) => updateParams({ page: p })}
             goToNextPage={() => updateParams({ page: Math.min(totalPages, page + 1) })}
             goToPreviousPage={() => updateParams({ page: Math.max(1, page - 1) })}
-            emptyTitle={`Nenhum(a) ${typeConfig.singularName.toLowerCase()} encontrado(a)`}
+            emptyTitle={typeConfig.gender === "f" ? `Nenhuma ${typeConfig.singularName.toLowerCase()} encontrada` : `Nenhum ${typeConfig.singularName.toLowerCase()} encontrado`}
             emptyDescription="Nenhum documento coincide com os filtros aplicados."
           />
         ) : (

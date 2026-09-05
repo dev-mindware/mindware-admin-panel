@@ -50,7 +50,7 @@ export default function LoginPage() {
       {/* Mindgest-identical Hero Left Column with Mindware logo */}
       <div className="hidden lg:block">
         <HeroImageSide
-          source="/login-hero.webp"
+          source="/doc-generator/login-hero.webp"
           title="Gestão e geração de propostas para empresas e profissionais."
           subtitle="Uma forma simples de orçamentar, controlar a actividade e emitir documentos oficiais da Mindware."
           badge="MINDWARE - Document Generator"
@@ -64,7 +64,7 @@ export default function LoginPage() {
             <div className="flex flex-col items-center gap-3 text-center">
               <div className="relative h-16 w-36 mb-1">
                 <Image
-                  src="/mindware.png"
+                  src="/doc-generator/mindware.png"
                   fill
                   alt="Logótipo da Mindware"
                   className="object-contain"

@@ -713,7 +713,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
   const createMutation = useMutation({
     mutationFn: async () => {
       if (!title.trim()) {
-        throw new Error(`Preencha o título do(a) ${typeConfig.name.toLowerCase()}.`);
+        throw new Error(`Preencha o título ${typeConfig.contractedArticle || "do"} ${typeConfig.name.toLowerCase()}.`);
       }
       if (!clientName.trim()) {
         throw new Error("Preencha o nome do cliente destinatário.");
@@ -738,7 +738,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
       });
     },
     onSuccess: (res) => {
-      toast.success(`${typeConfig.name} criado(a) e salvo(a) com sucesso!`);
+      toast.success(`${typeConfig.name} salvo com sucesso!`);
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       if (res?.id) {
         setCreatedDocumentId(res.id);
@@ -760,14 +760,14 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
     <PageWrapper
       routePath={`/documents/${typeConfig.slug}`}
       routeLabel={typeConfig.pluralName}
-      subRoute={`Novo(a) ${typeConfig.name}`}
+      subRoute={typeConfig.newLabel || `Novo(a) ${typeConfig.name}`}
       showSeparator={true}
     >
       <div className="space-y-6">
         {/* Cabeçalho minimalista com TitleList e Ações Rápidas */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <TitleList
-            title={`Emitir Novo(a) ${typeConfig.name}`}
+            title={typeConfig.emitLabel || `Emitir Novo(a) ${typeConfig.name}`}
             suTitle="Ajuste escopos, tabelas, páginas e visualize o PDF oficial em tempo real antes de salvar"
           />
 
@@ -871,7 +871,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                 <CardContent className="space-y-4">
                   <div className="space-y-1.5">
                     <label className="text-xs font-medium text-foreground">
-                      Título / Objecto do(a) {typeConfig.name} *
+                      Título / Objecto {typeConfig.contractedArticle || "do"} {typeConfig.name} *
                     </label>
                     <Input
                       placeholder={`Ex: Proposta para Desenvolvimento da Plataforma GCH...`}
