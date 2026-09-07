@@ -9,7 +9,8 @@ const nextConfig: NextConfig = {
       allowedOrigins: [
         "test.panel.mindware-vps.cloud",
         "panel.mindware-vps.cloud",
-        "mindgest.mindware.ao",
+        "docgen.mindware.ao",
+        "mindware.ao",
         "*.mindware-vps.cloud",
         "*.vercel.app",
         "localhost:3000",

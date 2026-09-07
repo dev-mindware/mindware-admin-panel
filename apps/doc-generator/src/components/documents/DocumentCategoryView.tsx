@@ -33,7 +33,7 @@ export function DocumentCategoryView({ typeConfig }: DocumentCategoryViewProps) 
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Ler parâmetros da URL (Padrão Mindgest)
+  // Ler parâmetros da URL (Padrão Mindware)
   const page = Number(searchParams.get("page")) || 1;
   const limit = Number(searchParams.get("limit")) || 10;
   const searchParam = searchParams.get("search") || "";

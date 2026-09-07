@@ -45,7 +45,7 @@ export default function LoginPage() {
 
   return (
     <div className="grid min-h-screen min-h-dvh w-full overflow-hidden lg:grid-cols-2 bg-background">
-      {/* Mindgest-identical Hero Left Column with Mindware logo */}
+      {/* Hero Left Column with Mindware branding */}
       <div className="hidden lg:block">
         <HeroImageSide
           source="/doc-generator/login-hero.webp"

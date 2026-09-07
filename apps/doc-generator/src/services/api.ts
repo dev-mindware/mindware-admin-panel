@@ -10,7 +10,7 @@ export const api: AxiosInstance = axios.create({
   timeout: 30000,
 });
 
-// Cache e Gestão de Token (Padrão mindgest-frontend)
+// Cache e Gestão de Token (Padrão Mindware)
 const TOKEN_KEY = "mindware_doc_access_token";
 const USER_KEY = "mindware_doc_user";
 
