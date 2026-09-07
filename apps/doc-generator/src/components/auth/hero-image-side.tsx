@@ -9,8 +9,8 @@ interface HeroImageSideProps {
 
 export function HeroImageSide({
   source = "/doc-generator/login-hero.webp",
-  title = "Gestão e geração de propostas para empresas e profissionais.",
-  subtitle = "Uma forma inteligente de orçamentar, controlar a atividade e gerar documentos oficiais da Mindware.",
+  title = "Geração e gestão inteligente de documentos corporativos e oficiais.",
+  subtitle = "Uma plataforma unificada para elaborar, padronizar e emitir propostas, contratos, ofícios e relatórios oficiais da Mindware.",
   badge = "MINDWARE - Document Generator",
 }: HeroImageSideProps) {
   return (

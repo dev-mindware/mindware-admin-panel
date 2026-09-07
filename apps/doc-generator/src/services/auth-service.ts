@@ -24,7 +24,7 @@ export const authService = {
   logout(): void {
     clearStoredSession();
     if (typeof window !== "undefined") {
-      window.location.href = "/login";
+      window.location.href = "/doc-generator/auth/login";
     }
   },
 

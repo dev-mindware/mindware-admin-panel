@@ -66,7 +66,7 @@ export default function PortalPage() {
 
           <PortalCard 
             id="docgen"
-            href="/doc-generator/dashboard"
+            href="/doc-generator/auth/login"
             label="DOCUMENTOS E RELATÓRIOS"
             title="DocGen"
             logoSrc="/brand/mindware.png"

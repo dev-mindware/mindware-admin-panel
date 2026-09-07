@@ -66,7 +66,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       clearStoredSession();
       if (typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
-        window.location.href = "/login?expired=true";
+        window.location.href = "/doc-generator/auth/login?expired=true";
       }
     }
     return Promise.reject(error);
