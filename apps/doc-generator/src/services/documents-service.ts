@@ -188,21 +188,24 @@ export const documentsService = {
   },
 
   getPreviewHtmlUrl(documentId: string): string {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const rawBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005/api";
+    const baseUrl = rawBase.replace(/\/+$/, "");
     const apiKey = process.env.NEXT_PUBLIC_API_KEY;
     const query = apiKey ? `?apiKey=${encodeURIComponent(apiKey)}` : "";
     return `${baseUrl}/documents/${documentId}/preview-html${query}`;
   },
 
   getDirectPdfUrl(documentId: string): string {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const rawBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005/api";
+    const baseUrl = rawBase.replace(/\/+$/, "");
     const apiKey = process.env.NEXT_PUBLIC_API_KEY;
     const query = apiKey ? `?apiKey=${encodeURIComponent(apiKey)}` : "";
     return `${baseUrl}/documents/${documentId}/render-pdf${query}`;
   },
 
   getDownloadPdfUrl(documentId: string): string {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    const rawBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005/api";
+    const baseUrl = rawBase.replace(/\/+$/, "");
     const apiKey = process.env.NEXT_PUBLIC_API_KEY;
     const query = apiKey ? `?apiKey=${encodeURIComponent(apiKey)}` : "";
     return `${baseUrl}/documents/${documentId}/download-pdf${query}`;
