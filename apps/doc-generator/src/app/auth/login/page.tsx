@@ -35,9 +35,24 @@ export default function LoginPage() {
       router.push("/dashboard");
     } catch (err: any) {
       setIsAuthenticating(false);
-      toast.error(
-        err.response?.data?.message || "Credenciais inválidas. Tente novamente."
-      );
+      const apiMessage =
+        err.response?.data?.message || "Credenciais inválidas. Tente novamente.";
+      const apiReason = err.response?.data?.reason;
+      const apiDebug = err.response?.data?.debug;
+
+      console.error("[Login Error]", {
+        status: err.response?.status,
+        message: apiMessage,
+        reason: apiReason,
+        debug: apiDebug,
+        raw: err.response?.data,
+      });
+
+      toast.error(apiMessage, {
+        description:
+          apiReason || "Verifique as suas credenciais ou consulte as variáveis de ambiente.",
+        duration: 9000,
+      });
     } finally {
       setIsSubmitting(false);
     }
