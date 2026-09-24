@@ -39,13 +39,27 @@ export interface DocumentSnapshot {
 export interface DocumentItem {
   id: string;
   code: string;
+  type?: string;
   title: string;
   clientId: string;
   templateId: string;
-  status: "DRAFT" | "GENERATING" | "GENERATED" | "FAILED" | "ARCHIVED";
+  status:
+    | "DRAFT"
+    | "PENDING_APPROVAL"
+    | "APPROVED"
+    | "REJECTED"
+    | "GENERATING"
+    | "GENERATED"
+    | "FAILED"
+    | "ARCHIVED";
+  createdById?: string;
+  approvedById?: string | null;
+  approvedAt?: string | null;
+  rejectionReason?: string | null;
   validityDays: number;
   deliveryDays: number;
   notes?: string | null;
+  metadata?: any;
   createdAt: string;
   updatedAt: string;
   client: Client;
@@ -58,6 +72,7 @@ export interface DocumentItem {
 
 export interface CreateDocumentPayload {
   code: string;
+  type?: string;
   title: string;
   clientId?: string;
   clientName?: string;
@@ -69,6 +84,17 @@ export interface CreateDocumentPayload {
   clauseIds?: string[];
   priceItems?: PriceItem[];
   milestones?: PaymentMilestone[];
+  metadata?: any;
+  workerName?: string;
+  workerGender?: "M" | "F";
+  workerIdNumber?: string;
+  workerRole?: string;
+  workerDepartment?: string;
+  workerStatus?: string;
+  purpose?: string;
+  emissionDate?: string;
+  emissionPlace?: string;
+  signatoryRole?: string;
 }
 
 export interface TriggerGenerationResponse {
@@ -208,6 +234,20 @@ export const documentsService = {
     return `${baseUrl}/documents/${documentId}/download-pdf${query}`;
   },
 
+  async submitForApproval(id: string): Promise<DocumentItem> {
+    const response = await api.post<DocumentItem>(`/documents/${id}/submit`);
+    return response.data;
+  },
+
+  async approve(id: string): Promise<DocumentItem> {
+    const response = await api.post<DocumentItem>(`/documents/${id}/approve`);
+    return response.data;
+  },
+
+  async reject(id: string, reason: string): Promise<DocumentItem> {
+    const response = await api.post<DocumentItem>(`/documents/${id}/reject`, { reason });
+    return response.data;
+  },
   async renderLivePdfBlob(payload: any): Promise<Blob> {
     const response = await api.post("/documents/preview-live", payload, {
       responseType: "blob",

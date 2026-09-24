@@ -29,7 +29,7 @@ export const subscriptionSchema = z.object({
   companyId: z.string().trim().optional(),
 
   planId: z.string().trim(),
-  frequency: z.enum(["MONTHLY", "ANNUAL"]),
+  frequency: z.enum(["MONTHLY", "SEMI_ANNUAL", "ANNUAL"]),
   proofPayment: FileSchema.nullable(),
 
   periodStartsAt: z.string().trim().datetime().optional(),

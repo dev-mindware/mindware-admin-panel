@@ -1,3 +1,4 @@
+﻿import { usePermissions } from "@/hooks/use-permissions";
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -40,6 +41,8 @@ export function DocumentCategoryView({ typeConfig }: DocumentCategoryViewProps) 
   const statusFilter = searchParams.get("status") || "ALL";
 
   const [searchValue, setSearchValue] = useState(searchParam);
+  const { canCreateDocumentType, isAdmin } = usePermissions();
+  const canCreate = canCreateDocumentType(typeConfig.slug);
   const [selectedDoc, setSelectedDoc] = useState<DocumentItem | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
@@ -302,12 +305,14 @@ export function DocumentCategoryView({ typeConfig }: DocumentCategoryViewProps) 
             suTitle={`Gestão, emissão e exportação PDF de ${typeConfig.pluralName.toLowerCase()} institucionais da Mindware`}
           />
 
-          <Link href={`/documents/${typeConfig.slug}/add`}>
+          {canCreate && (
+            <Link href={`/documents/${typeConfig.slug}/add`}>
             <Button className="gap-2 cursor-pointer shadow-sm">
               <Icon name="Plus" size={15} />
               <span>Criar Novo Documento</span>
             </Button>
           </Link>
+          )}
         </div>
 
         {/* Barra de Filtros e Busca com URL Query Params */}

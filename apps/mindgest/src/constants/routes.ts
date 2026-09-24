@@ -14,6 +14,7 @@ export const PRIVATE_ROUTE_PREFIXES = [
   "/users",
   "/plans",
   "/subscriptions",
+  "/coupons",
   "/logs",
   "/definitions",
   "/settings",

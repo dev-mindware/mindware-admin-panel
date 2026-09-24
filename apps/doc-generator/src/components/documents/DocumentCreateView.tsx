@@ -29,6 +29,7 @@ import { Icon } from "@workspace/ui";
 import { clausesService, Clause } from "@/services/clauses-service";
 import { documentsService, PriceItem } from "@/services/documents-service";
 import { DocumentTypeConfig } from "@/constants/document-types";
+import { WorkDeclarationForm, WorkDeclarationFormData } from "@/components/documents/WorkDeclarationForm";
 import { toast } from "sonner";
 
 export type CustomPageBlockType = "PARAGRAPH" | "TABLE" | "SCOPE_LIST" | "NOTE";
@@ -93,13 +94,44 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const [activeTab, setActiveTab] = useState<"form" | "pdf">("form");
+    const isDeclaration = typeConfig.slug === "declaration";
 
   // Código automático
   const [code, setCode] = useState(
     `${typeConfig.prefix}-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`
   );
   const [title, setTitle] = useState("");
+
+  const [declarationData, setDeclarationData] = useState<WorkDeclarationFormData>({
+    workerName: "Ângelo Tchiwano Domingos",
+    workerGender: "M",
+    workerIdNumber: "",
+    workerRole: "Técnico Especialista de TI & Gestor de Sistemas",
+    workerDepartment: "Tecnologias de Informação",
+    workerStatus: "activo e regular",
+    purpose:
+      "comprovação da sua situação profissional, vínculo institucional e exercício de actividade na área de Tecnologias de Informação",
+    emissionPlace: "Luanda, Angola",
+    city: "Luanda",
+    emissionDate: "04 de Setembro de 2026",
+    signatoryRole: "A DIRECÇÃO GERAL",
+    code,
+  });
+
+  const handleDeclarationChange = (
+    field: keyof WorkDeclarationFormData,
+    val: any
+  ) => {
+    setDeclarationData((prev) => ({ ...prev, [field]: val }));
+  };
+
+  useEffect(() => {
+    if (isDeclaration) {
+      setDeclarationData((prev) => ({ ...prev, code }));
+    }
+  }, [code, isDeclaration]);
+
+  const [activeTab, setActiveTab] = useState<"form" | "pdf">("form");
 
   // Dados do Cliente directos (sem base de dados separada)
   const [clientName, setClientName] = useState("");
@@ -814,7 +846,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
             }`}
           >
             <Icon name="FilePenLine" size={14} />
-            <span>Configuração, Escopos & Páginas</span>
+            <span>{isDeclaration ? "Dados do Colaborador & Texto" : "Configuração, Escopos & Páginas"}</span>
           </button>
 
           <button

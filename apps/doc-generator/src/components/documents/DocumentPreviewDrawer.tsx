@@ -1,3 +1,4 @@
+﻿import { usePermissions } from "@/hooks/use-permissions";
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -40,6 +41,47 @@ export function DocumentPreviewDrawer({
 }: Props) {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"edit" | "pdf">("pdf");
+  const { isAdmin } = usePermissions();
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+
+  const submitMutation = useMutation({
+    mutationFn: () => documentsService.submitForApproval(document!.id),
+    onSuccess: () => {
+      toast.success("Documento submetido para aprovação do Administrador!");
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+      onUpdated();
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Erro ao submeter documento.");
+    },
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: () => documentsService.approve(document!.id),
+    onSuccess: () => {
+      toast.success("Documento aprovado com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+      onUpdated();
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Erro ao aprovar documento.");
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: () => documentsService.reject(document!.id, rejectReason),
+    onSuccess: () => {
+      toast.success("Documento rejeitado.");
+      setIsRejectDialogOpen(false);
+      setRejectReason("");
+      queryClient.invalidateQueries({ queryKey: ["documents"] });
+      onUpdated();
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Erro ao rejeitar documento.");
+    },
+  });
 
   // Estados de edição do documento completo
   const [title, setTitle] = useState("");
@@ -216,6 +258,98 @@ export function DocumentPreviewDrawer({
             <span>Editar Conteúdo & Tabelas</span>
           </button>
         </div>
+        {/* Barra de Fluxo de Aprovao */}
+        <div className="p-3.5 rounded-xl border bg-card flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <GenerationStatusBadge status={document.status} />
+            {document.status === "PENDING_APPROVAL" && (
+              <span className="text-xs text-muted-foreground">
+                Aguardando aprovao de um Administrador.
+              </span>
+            )}
+            {document.status === "APPROVED" && (
+              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                Documento aprovado por Administrador.
+              </span>
+            )}
+            {document.status === "REJECTED" && (
+              <span className="text-xs text-destructive">
+                Rejeitado: {document.rejectionReason || "Reviso necessria."}
+              </span>
+            )}
+            {document.status === "DRAFT" && (
+              <span className="text-xs text-muted-foreground">
+                Rascunho. Submeta para aprovao quando estiver concludo.
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {(document.status === "DRAFT" || document.status === "REJECTED") && (
+              <Button
+                size="sm"
+                variant="default"
+                onClick={() => submitMutation.mutate()}
+                disabled={submitMutation.isPending}
+                className="h-8 text-xs gap-1.5 cursor-pointer shadow-xs"
+              >
+                <Icon name="Send" size={13} />
+                <span>Submeter para Aprovao</span>
+              </Button>
+            )}
+
+            {document.status === "PENDING_APPROVAL" && isAdmin && (
+              <>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setIsRejectDialogOpen(true)}
+                  disabled={rejectMutation.isPending}
+                  className="h-8 text-xs gap-1.5 cursor-pointer text-destructive hover:bg-destructive/10 border-destructive/30"
+                >
+                  <Icon name="CircleX" size={13} />
+                  <span>Rejeitar...</span>
+                </Button>
+                <Button
+                  size="sm"
+                  variant="default"
+                  onClick={() => approveMutation.mutate()}
+                  disabled={approveMutation.isPending}
+                  className="h-8 text-xs gap-1.5 cursor-pointer shadow-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                >
+                  <Icon name="CheckCheck" size={13} />
+                  <span>Aprovar Documento</span>
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {isRejectDialogOpen && (
+          <div className="p-3 rounded-lg border border-destructive/30 bg-destructive/5 space-y-2">
+            <p className="text-xs font-semibold text-destructive">Motivo da Rejeio:</p>
+            <Input
+              placeholder="Descreva o motivo da rejeio ou as alteraes necessrias..."
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              className="text-xs h-8"
+            />
+            <div className="flex justify-end gap-2">
+              <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setIsRejectDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                className="h-7 text-xs"
+                disabled={!rejectReason.trim() || rejectMutation.isPending}
+                onClick={() => rejectMutation.mutate()}
+              >
+                Confirmar Rejeio
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* ========================================================
             ABA: FORMULÁRIO DE EDIÇÃO COMPLETA

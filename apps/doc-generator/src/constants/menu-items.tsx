@@ -1,4 +1,4 @@
-import * as React from "react";
+﻿import * as React from "react";
 import { Icon } from "@workspace/ui";
 import { DOCUMENT_TYPES } from "./document-types";
 
@@ -7,6 +7,7 @@ export type MenuItem = {
   url: string;
   icon?: React.ReactNode;
   showMoreIcon?: boolean;
+  adminOnly?: boolean;
   items?: MenuItem[];
 };
 
@@ -39,6 +40,18 @@ export const adminMenuItems: MenuStructure = {
       name: "Biblioteca de Cláusulas",
       url: "/clauses",
       icon: <Icon name="Layers" />,
+    },
+    {
+      name: "Utilizadores",
+      url: "/users",
+      icon: <Icon name="UserCog" />,
+      adminOnly: true,
+    },
+    {
+      name: "Auditoria",
+      url: "/logs",
+      icon: <Icon name="ClipboardList" />,
+      adminOnly: true,
     },
   ],
 };

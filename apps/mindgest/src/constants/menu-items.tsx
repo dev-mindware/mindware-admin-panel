@@ -41,6 +41,11 @@ export const menuItems: MenuStructure = {
       icon: <Icon name="Wallet" />,
     },
     {
+      name: "Cupões",
+      url: "/coupons",
+      icon: <Icon name="Ticket" />,
+    },
+    {
       name: "Email Marketing",
       url: "/email-marketing/dashboard",
       icon: <Icon name="Mail" />,
