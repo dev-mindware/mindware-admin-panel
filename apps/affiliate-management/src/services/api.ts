@@ -1,6 +1,8 @@
 import axios from "axios";
 import { getAccessToken } from "@/actions/token";
 import { BASE_PATH } from "@/constants/routes";
+import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "@/constants/auth";
+import { getCookie, deleteCookie } from "cookies-next";
 
 let accessTokenCache: string | null = null;
 let isRefreshing = false;
@@ -47,7 +49,11 @@ api.interceptors.request.use(async (config) => {
 
   if (!isPublicAuthRoute) {
     if (!accessTokenCache) {
-      accessTokenCache = await getAccessToken();
+      if (typeof window !== "undefined") {
+        accessTokenCache = (getCookie(ACCESS_TOKEN_KEY) as string) || null;
+      } else {
+        accessTokenCache = await getAccessToken();
+      }
     }
 
     if (accessTokenCache) {
@@ -92,7 +98,11 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await refreshApi.post(`${BASE_PATH}/api/auth/refresh`);
+        const refreshUrl =
+          typeof window !== "undefined"
+            ? `${BASE_PATH}/api/auth/refresh`
+            : `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3007/affiliate"}/api/auth/refresh`;
+        const response = await refreshApi.post(refreshUrl);
         const newToken = response.data?.accessToken;
 
         if (!newToken) {
@@ -108,6 +118,8 @@ api.interceptors.response.use(
         processQueue(refreshError, null);
 
         if (typeof window !== "undefined") {
+          deleteCookie(ACCESS_TOKEN_KEY, { path: "/" });
+          deleteCookie(REFRESH_TOKEN_KEY, { path: "/" });
           window.location.replace(`${BASE_PATH}/auth/login`);
         }
 

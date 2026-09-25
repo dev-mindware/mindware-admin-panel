@@ -2,6 +2,8 @@
 import { useEffect, useMemo } from "react";
 import { useAuthStore } from "@/stores/auth/auth-store";
 import { BASE_PATH } from "@/constants/routes";
+import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from "@/constants/auth";
+import { deleteCookie } from "cookies-next";
 
 interface RouteProtectorProps {
   allowed: string[];
@@ -21,6 +23,8 @@ export function RouteProtector({
 
     // window.location respects basePath only when we include it explicitly.
     if (!user || !userRole || !allowedRoles.includes(userRole)) {
+      deleteCookie(ACCESS_TOKEN_KEY, { path: "/" });
+      deleteCookie(REFRESH_TOKEN_KEY, { path: "/" });
       window.location.replace(`${BASE_PATH}/auth/login`);
     }
   }, [user, userRole, allowedRoles, isAuthenticating]);

@@ -43,6 +43,9 @@ export async function POST() {
     return res;
   } catch (error: any) {
     console.error("Refresh Error:", error.response?.data || error.message);
-    return NextResponse.json({ error: "Failed to refresh token" }, { status: 401 });
+    const res = NextResponse.json({ error: "Failed to refresh token" }, { status: 401 });
+    res.cookies.delete(ACCESS_TOKEN_KEY);
+    res.cookies.delete(REFRESH_TOKEN_KEY);
+    return res;
   }
 }
