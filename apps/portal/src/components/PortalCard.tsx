@@ -2,14 +2,14 @@
 import Image from "next/image";
 
 interface PortalCardProps {
-  id: "mindgest" | "affiliate" | "docgen";
+  id: "mindgest" | "affiliate" | "docgen" | "mindschool";
   href: string;
   label: string;
   title: string;
   logoSrc: string;
   logoAlt: string;
-  hoveredCard: "mindgest" | "affiliate" | "docgen" | null;
-  onHover: (id: "mindgest" | "affiliate" | "docgen" | null) => void;
+  hoveredCard: "mindgest" | "affiliate" | "docgen" | "mindschool" | null;
+  onHover: (id: "mindgest" | "affiliate" | "docgen" | "mindschool" | null) => void;
 }
 
 export function PortalCard({ id, href, label, title, logoSrc, logoAlt, hoveredCard, onHover }: PortalCardProps) {

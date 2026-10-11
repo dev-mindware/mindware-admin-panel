@@ -5,7 +5,7 @@ import { useState } from "react";
 import { PortalCard } from "@/components/PortalCard";
 import { SpotlightBeam } from "@/components/SpotlightBeam";
 
-export type CardType = "mindgest" | "affiliate" | "docgen" | null;
+export type CardType = "mindgest" | "affiliate" | "docgen" | "mindschool" | null;
 
 export default function PortalPage() {
   const [hoveredCard, setHoveredCard] = useState<CardType>(null);
@@ -41,7 +41,7 @@ export default function PortalPage() {
         </div>
 
         {/* Cards Section */}
-        <div className="flex flex-col lg:flex-row justify-center items-stretch gap-6 w-full max-w-5xl mx-auto px-4 relative z-30">
+        <div className="flex flex-col lg:flex-row justify-center items-stretch gap-6 w-full max-w-7xl mx-auto px-4 relative z-30 lg:flex-wrap">
           <PortalCard 
             id="mindgest"
             href="/mindgest/auth/login"
@@ -49,6 +49,17 @@ export default function PortalPage() {
             title="Mindgest"
             logoSrc="/brand/mindgest.png"
             logoAlt="Mindgest"
+            hoveredCard={hoveredCard}
+            onHover={setHoveredCard}
+          />
+
+          <PortalCard 
+            id="mindschool"
+            href="/mindschool/auth/login"
+            label="GESTÃO ESCOLAR"
+            title="MindSchool"
+            logoSrc="/brand/mindware.png"
+            logoAlt="MindSchool"
             hoveredCard={hoveredCard}
             onHover={setHoveredCard}
           />

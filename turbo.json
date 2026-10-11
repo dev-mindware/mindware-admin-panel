@@ -18,7 +18,8 @@
         "MINDGEST_URL",
         "AFFILIATE_URL",
         "SESSION_SECRET",
-        "DOC_GENERATOR_URL"
+        "DOC_GENERATOR_URL",
+        "MINDSCHOOL_URL"
       ]
     },
     "dev": {

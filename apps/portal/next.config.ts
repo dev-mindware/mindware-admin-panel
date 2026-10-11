@@ -4,11 +4,13 @@ import path from "node:path";
 const rawMindgestUrl = process.env.MINDGEST_URL || "http://localhost:3000";
 const rawAffiliateUrl = process.env.AFFILIATE_URL || "http://localhost:3002";
 const rawDocgenUrl = process.env.DOC_GENERATOR_URL || "http://localhost:3008";
+const rawMindschoolUrl = process.env.MINDSCHOOL_URL || "http://localhost:3009";
 
 // Clean base URLs by removing trailing slashes and redundant subpaths if misconfigured in env vars
 const MINDGEST_URL = rawMindgestUrl.replace(/\/mindgest\/?$/, "").replace(/\/$/, "");
 const AFFILIATE_URL = rawAffiliateUrl.replace(/\/affiliate\/?$/, "").replace(/\/$/, "");
 const DOC_GENERATOR_URL = rawDocgenUrl.replace(/\/doc-generator\/?$/, "").replace(/\/$/, "");
+const MINDSCHOOL_URL = rawMindschoolUrl.replace(/\/mindschool\/?$/, "").replace(/\/$/, "");
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@workspace/ui", "@workspace/utils", "@workspace/types", "@workspace/hooks"],
@@ -22,6 +24,7 @@ const nextConfig: NextConfig = {
         "*.vercel.app",
         "localhost:3000",
         "localhost:3006",
+        "localhost:3009",
       ],
     },
   },
@@ -45,6 +48,14 @@ const nextConfig: NextConfig = {
       {
         source: "/affiliate/:path*",
         destination: `${AFFILIATE_URL}/affiliate/:path*`,
+      },
+      {
+        source: "/mindschool",
+        destination: `${MINDSCHOOL_URL}/mindschool`,
+      },
+      {
+        source: "/mindschool/:path*",
+        destination: `${MINDSCHOOL_URL}/mindschool/:path*`,
       },
       {
         source: "/doc-generator",

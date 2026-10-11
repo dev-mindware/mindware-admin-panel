@@ -1,9 +1,9 @@
 interface SpotlightBeamProps {
-  hoveredCard: "mindgest" | "affiliate" | "docgen" | null;
+  hoveredCard: "mindgest" | "affiliate" | "docgen" | "mindschool" | null;
 }
 
 export function SpotlightBeam({ hoveredCard }: SpotlightBeamProps) {
-  const beamAngle = hoveredCard === "mindgest" ? "25deg" : hoveredCard === "docgen" ? "-25deg" : hoveredCard === "affiliate" ? "0deg" : "0deg";
+  const beamAngle = hoveredCard === "mindgest" ? "25deg" : hoveredCard === "docgen" ? "-25deg" : hoveredCard === "affiliate" ? "0deg" : hoveredCard === "mindschool" ? "12deg" : "0deg";
 
   return (
     <div className="absolute inset-0 z-0 pointer-events-none flex justify-center">

@@ -12,6 +12,7 @@ export function proxy(request: NextRequest) {
     pathname === "/" ||
     pathname.startsWith("/mindgest") ||
     pathname.startsWith("/affiliate") ||
+    pathname.startsWith("/mindschool") ||
     pathname.startsWith("/doc-generator");
 
   if (!portalOwned) {
