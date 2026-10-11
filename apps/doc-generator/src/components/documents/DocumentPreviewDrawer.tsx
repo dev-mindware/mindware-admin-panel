@@ -1,5 +1,5 @@
-﻿import { usePermissions } from "@/hooks/use-permissions";
 "use client";
+import { usePermissions } from "@/hooks/use-permissions";
 
 import React, { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
