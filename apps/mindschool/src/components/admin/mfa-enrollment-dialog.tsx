@@ -51,7 +51,7 @@ export function MfaEnrollmentDialog() {
   };
 
   return (
-    <Dialog open={open && !pathname.startsWith("/account")} onOpenChange={(o) => !o && close()}>
+    <Dialog open={open && !pathname.startsWith("/settings")} onOpenChange={(o) => !o && close()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Proteja a sua conta com o segundo factor</DialogTitle>
@@ -65,7 +65,7 @@ export function MfaEnrollmentDialog() {
             Mais tarde
           </Button>
           <Button asChild onClick={close}>
-            <Link href="/account">Activar agora</Link>
+            <Link href="/settings?tab=account">Activar agora</Link>
           </Button>
         </DialogFooter>
       </DialogContent>

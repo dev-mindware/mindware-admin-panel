@@ -25,6 +25,8 @@ interface MetricGridProps {
   className?: string;
 }
 
+const MAX_METRICS = 4;
+
 const COLS: Record<number, string> = {
   1: "grid-cols-1",
   2: "grid-cols-2",
@@ -36,15 +38,16 @@ const COLS: Record<number, string> = {
 
 /**
  * Faixa de indicadores de uma página: grelha única para todo o painel, com estados de carregamento e de erro («tentar de novo»).
- * Regra do painel: uma página de lista tem pelo menos 4 indicadores úteis; abaixo disso, em desenvolvimento, avisa na consola.
+ * Regra do painel: no máximo 4 indicadores por página (o resto vai para gráficos: donut, radar, barras). Acima disso, em desenvolvimento,
+ * avisa na consola e só os 4 primeiros são mostrados.
  */
-export function MetricGrid({ items, isLoading, isError, onRetry, skeletons, className }: MetricGridProps) {
-  const n = isLoading ? (skeletons ?? Math.max(items.length, 4)) : items.length;
-  const cols = n > 6 ? COLS[4] : COLS[Math.max(n, 1)];
-
-  if (process.env.NODE_ENV !== "production" && !isLoading && !isError && items.length > 0 && items.length < 4) {
-    console.warn(`[MetricGrid] ${items.length} indicador(es): o padrão do painel pede pelo menos 4.`);
+export function MetricGrid({ items: allItems, isLoading, isError, onRetry, skeletons, className }: MetricGridProps) {
+  if (process.env.NODE_ENV !== "production" && allItems.length > MAX_METRICS) {
+    console.warn(`[MetricGrid] ${allItems.length} indicadores: o máximo do painel é ${MAX_METRICS}. Mova o resto para gráficos.`);
   }
+  const items = allItems.slice(0, MAX_METRICS);
+  const n = isLoading ? Math.min(skeletons ?? 4, MAX_METRICS) : items.length;
+  const cols = COLS[Math.max(n, 1)];
 
   if (isError) {
     return (

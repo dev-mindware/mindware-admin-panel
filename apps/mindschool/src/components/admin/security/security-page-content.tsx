@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Badge, Button, FilterToolbar, Icon, MetricGrid, Panel, SelectField, StatusBadge, Tabs, TabsContent, TabsList, TabsTrigger, TitleList } from "@workspace/ui";
+import { Badge, BarListPanel, Button, FilterToolbar, Icon, MetricGrid, Panel, SelectField, StatusBadge, Tabs, TabsContent, TabsList, TabsTrigger, TitleList } from "@workspace/ui";
 import { useQueryState } from "nuqs";
 import { ALERT_TYPE_LABEL, OPERATION_LABEL } from "@/constants/labels";
 import { SEVERITY } from "@/constants/statuses";
@@ -9,6 +9,7 @@ import { useAcknowledge, useAlerts, useSecurityOverview } from "@/hooks/ops/use-
 import { getApiErrorMessage } from "@/utils/api-error";
 import { dateTime } from "@/utils/format";
 import { ErrorMessage } from "@/utils/messages";
+import { ImpersonationsPageContent } from "@/components/admin/impersonations/impersonations-page-content";
 import { SecurityAuditTab } from "./security-audit-tab";
 
 function OverviewTab({ onGoAlerts }: { onGoAlerts: () => void }) {
@@ -30,38 +31,29 @@ function OverviewTab({ onGoAlerts }: { onGoAlerts: () => void }) {
                 { title: o.alerts.unacknowledged, subtitle: "Alertas por reconhecer", description: `${o.alerts.critical_unacknowledged} crítico(s)`, icon: "ShieldAlert", variant: o.alerts.unacknowledged > 0 ? "action" : "default", colors: "destructive", onClick: onGoAlerts },
                 { title: o.accounts.titulars_without_mfa, subtitle: "Titulares sem 2FA", description: "Papéis que o exigem", icon: "ShieldOff", variant: o.accounts.titulars_without_mfa > 0 ? "action" : "default", colors: "destructive" },
                 { title: o.accounts.blocked, subtitle: "Contas bloqueadas", description: `${o.accounts.temporarily_locked} em bloqueio temporário`, icon: "Ban" },
-                { title: o.accounts.with_failed_attempts, subtitle: "Com tentativas falhadas", description: "Falhas em curso", icon: "KeyRound" },
-                { title: o.impersonations.started, subtitle: "Personificações", description: `${o.impersonations.with_write} com escrita · ${o.impersonations.active_now} activa(s)`, icon: "UserCog" },
+                                { title: o.impersonations.started, subtitle: "Personificações", description: `${o.impersonations.with_write} com escrita · ${o.impersonations.active_now} activa(s)`, icon: "UserCog" },
               ]
             : []
         }
-        skeletons={5}
+        skeletons={4}
       />
 
       {o && (
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Panel title="Alertas no período" icon="Siren">
-            {o.alerts.by_type.length === 0 ? <p className="py-4 text-center text-sm text-muted-foreground">Nenhum alerta no período.</p> : (
-              <ul className="space-y-1.5">
-                {o.alerts.by_type.map((a) => (
-                  <li key={`${a.type}-${a.severity}`} className="flex items-center justify-between gap-3 text-sm">
-                    <span className="flex items-center gap-2"><StatusBadge status={a.severity} map={SEVERITY} className="text-[10px]" />{ALERT_TYPE_LABEL[a.type] ?? a.type}</span>
-                    <span className="font-semibold tabular-nums">{a.count}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Panel>
+        <div className="grid gap-4 md:grid-cols-2">
+          <BarListPanel
+            title="Alertas no período"
+            icon="Siren"
+            items={Object.entries(o.alerts.by_type.reduce<Record<string, number>>((m, x) => ({ ...m, [x.type]: (m[x.type] ?? 0) + x.count }), {})).map(([t, n]) => ({ label: ALERT_TYPE_LABEL[t] ?? t, value: n }))}
+            emptyText="Nenhum alerta no período."
+          />
 
-          <Panel title="Operações sensíveis" description="Acções de suporte e administração no período" icon="ClipboardList">
-            {o.sensitive_operations.length === 0 ? <p className="py-4 text-center text-sm text-muted-foreground">Nenhuma operação sensível no período.</p> : (
-              <ul className="space-y-1.5">
-                {o.sensitive_operations.map((x) => (
-                  <li key={x.operation} className="flex items-center justify-between gap-3 text-sm"><span>{OPERATION_LABEL[x.operation] ?? x.operation}</span><span className="font-semibold tabular-nums">{x.count}</span></li>
-                ))}
-              </ul>
-            )}
-          </Panel>
+          <BarListPanel
+            title="Operações sensíveis"
+            description="Acções de suporte e administração no período"
+            icon="ClipboardList"
+            items={o.sensitive_operations.map((x) => ({ label: OPERATION_LABEL[x.operation] ?? x.operation, value: x.count }))}
+            emptyText="Nenhuma operação sensível no período."
+          />
 
           <Panel title="Contas a precisar de atenção" icon="UserX" className="lg:col-span-2">
             {o.accounts.attention.length === 0 ? <p className="py-4 text-center text-sm text-muted-foreground">Nenhuma conta com tentativas falhadas em curso.</p> : (
@@ -142,10 +134,12 @@ export function SecurityPageContent() {
         <TabsList>
           <TabsTrigger value="resumo">Resumo</TabsTrigger>
           <TabsTrigger value="alertas">Alertas</TabsTrigger>
+          <TabsTrigger value="personificacoes">Personificações</TabsTrigger>
           <TabsTrigger value="auditoria">Auditoria e integridade</TabsTrigger>
         </TabsList>
         <TabsContent value="resumo" className="pt-4"><OverviewTab onGoAlerts={() => void setTab("alertas")} /></TabsContent>
         <TabsContent value="alertas" className="pt-4"><AlertsTab /></TabsContent>
+        <TabsContent value="personificacoes" className="pt-4"><ImpersonationsPageContent embedded /></TabsContent>
         <TabsContent value="auditoria" className="pt-4"><SecurityAuditTab /></TabsContent>
       </Tabs>
     </div>

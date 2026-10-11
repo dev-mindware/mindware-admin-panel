@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Badge, ButtonOnlyAction, FilterToolbar, GenericTable, ListSkeleton, ConfirmModal, MetricGrid, StatusBadge, TitleList, type Column } from "@workspace/ui";
+import { Badge, ButtonOnlyAction, FilterToolbar, GenericTable, ListSkeleton, ConfirmModal, MetricGrid, StackedBarPanel, StatusBadge, TitleList, type Column } from "@workspace/ui";
 import { useModalStore } from "@workspace/hooks";
 import { useImpersonationActions, useImpersonations } from "@/hooks/directory/use-directory";
 import { useLocalPage } from "@/hooks/use-local-page";
@@ -17,7 +17,7 @@ const stateOf = (i: AdminImpersonation) => (i.active ? "activa" : i.revoked_at ?
 const minutes = (i: AdminImpersonation) => Math.max(0, Math.round(((i.revoked_at ? new Date(i.revoked_at) : new Date(i.expires_at)).getTime() - new Date(i.started_at).getTime()) / 60_000));
 
 /** Registo das personificações (activas e passadas): quem assumiu quem, onde, porquê, em que modo, e revogação imediata. */
-export function ImpersonationsPageContent() {
+export function ImpersonationsPageContent({ embedded }: { embedded?: boolean } = {}) {
   const q = useImpersonations();
   const { revoke } = useImpersonationActions();
   const { openModal } = useModalStore();
@@ -35,7 +35,6 @@ export function ImpersonationsPageContent() {
   const [now] = useState(() => Date.now());
   const month = now - 30 * 86_400_000;
   const recent = all.filter((i) => new Date(i.started_at).getTime() >= month);
-  const avg = recent.length ? Math.round(recent.reduce((a, i) => a + minutes(i), 0) / recent.length) : 0;
 
   const columns: Column<AdminImpersonation>[] = [
     { key: "admin", header: "Administrador", render: (_, i) => <div><p className="text-sm font-medium">{i.admin?.full_name ?? "—"}</p><p className="text-xs text-muted-foreground">{i.admin?.email}</p></div> },
@@ -49,7 +48,7 @@ export function ImpersonationsPageContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <TitleList title="Personificações" suTitle="Todas as vezes que alguém da plataforma assumiu a identidade de um utilizador. Cada uma tem motivo, duração máxima de 30 minutos e fica na auditoria da escola. Para iniciar uma, use Utilizadores › Personificar." />
+      {!embedded && <TitleList title="Personificações" suTitle="Todas as vezes que alguém da plataforma assumiu a identidade de um utilizador. Cada uma tem motivo, duração máxima de 30 minutos e fica na auditoria da escola. Para iniciar uma, use Utilizadores › Personificar." />}
 
       <MetricGrid
         isLoading={q.isLoading}
@@ -59,8 +58,18 @@ export function ImpersonationsPageContent() {
           { title: all.filter((i) => i.active).length, subtitle: "Activas agora", description: "Podem ser revogadas", icon: "UserCog", variant: all.some((i) => i.active) ? "action" : "default" },
           { title: recent.length, subtitle: "Nos últimos 30 dias", description: `${all.length} no registo`, icon: "CalendarDays" },
           { title: recent.filter((i) => i.mode === "escrita").length, subtitle: "Com escrita", description: "Últimos 30 dias", icon: "Pencil", colors: "destructive", variant: recent.some((i) => i.mode === "escrita") ? "action" : "default" },
-          { title: `${avg} min`, subtitle: "Duração média", description: "Últimos 30 dias", icon: "Timer" },
+                  ]}
+      />
+
+      <StackedBarPanel
+        title="Modo de acesso (30 dias)"
+        description="Leitura é o padrão; escrita altera dados da escola e merece revisão"
+        icon="UserCog"
+        segments={[
+          { key: "leitura", label: "Leitura", value: recent.filter((i) => i.mode === "leitura").length },
+          { key: "escrita", label: "Escrita", value: recent.filter((i) => i.mode === "escrita").length },
         ]}
+        emptyText="Nenhuma personificação nos últimos 30 dias."
       />
 
       <div className="space-y-4">

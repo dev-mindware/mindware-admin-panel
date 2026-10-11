@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, ButtonOnlyAction, GenericTable, Icon, Input, ListSkeleton, MetricGrid, ReasonModal, TitleList, ToneBadge, type Column } from "@workspace/ui";
+import { Button, ButtonOnlyAction, GaugePanel, GenericTable, Icon, Input, ListSkeleton, MetricGrid, ReasonModal, TitleList, ToneBadge, type Column } from "@workspace/ui";
 import { useModalStore } from "@workspace/hooks";
 import { useEffect, useRef, useState } from "react";
 import { EMAIL_FAILURE_LABEL } from "@/constants/labels";
@@ -31,7 +31,7 @@ function InviteFields({ onDraft }: { onDraft: (d: { email: string; name: string 
 }
 
 /** Quem administra a plataforma: convidar novos administradores, ver o estado do 2FA e revogar acessos (nunca o próprio nem o último). */
-export function AdminsPageContent() {
+export function AdminsPageContent({ embedded }: { embedded?: boolean } = {}) {
   const q = useAdmins();
   const { invite, revoke } = useAdminActions();
   const { openModal } = useModalStore();
@@ -62,12 +62,21 @@ export function AdminsPageContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <TitleList title="Administradores" suTitle="Quem pode administrar a plataforma. Cada convite e cada revogação exigem motivo e reautenticação, e ficam na auditoria.">
-        <Button size="sm" className="gap-2" onClick={() => openModal(INVITE_MODAL)}>
+      {embedded ? (
+        <div className="flex justify-end">
+          <Button size="sm" className="gap-2" onClick={() => openModal(INVITE_MODAL)}>
+            <Icon name="UserPlus" className="size-4" />
+            Convidar administrador
+          </Button>
+        </div>
+      ) : (
+        <TitleList title="Administradores" suTitle="Quem pode administrar a plataforma. Cada convite e cada revogação exigem motivo e reautenticação, e ficam na auditoria.">
+          <Button size="sm" className="gap-2" onClick={() => openModal(INVITE_MODAL)}>
           <Icon name="UserPlus" className="size-4" />
           Convidar administrador
         </Button>
-      </TitleList>
+        </TitleList>
+      )}
 
       <MetricGrid
         isLoading={q.isLoading}
@@ -80,6 +89,10 @@ export function AdminsPageContent() {
           { title: all.filter((a) => a.last_login_at && Date.now() - new Date(a.last_login_at).getTime() < 7 * 86_400_000).length, subtitle: "Activos na semana", description: "Entraram nos últimos 7 dias", icon: "Activity" },
         ]}
       />
+
+      {!q.isLoading && all.length > 0 && (
+        <GaugePanel title="Cobertura de 2FA" description="Administradores com segundo factor activo" icon="ShieldCheck" percent={(all.filter((a) => a.mfa_enabled).length / all.length) * 100} caption={`${all.filter((a) => a.mfa_enabled).length} de ${all.length}`} warnBelow={100} className="max-w-md" />
+      )}
 
       {q.isLoading ? <ListSkeleton cols={5} rows={3} /> : (
         <GenericTable<Row> data={page.rows} columns={columns} page={page.page} total={page.total} totalPages={page.totalPages} setPage={page.setPage} goToNextPage={page.goToNextPage} goToPreviousPage={page.goToPreviousPage} emptyTitle="Sem administradores" emptyDescription="Não há administradores activos." emptyIcon="ShieldCheck" />

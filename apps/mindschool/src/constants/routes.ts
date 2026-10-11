@@ -7,12 +7,10 @@ export const PRIVATE_ROUTE_PREFIXES = [
   "/users",
   "/plans",
   "/coupons",
-  "/impersonations",
   "/security",
   "/operations",
   "/communication",
-  "/admins",
-  "/account",
+  "/settings",
 ];
 
 export const BASE_PATH = "/mindschool";

@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Button, ConfirmModal, GenericTable, Icon, MetricGrid, Panel, TitleList, ToneBadge, type Column } from "@workspace/ui";
+import { Badge, Button, ConfirmModal, GenericTable, Icon, BarListPanel, MetricGrid, Panel, RadarPanel, TitleList, ToneBadge, type Column } from "@workspace/ui";
 import { useModalStore } from "@workspace/hooks";
 import { useState } from "react";
 import { PermissionGate } from "@/components/admin/shared/permission-gate";
@@ -103,14 +103,35 @@ export function OperationsPageContent() {
           { title: outbox.data?.pending ?? "—", subtitle: "Outbox por entregar", description: `${outbox.data?.processed ?? 0} entregues`, icon: "Inbox" },
           { title: outbox.data?.dead_letter ?? n?.dead_letter_events ?? 0, subtitle: "Dead-letter", description: "Eventos que esgotaram as tentativas", icon: "MailX", variant: (outbox.data?.dead_letter ?? 0) > 0 ? "action" : "default", colors: "destructive" },
           { title: failedJobs, subtitle: "Trabalhos falhados", description: `Filas em modo ${queues.data?.mode ?? "—"}`, icon: "ListX", variant: failedJobs > 0 ? "action" : "default", colors: "destructive" },
-          { title: n?.fiscal_submissions_pending ?? 0, subtitle: "Fiscal pendente", description: "A aguardar o MindGest", icon: "FileClock" },
-          { title: n?.fiscal_submissions_failed ?? 0, subtitle: "Fiscal rejeitado", description: "Precisam de correcção", icon: "FileX", variant: (n?.fiscal_submissions_failed ?? 0) > 0 ? "action" : "default", colors: "destructive" },
-          { title: n?.failed_report_jobs_24h ?? 0, subtitle: "Relatórios falhados", description: "Últimas 24 horas", icon: "FileWarning" },
-          { title: mb(totalBytes), subtitle: "Armazenamento", description: `${objects.reduce((a, x) => a + x.objects, 0)} ficheiro(s) · ${storage.data?.driver ?? "—"}`, icon: "HardDrive" },
-          { title: n?.past_due_or_grace_subscriptions ?? 0, subtitle: "Subscrições em atraso", description: "Vencidas ou em tolerância", icon: "CircleAlert" },
-        ]}
-        skeletons={8}
+                    { title: n?.fiscal_submissions_failed ?? 0, subtitle: "Fiscal rejeitado", description: "Precisam de correcção", icon: "FileX", variant: (n?.fiscal_submissions_failed ?? 0) > 0 ? "action" : "default", colors: "destructive" },
+                                      ]}
+        skeletons={4}
       />
+
+      <div className="grid gap-4 md:grid-cols-2">
+      <RadarPanel
+        title="Perfil de pendências"
+        description="Onde se concentram os problemas por resolver"
+        icon="Radar"
+        seriesLabel="Pendentes"
+        axes={[
+          { label: "Outbox", value: outbox.data?.pending ?? 0 },
+          { label: "Dead-letter", value: outbox.data?.dead_letter ?? n?.dead_letter_events ?? 0 },
+          { label: "Trabalhos", value: failedJobs },
+          { label: "Fiscal pendente", value: n?.fiscal_submissions_pending ?? 0 },
+          { label: "Fiscal rejeitado", value: n?.fiscal_submissions_failed ?? 0 },
+          { label: "Relatórios 24 h", value: n?.failed_report_jobs_24h ?? 0 },
+          { label: "Subs. em atraso", value: n?.past_due_or_grace_subscriptions ?? 0 },
+        ]}
+      />
+      <BarListPanel
+        title="Ficheiros por domínio"
+        description="Objectos guardados e disponíveis"
+        icon="HardDrive"
+        items={objects.map((x) => ({ label: x.domain, value: x.objects }))}
+        emptyText="Sem ficheiros guardados."
+      />
+      </div>
 
       <Panel title="Filas de trabalhos" description="Processamento em segundo plano (relatórios, emails, calendário, facturação…)" icon="Layers">
         {queues.data?.mode === "inline" && <p className="mb-3 rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">As filas correm no processo da API (sem Redis): não há contadores nem trabalhos para repetir.</p>}
@@ -124,7 +145,7 @@ export function OperationsPageContent() {
 
       <Panel
         title="Armazenamento"
-        description="Ficheiros guardados (comprovativos, relatórios…) e limpeza dos expirados"
+        description={`${mb(totalBytes)} em ${objects.reduce((a, x) => a + x.objects, 0)} ficheiro(s) · ${storage.data?.driver ?? "—"}. Inclui a limpeza dos expirados.`}
         icon="HardDrive"
         action={
           <PermissionGate permission="platform:storage_manage">

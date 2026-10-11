@@ -1,6 +1,6 @@
 "use client";
 
-import { MetricGrid, TitleList } from "@workspace/ui";
+import { BarListPanel, GaugePanel, MetricGrid, TitleList } from "@workspace/ui";
 import { useUserStats } from "@/hooks/directory/use-directory";
 import { ImpersonateModal } from "./impersonate-modal";
 import { UserActionModal } from "./user-action-modal";
@@ -22,16 +22,34 @@ export function UsersPageContent() {
         items={
           s
             ? [
-                { title: s.total, subtitle: "Utilizadores", description: `${s.new_30d} novos em 30 dias`, icon: "Users" },
+                { title: s.total, subtitle: "Utilizadores", description: `${s.new_30d} novos em 30 dias · ${s.invite_pending} convite(s) pendente(s)`, icon: "Users" },
                 { title: s.active_7d, subtitle: "Activos na semana", description: "Entraram nos últimos 7 dias", icon: "Activity" },
-                { title: s.invite_pending, subtitle: "Convites pendentes", description: "Ainda nunca entraram", icon: "MailPlus", variant: s.invite_pending > 0 ? "action" : "default" },
                 { title: s.privileged_without_mfa, subtitle: "Sem segundo factor", description: "Papéis que o exigem", icon: "ShieldOff", variant: s.privileged_without_mfa > 0 ? "action" : "default", colors: "destructive" },
                 { title: s.blocked, subtitle: "Bloqueados", description: `${s.locked} em bloqueio temporário`, icon: "Ban" },
               ]
             : []
         }
-        skeletons={5}
+        skeletons={4}
       />
+
+      {s && (
+        <div className="grid gap-4 md:grid-cols-2">
+          <GaugePanel title="Utilizadores activos" description="Entraram nos últimos 7 dias" icon="Activity" percent={s.total ? (s.active_7d / s.total) * 100 : null} caption={`${s.active_7d} de ${s.total}`} />
+          <BarListPanel
+            title="Pontos de atenção"
+            description="Contas que precisam de uma acção de suporte"
+            icon="ShieldAlert"
+            multicolor
+            items={[
+              { label: "Sem 2FA", value: s.privileged_without_mfa },
+              { label: "Bloqueados", value: s.blocked },
+              { label: "Bloqueio temp.", value: s.locked },
+              { label: "Convites pend.", value: s.invite_pending },
+            ]}
+            emptyText="Nenhuma conta precisa de atenção."
+          />
+        </div>
+      )}
 
       <UsersTable />
       <UserActionModal />

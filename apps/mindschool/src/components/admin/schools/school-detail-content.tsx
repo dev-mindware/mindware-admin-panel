@@ -68,9 +68,8 @@ export function SchoolDetailContent({ schoolId }: { schoolId: string }) {
       <MetricGrid
         items={[
           { title: usage.students, subtitle: "Alunos", description: `${usage.sections} turma(s)`, icon: "GraduationCap" },
-          { title: usage.teachers, subtitle: "Professores", icon: "Presentation" },
-          { title: usage.internal_users, subtitle: "Utilizadores internos", description: `${usage.family_users} da família`, icon: "Users" },
-          { title: `${activation.done}/${activation.total}`, subtitle: "Arranque", description: activation.next_step ? `Falta: ${activation.next_step.label}` : "Completo", icon: "Rocket", variant: activation.status === "parada" ? "action" : "default", colors: "destructive" },
+          { title: usage.teachers, subtitle: "Professores", description: `${usage.internal_users} utilizador(es) internos`, icon: "Presentation" },
+                    { title: `${activation.done}/${activation.total}`, subtitle: "Arranque", description: activation.next_step ? `Falta: ${activation.next_step.label}` : "Completo", icon: "Rocket", variant: activation.status === "parada" ? "action" : "default", colors: "destructive" },
           { title: q.data.last_login_at ? day(q.data.last_login_at) : "nunca", subtitle: "Último acesso", description: `${activation.days_inactive} dia(s) sem actividade`, icon: "Clock" },
         ]}
       />

@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Badge, Button, ConfirmModal, GenericTable, GlobalModal, Icon, Input, ListSkeleton, MetricGrid, Panel, RecoveryCodes, TitleList, TotpSetup, ToneBadge, type Column } from "@workspace/ui";
+import { Badge, Button, ConfirmModal, GenericTable, GlobalModal, Icon, Input, ListSkeleton, Panel, RecoveryCodes, TitleList, TotpSetup, ToneBadge, type Column } from "@workspace/ui";
 import { useModalStore } from "@workspace/hooks";
 import { useMe } from "@/hooks/auth/use-me";
 import { useAccountActions, useSessions } from "@/hooks/ops/use-ops";
@@ -21,7 +21,7 @@ const END_ALL_MODAL = "sessions-end-all";
 const END_ONE_MODAL = "session-end";
 
 /** A minha conta: segundo factor (activar com QR, códigos de recuperação, desactivar) e sessões abertas. */
-export function AccountPageContent() {
+export function AccountPageContent({ embedded }: { embedded?: boolean } = {}) {
   const qc = useQueryClient();
   const { me, refetch: refetchMe } = useMe();
   const sessions = useSessions();
@@ -82,17 +82,7 @@ export function AccountPageContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      <TitleList title="A minha conta" suTitle="Proteja o seu acesso de administrador: segundo factor, códigos de recuperação e sessões abertas." />
-
-      <MetricGrid
-        isLoading={!me}
-        items={[
-          { title: me?.full_name ?? "—", subtitle: "Administrador", description: me?.email, icon: "UserRound" },
-          { title: mfaOn ? "Activo" : "Por activar", subtitle: "Segundo factor", description: mfaOn ? "Autenticador ligado" : "Recomendado e exigido em produção", icon: mfaOn ? "ShieldCheck" : "ShieldOff", variant: mfaOn ? "default" : "action", colors: "destructive" },
-          { title: sessions.data?.length ?? "—", subtitle: "Sessões abertas", description: "Dispositivos com sessão iniciada", icon: "Monitor" },
-          { title: "Plataforma", subtitle: "Papel", description: "Administrador de sistema", icon: "Crown" },
-        ]}
-      />
+      {!embedded && <TitleList title="A minha conta" suTitle="Proteja o seu acesso de administrador: segundo factor, códigos de recuperação e sessões abertas." />}
 
       <Panel title="Autenticação em dois passos" description="Além da palavra-passe, pede um código de 6 dígitos gerado no telemóvel." icon="Smartphone" action={<ToneBadge tone={mfaOn ? "success" : "warning"} label={mfaOn ? "Segundo factor activo" : "Sem segundo factor"} />}>
         {me?.mfa_enrollment_required && !mfaOn && (

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Badge, Button, ButtonOnlyAction, FilterToolbar, Icon, MetricGrid, StatusBadge, TitleList, ToneBadge, type Column } from "@workspace/ui";
+import { Badge, Button, ButtonOnlyAction, DonutPanel, FilterToolbar, GaugePanel, Icon, MetricGrid, StatusBadge, TitleList, ToneBadge, type Column } from "@workspace/ui";
 import { useModalStore } from "@workspace/hooks";
 import { useQueryState } from "nuqs";
 import { useDebounce } from "use-debounce";
@@ -11,6 +11,7 @@ import { PermissionGate } from "@/components/admin/shared/permission-gate";
 import { SUBSCRIPTION_STATUS } from "@/constants/statuses";
 import { SUBSYSTEM_LABEL } from "@/constants/labels";
 import { useSchoolStats, useSchools } from "@/hooks/directory/use-directory";
+import { slicesFromCounts } from "@/utils/charts";
 import { day } from "@/utils/format";
 import type { AdminSchool } from "@/types/directory";
 import { ONBOARD_MODAL, OnboardModal } from "./onboard-modal";
@@ -107,13 +108,19 @@ export function SchoolsPageContent() {
                 { title: s.total, subtitle: "Escolas", description: `${s.new_month} nova(s) este mês`, icon: "School" },
                 { title: s.by_status.active, subtitle: "A pagar", description: "Subscrição activa", icon: "CircleCheck" },
                 { title: s.by_status.trial, subtitle: "Em teste", description: `${s.no_subscription} sem subscrição`, icon: "FlaskConical" },
-                { title: s.by_status.suspended + s.by_status.expired + s.by_status.cancelled, subtitle: "Suspensas ou terminadas", description: `${s.by_status.past_due + s.by_status.grace} em atraso`, icon: "CirclePause" },
                 { title: s.activation.stalled, subtitle: "Arranque parado", description: `${s.activation.incomplete} com arranque por concluir`, icon: "TriangleAlert", variant: s.activation.stalled > 0 ? "action" : "default", colors: "destructive" },
               ]
             : []
         }
-        skeletons={5}
+        skeletons={4}
       />
+
+      {s && (
+        <div className="grid gap-4 md:grid-cols-2">
+          <DonutPanel title="Escolas por estado" description="Estado comercial de todas as escolas" icon="ChartPie" centerLabel="escolas" slices={slicesFromCounts({ ...s.by_status, none: s.no_subscription }, { ...Object.fromEntries(Object.entries(SUBSCRIPTION_STATUS).map(([k, v]) => [k, v.label])), none: "Sem subscrição" })} />
+          <GaugePanel title="Arranque concluído" description="Escolas com o arranque completo" icon="Rocket" percent={s.total ? ((s.total - s.activation.incomplete) / s.total) * 100 : null} caption={`${s.activation.incomplete} por concluir · ${s.activation.stalled} parada(s)`} warnBelow={50} />
+        </div>
+      )}
 
       <div className="space-y-4">
         <FilterToolbar

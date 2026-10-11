@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import { Button, ChartContainer, ChartTooltip, ChartTooltipContent, Icon, MetricGrid, Panel, SelectField, Skeleton, TitleList, ToneBadge, type ChartConfig } from "@workspace/ui";
+import { BarListPanel, Button, ChartContainer, DonutPanel, GaugePanel, ChartTooltip, ChartTooltipContent, Icon, MetricGrid, Panel, SelectField, Skeleton, TitleList, ToneBadge, type ChartConfig } from "@workspace/ui";
 import { useAnalytics } from "@/hooks/commerce/use-analytics";
+import { slicesFromCounts } from "@/utils/charts";
 import { day, kz, kzShort, monthLabel, since } from "@/utils/format";
 import type { Analytics } from "@/types/api";
 
@@ -33,11 +34,10 @@ function AttentionRow({ href, icon, label, value, danger }: { href: string; icon
 function Charts({ a }: { a: Analytics }) {
   const revenue = a.series.revenue.map((r) => ({ month: monthLabel(r.month), amount: Number(r.amount) }));
   const schools = a.series.new_schools.map((r) => ({ month: monthLabel(r.month), n: r.n }));
-  const maxPlan = Math.max(1, ...a.series.mrr_by_plan.map((p) => Number(p.mrr)));
 
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
-      <Panel title="Receita aprovada por mês" description="Pagamentos confirmados (Kz)" icon="Banknote" className="lg:col-span-2">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <Panel title="Receita aprovada por mês" description={`Pagamentos confirmados (Kz) · total ${kzShort(a.kpis.revenue_total)}`} icon="Banknote" className="md:col-span-2">
         <ChartContainer config={revenueConfig} className="h-56 w-full">
           <BarChart data={revenue}>
             <CartesianGrid vertical={false} />
@@ -49,19 +49,9 @@ function Charts({ a }: { a: Analytics }) {
         </ChartContainer>
       </Panel>
 
-      <Panel title="MRR por plano" description="Receita recorrente mensal" icon="Layers">
-        <div className="space-y-3">
-          {a.series.mrr_by_plan.map((p) => (
-            <div key={p.code} className="space-y-1">
-              <div className="flex justify-between text-sm"><span className="font-medium">{p.name}</span><span className="text-muted-foreground">{p.schools} escola(s) · {kzShort(p.mrr)}</span></div>
-              <div className="h-2 overflow-hidden rounded bg-muted"><div className="h-full rounded bg-primary" style={{ width: `${(Number(p.mrr) / maxPlan) * 100}%` }} /></div>
-            </div>
-          ))}
-          {a.series.mrr_by_plan.length === 0 && <Empty text="Sem planos." />}
-        </div>
-      </Panel>
+      <BarListPanel title="MRR por plano" description="Receita recorrente mensal (Kz)" icon="Layers" formatValue={kzShort} items={a.series.mrr_by_plan.map((p) => ({ label: p.name, value: Number(p.mrr) }))} emptyText="Sem planos." />
 
-      <Panel title="Novas escolas por mês" icon="School" className="lg:col-span-2">
+      <Panel title="Novas escolas por mês" icon="School">
         <ChartContainer config={schoolsConfig} className="h-44 w-full">
           <AreaChart data={schools}>
             <CartesianGrid vertical={false} />
@@ -73,14 +63,15 @@ function Charts({ a }: { a: Analytics }) {
         </ChartContainer>
       </Panel>
 
-      <Panel title="Escolas por estado" icon="ChartPie">
-        <div className="space-y-2 text-sm">
-          {Object.entries(a.series.schools_by_status).map(([k, n]) => (
-            <div key={k} className="flex justify-between"><span className="text-muted-foreground">{STATUS[k] ?? k}</span><span className="font-semibold">{n}</span></div>
-          ))}
-          {Object.keys(a.series.schools_by_status).length === 0 && <Empty text="Ainda sem escolas." />}
-        </div>
-      </Panel>
+      <DonutPanel
+        title="Escolas por estado"
+        description="Estado comercial de todas as escolas"
+        icon="ChartPie"
+        centerLabel="escolas"
+        slices={slicesFromCounts(a.series.schools_by_status, STATUS)}
+        emptyText="Ainda sem escolas."
+      />
+      <GaugePanel title="Conversão teste → pago" description={`Coorte de ${a.kpis.trial_conversion_cohort} escola(s)`} icon="Percent" percent={a.kpis.trial_conversion_rate} caption="das escolas em teste passam a pagar" />
     </div>
   );
 }
@@ -102,9 +93,7 @@ export function DashboardPageContent() {
         { title: a.kpis.schools_paying, subtitle: "Escolas a pagar", description: `${a.kpis.schools_total} no total`, icon: "School" as const },
         { title: a.kpis.schools_trial, subtitle: "Em período de teste", description: `${a.attention.trials_ending.length} a terminar em 7 dias`, icon: "FlaskConical" as const },
         { title: a.kpis.orders_waiting, subtitle: "Comprovativos por rever", description: a.attention.stale_orders ? `${a.attention.stale_orders} há mais de 24 h` : "Fila em dia", icon: "ReceiptText" as const, variant: a.kpis.orders_waiting > 0 ? ("action" as const) : ("default" as const) },
-        { title: a.kpis.trial_conversion_rate === null ? "—" : `${a.kpis.trial_conversion_rate}%`, subtitle: "Conversão teste → pago", description: `Coorte de ${a.kpis.trial_conversion_cohort} escola(s)`, icon: "Percent" as const },
-        { title: kzShort(a.kpis.revenue_total), subtitle: "Receita total", description: "Pagamentos aprovados", icon: "Banknote" as const },
-      ]
+                      ]
     : [];
 
   return (
@@ -115,7 +104,7 @@ export function DashboardPageContent() {
         </div>
       </TitleList>
 
-      <MetricGrid isLoading={q.isLoading} isError={q.isError} onRetry={() => void q.refetch()} items={kpis} skeletons={6} />
+      <MetricGrid isLoading={q.isLoading} isError={q.isError} onRetry={() => void q.refetch()} items={kpis} skeletons={4} />
 
       {q.isLoading && <Skeleton className="h-72 w-full rounded-xl" />}
       {a && <Charts a={a} />}
@@ -129,7 +118,7 @@ export function DashboardPageContent() {
               <AttentionRow href="/operations" icon="Inbox" label="Eventos em dead-letter" value={a.attention.dead_letter_events} danger />
               <AttentionRow href="/operations" icon="FileX" label="Facturação fiscal pendente ou rejeitada" value={a.attention.fiscal_submissions_pending + a.attention.fiscal_submissions_failed} />
               <AttentionRow href="/operations" icon="FileWarning" label="Relatórios falhados (24 h)" value={a.attention.failed_report_jobs_24h} />
-              <AttentionRow href="/impersonations" icon="UserCog" label="Personificações activas" value={a.attention.impersonations_active} />
+              <AttentionRow href="/security?tab=personificacoes" icon="UserCog" label="Personificações activas" value={a.attention.impersonations_active} />
             </div>
           </Panel>
 

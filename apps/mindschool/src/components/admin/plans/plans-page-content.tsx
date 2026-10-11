@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Button, ButtonOnlyAction, GenericTable, Icon, ListSkeleton, MetricGrid, ReasonModal, Tabs, TabsContent, TabsList, TabsTrigger, TitleList, ToneBadge, type Column } from "@workspace/ui";
+import { Badge, BarListPanel, Button, ButtonOnlyAction, GenericTable, Icon, ListSkeleton, MetricGrid, ReasonModal, Tabs, TabsContent, TabsList, TabsTrigger, TitleList, ToneBadge, type Column } from "@workspace/ui";
 import { useModalStore } from "@workspace/hooks";
 import { useQueryState } from "nuqs";
 import { useMemo } from "react";
@@ -135,6 +135,13 @@ export function PlansPageContent() {
       </TitleList>
 
       <MetricGrid items={kpis} isLoading={plans.isLoading && addons.isLoading} />
+
+      {stats.data && (
+        <div className="grid gap-4 md:grid-cols-2">
+          <BarListPanel title="MRR por plano" description="Receita recorrente mensal (Kz)" icon="TrendingUp" formatValue={kzShort} items={stats.data.plans.map((p) => ({ label: p.name, value: Number(p.mrr) }))} />
+          <BarListPanel title="Escolas por plano" description="Escolas a pagar em cada plano" icon="School" items={stats.data.plans.map((p) => ({ label: p.name, value: p.schools_paying }))} />
+        </div>
+      )}
 
       <Tabs value={tab} onValueChange={(v) => void setTab(v)}>
         <TabsList>

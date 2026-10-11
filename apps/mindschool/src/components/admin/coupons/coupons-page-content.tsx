@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Button, ButtonOnlyAction, FilterToolbar, Icon, MetricGrid, ReasonModal, StatusBadge, TitleList, type Column } from "@workspace/ui";
+import { Badge, Button, ButtonOnlyAction, FilterToolbar, Icon, MetricGrid, ReasonModal, StackedBarPanel, StatusBadge, TitleList, type Column } from "@workspace/ui";
 import { useModalStore } from "@workspace/hooks";
 import { useQueryState } from "nuqs";
 import { useDebounce } from "use-debounce";
@@ -106,11 +106,13 @@ export function CouponsPageContent() {
                 { title: s.by_state.active, subtitle: "Cupões activos", description: `${s.total} no total`, icon: "Ticket", variant: "action" },
                 { title: s.redemptions_month, subtitle: "Usados no mês", description: `${s.redemptions_total} desde sempre`, icon: "TicketCheck" },
                 { title: kzShort(s.discount_month), subtitle: "Desconto no mês", description: `${kzShort(s.discount_total)} no total`, icon: "BadgePercent" },
-                { title: s.expiring_7d, subtitle: "A expirar em 7 dias", description: `${s.by_state.expired} já expirado(s)`, icon: "CalendarClock", colors: "destructive", variant: s.expiring_7d > 0 ? "action" : "default" },
               ]
             : []
         }
+        skeletons={3}
       />
+
+      {s && <StackedBarPanel title="Cupões por estado" description="Composição do catálogo de cupões" icon="Ticket" segments={Object.entries(s.by_state).map(([k, v]) => ({ key: k, label: COUPON_STATE[k]?.label ?? k, value: v }))} />}
 
       <div className="space-y-4">
         <FilterToolbar

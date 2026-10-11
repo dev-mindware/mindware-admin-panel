@@ -32,7 +32,7 @@ function ImpersonateDialog({ user }: { user: AdminUser }) {
       { targetUserId: user.id, schoolId, reason: reason.trim(), durationMinutes: Number(minutes), mode },
       {
         onSuccess: (r) => {
-          const back = encodeURIComponent(`${window.location.origin}${BASE_PATH}/impersonations`);
+          const back = encodeURIComponent(`${window.location.origin}${BASE_PATH}/security?tab=personificacoes`);
           setLink(`${SCHOOL_APP}/auth/impersonar?code=${encodeURIComponent(r.handoff.code)}&return=${back}`);
         },
         onError: (e) => ErrorMessage(getApiErrorMessage(e, "Não foi possível iniciar a personificação.")),

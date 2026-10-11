@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Badge, Button, ButtonOnlyAction, FilterToolbar, GenericTable, GlobalModal, Icon, Input, ListSkeleton, MetricGrid, ReasonModal, StatusBadge, Tabs, TabsContent, TabsList, TabsTrigger, TitleList, type Column, type StatusMap } from "@workspace/ui";
+import { Badge, BarListPanel, Button, ButtonOnlyAction, FilterToolbar, GaugePanel, GenericTable, GlobalModal, Icon, Input, ListSkeleton, MetricGrid, ReasonModal, StatusBadge, Tabs, TabsContent, TabsList, TabsTrigger, TitleList, type Column, type StatusMap } from "@workspace/ui";
 import { useModalStore } from "@workspace/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { useQueryState } from "nuqs";
@@ -121,12 +121,17 @@ export function CommunicationPageContent() {
             ? [
                 { title: s.sent, subtitle: "Enviados", description: `Últimos ${s.window_days} dias`, icon: "MailCheck" },
                 { title: s.failed, subtitle: "Falhados", description: "Precisam de atenção", icon: "MailX", variant: s.failed > 0 ? "action" : "default", colors: "destructive", onClick: () => { void setStatus("falhou"); void setTab("registo"); } },
-                { title: s.pending, subtitle: "Pendentes", description: `${s.skipped} ignorado(s)`, icon: "MailQuestion" },
-                { title: s.delivery_rate === null ? "—" : `${s.delivery_rate}%`, subtitle: "Taxa de entrega", description: s.top_templates[0] ? `Mais enviado: ${s.top_templates[0].template_code}` : "Sem envios", icon: "Gauge" },
+                                { title: s.delivery_rate === null ? "—" : `${s.delivery_rate}%`, subtitle: "Taxa de entrega", description: s.pending ? `${s.pending} pendente(s) · ${s.skipped} ignorado(s)` : "Sem envios pendentes", icon: "Gauge" },
               ]
             : []
         }
       />
+      {s && (
+        <div className="grid gap-4 md:grid-cols-2">
+          <GaugePanel title="Taxa de entrega" description={`Últimos ${s.window_days} dias`} icon="Gauge" percent={s.delivery_rate} caption={`${s.sent} enviados · ${s.failed} falhados`} warnBelow={90} />
+          <BarListPanel title="Modelos mais enviados" description={`Últimos ${s.window_days} dias`} icon="Mail" items={s.top_templates.slice(0, 5).map((t) => ({ label: t.template_code, value: t.total }))} emptyText="Sem envios no período." />
+        </div>
+      )}
       {templates.data && !templates.data.configured && <div className="flex items-center gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm"><Icon name="TriangleAlert" className="size-4 text-amber-600" />O canal de email não está configurado: os emails ficam registados mas não saem.</div>}
 
       <Tabs value={tab} onValueChange={(v) => void setTab(v)}>
