@@ -127,6 +127,7 @@ export function CouponsPageContent() {
       <CouponRedemptionsModal />
       <ReasonModal<AdminCoupon>
         id={TOGGLE_MODAL}
+        icon="Ticket"
         title="Estado do cupão"
         description={(c) => (c ? `${c.is_active ? "Desactivar" : "Activar"} ${c.code}.` : undefined)}
         destructive

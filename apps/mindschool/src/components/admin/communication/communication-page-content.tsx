@@ -41,6 +41,7 @@ function TestModal() {
   return (
     <ReasonModal<EmailTemplate>
       id={TEST_MODAL}
+      icon="Mail"
       title="Enviar email de teste"
       description={(x) => (x ? `Envia «${x.name}» com dados de exemplo.` : undefined)}
       minLength={0}

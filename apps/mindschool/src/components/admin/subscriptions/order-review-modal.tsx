@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button, GlobalModal, Icon, Input, StatusBadge, Textarea, ToneBadge } from "@workspace/ui";
+import { Button, GlobalModal, Icon, Input, InputCurrency, StatusBadge, Textarea, ToneBadge } from "@workspace/ui";
 import { useModalStore } from "@workspace/hooks";
 import { ORDER_KIND, ORDER_STATUS } from "@/constants/statuses";
 import { useOrder, useOrderActions, useOrderTimeline } from "@/hooks/commerce/use-subscriptions";
@@ -85,8 +85,8 @@ function DecisionForm({ o, onDone }: { o: OrderDetail; onDone: () => void }) {
       </div>
       {decision === "approved" && (
         <div className="grid gap-4 sm:grid-cols-2">
-          <Input label={`Valor confirmado em Kz * (mínimo ${kz(o.total_amount)})`} inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
-          <Input label="Referência do pagamento *" placeholder="Ex.: TRF-20261011-001" value={reference} onChange={(e) => setReference(e.target.value)} />
+          <InputCurrency label="Valor confirmado em Kz *" suffix=" Kz" placeholder="0,00" hint={`Mínimo ${kz(o.total_amount)}, o valor da ordem.`} value={amount} onValueChange={(n) => setAmount(String(n))} />
+          <Input label="Referência do pagamento *" placeholder="Ex.: TRF-20261011-001" hint="Número da transferência ou do depósito, como no extracto." value={reference} onChange={(e) => setReference(e.target.value)} />
         </div>
       )}
       <Textarea label="Motivo * (mínimo 5 caracteres)" rows={2} value={reason} onChange={(e) => setReason(e.target.value)} placeholder={decision === "approved" ? "Ex.: Pagamento conferido no extracto." : "Ex.: Comprovativo ilegível, reenvie."} />

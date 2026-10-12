@@ -17,6 +17,7 @@ export function SubscriptionStateModal() {
   return (
     <ReasonModal<Target>
       id={SUBSCRIPTION_STATE_MODAL}
+      icon="Wallet"
       title="Estado da subscrição"
       description={(t) => (t ? `${t.action === "suspend" ? "A escola passa a modo de leitura" : "A escola volta a ter acesso completo"}: ${t.school.name}.` : undefined)}
       confirmLabel="Confirmar"

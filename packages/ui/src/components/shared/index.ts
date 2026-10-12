@@ -15,3 +15,4 @@ export * from "./chart-palette";
 export * from "./bar-list-panel";
 export * from "./gauge-panel";
 export * from "./stacked-bar-panel";
+export * from "./form-section";

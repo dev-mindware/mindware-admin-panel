@@ -4,6 +4,8 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useModalStore } from "@workspace/hooks";
 import { GlobalModal } from "../modal";
 import { Button } from "../ui/button";
+import { Icon } from "../common/icon";
+import type { icons } from "lucide-react";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 
@@ -13,6 +15,11 @@ interface ReasonModalProps<T = unknown> {
   /** Recebe o item guardado em `openModal(id, item)`. */
   description?: string | ((item: T | undefined) => string | undefined);
   confirmLabel?: string;
+  /** Ícone ao lado do título (padrão dos modais do painel). */
+  icon?: keyof typeof icons;
+  /** Ícone do botão de confirmação. */
+  confirmIcon?: keyof typeof icons;
+  size?: "sm" | "md" | "lg" | "xl";
   destructive?: boolean;
   /** Mínimo de caracteres do motivo (a API exige 10 nas acções administrativas). */
   minLength?: number;
@@ -29,7 +36,7 @@ interface ReasonModalProps<T = unknown> {
  * e a acção só fecha o modal se tiver sucesso. A reautenticação (step-up) é pedida pelo cliente HTTP quando a API a exige.
  */
 export function ReasonModal<T = unknown>({
-  id, title, description, confirmLabel = "Confirmar", destructive, minLength = 10, withTicket, children, onConfirm,
+  id, title, description, confirmLabel = "Confirmar", icon, confirmIcon, size, destructive, minLength = 10, withTicket, children, onConfirm,
 }: ReasonModalProps<T>) {
   const { open, modalData, closeModal } = useModalStore();
   const isOpen = !!open[id];
@@ -64,7 +71,15 @@ export function ReasonModal<T = unknown>({
   return (
     <GlobalModal
       id={id}
-      title={typeof title === "function" ? title(item) : title}
+      size={size}
+      title={
+        icon ? (
+          <span className="flex items-center gap-2">
+            <Icon name={icon} className="size-5 text-primary" />
+            {typeof title === "function" ? title(item) : title}
+          </span>
+        ) : typeof title === "function" ? title(item) : title
+      }
       description={typeof description === "function" ? description(item) : description}
       footer={
         <div className="flex justify-end gap-2">
@@ -72,6 +87,7 @@ export function ReasonModal<T = unknown>({
             Cancelar
           </Button>
           <Button type="button" variant={destructive ? "destructive" : "default"} disabled={!valid} loading={busy} onClick={submit}>
+            {confirmIcon && <Icon name={confirmIcon} className="mr-2 size-4" />}
             {confirmLabel}
           </Button>
         </div>

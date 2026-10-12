@@ -45,6 +45,7 @@ export function UserActionModal() {
   return (
     <ReasonModal<Target>
       id={USER_ACTION_MODAL}
+      icon="UserCog"
       title={(t) => (t ? USER_ACTION_LABEL[t.action] : "Acção de suporte")}
       description={(t) => (t ? `${USER_ACTION_LABEL[t.action]}: ${t.user.full_name} (${t.user.email}). ${HINT[t.action] ?? ""}` : undefined)}
       withTicket

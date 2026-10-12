@@ -20,7 +20,6 @@ export interface OnboardInput {
   name: string;
   nif: string;
   subsystem: AdminSchool["subsystem"];
-  fiscalSeriesPrefix: string;
   medCode?: string;
   phone?: string;
   email?: string;
@@ -41,7 +40,7 @@ export const directoryService = {
   school: async (id: string): Promise<AdminSchoolDetail> => (await api.get(`/admin/schools/${id}`)).data,
   onboard: async (v: OnboardInput): Promise<OnboardResult> =>
     (await api.post("/admin/schools/onboard", {
-      name: v.name, nif: v.nif, subsystem: v.subsystem, fiscal_series_prefix: v.fiscalSeriesPrefix,
+      name: v.name, nif: v.nif, subsystem: v.subsystem,
       ...(v.medCode ? { med_code: v.medCode } : {}), ...(v.phone ? { phone: v.phone } : {}), ...(v.email ? { email: v.email } : {}), ...(v.address ? { address: v.address } : {}),
       ...(v.trialDays ? { trial_days: v.trialDays } : {}), titular: { email: v.titularEmail, full_name: v.titularName },
     })).data,

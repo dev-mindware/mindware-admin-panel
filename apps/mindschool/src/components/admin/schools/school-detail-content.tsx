@@ -88,7 +88,6 @@ export function SchoolDetailContent({ schoolId }: { schoolId: string }) {
             <Panel title="Dados da escola" icon="Building2">
               <dl className="grid grid-cols-2 gap-3">
                 <Field label="Estado">{school.status}</Field>
-                <Field label="Série fiscal">{school.fiscal_series_prefix}</Field>
                 <Field label="Telefone">{school.phone}</Field>
                 <Field label="Email">{school.email}</Field>
                 <Field label="Morada">{school.address}</Field>

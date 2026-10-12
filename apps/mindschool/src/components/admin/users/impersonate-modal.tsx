@@ -42,7 +42,7 @@ function ImpersonateDialog({ user }: { user: AdminUser }) {
   return (
     <GlobalModal
       id={IMPERSONATE_MODAL}
-      title="Personificar utilizador"
+      title={<span className="flex items-center gap-2"><Icon name="UserCog" className="size-5 text-primary" />Personificar utilizador</span>}
       description={`Vai ver o sistema como ${user.full_name} (${user.email}). O Titular da escola é avisado por email e tudo fica registado com o seu nome.`}
       footer={
         <div className="flex justify-end gap-2">
@@ -63,11 +63,11 @@ function ImpersonateDialog({ user }: { user: AdminUser }) {
       ) : (
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
-            <SelectField label="Escola" value={schoolId} options={schools.map((s) => ({ value: s.id, label: s.name }))} onValueChange={setSchoolId} />
-            <SelectField label="Duração" value={minutes} options={[5, 10, 15, 20, 30].map((m) => ({ value: String(m), label: `${m} minutos` }))} onValueChange={setMinutes} />
+            <SelectField label="Escola *" hint="A escola em que vai actuar." value={schoolId} options={schools.map((s) => ({ value: s.id, label: s.name }))} onValueChange={setSchoolId} />
+            <SelectField label="Duração *" hint="A sessão termina sozinha." value={minutes} options={[5, 10, 15, 20, 30].map((m) => ({ value: String(m), label: `${m} minutos` }))} onValueChange={setMinutes} />
           </div>
           <SelectField
-            label="Modo"
+            label="Modo *"
             value={mode}
             options={[
               { value: "leitura", label: "Só leitura (recomendado): consulta, não altera nada" },

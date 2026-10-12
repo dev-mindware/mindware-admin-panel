@@ -10,6 +10,7 @@ interface InputCurrencyProps
   extends Omit<NumericFormatProps, "onValueChange"> {
   label?: string;
   error?: string;
+  hint?: string;
   startIcon?: keyof typeof icons;
   endIcon?: keyof typeof icons;
   containerClassName?: string;
@@ -21,6 +22,7 @@ const InputCurrency = React.forwardRef<HTMLInputElement, InputCurrencyProps>(
     {
       label,
       error,
+      hint,
       startIcon,
       endIcon,
       containerClassName,
@@ -89,6 +91,7 @@ const InputCurrency = React.forwardRef<HTMLInputElement, InputCurrencyProps>(
         </div>
 
         {error && <AlertError errorMessage={error} />}
+        {!error && hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
       </div>
     );
   }

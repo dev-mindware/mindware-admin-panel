@@ -117,6 +117,7 @@ export function SchoolEntitlementsTab({ schoolId }: { schoolId: string }) {
 
       <ReasonModal
         id={MODAL}
+        icon="KeyRound"
         title="Nova excepção de direitos"
         description="Concede ou retira uma funcionalidade ou quota a esta escola, por tempo limitado."
         withTicket

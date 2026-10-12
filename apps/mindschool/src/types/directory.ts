@@ -35,7 +35,7 @@ export interface SchoolStats {
 export interface AdminSchoolDetail {
   school: {
     id: string; name: string; nif: string; med_code: string | null; subsystem: string; status: string; phone: string | null; email: string | null;
-    address: string | null; school_group_id: string | null; fiscal_series_prefix: string; created_at: string;
+    address: string | null; school_group_id: string | null; created_at: string;
   };
   subscription: {
     status: SubscriptionStatus; plan: { code: string; name: string }; ends_at: string | null; days_left: number | null; trial_ends_at: string | null;

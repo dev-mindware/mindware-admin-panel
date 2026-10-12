@@ -17,6 +17,8 @@ type InputType =
 type InputProps = {
   label?: string;
   error?: string;
+  /** Ajuda curta por baixo do campo (formato esperado, para que serve). Some quando há erro. */
+  hint?: string;
   startIcon?: keyof typeof icons;
   endIcon?: keyof typeof icons;
   className?: string;
@@ -25,7 +27,7 @@ type InputProps = {
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
-    { label, error, startIcon, endIcon, className, type = "text", onChange, value, name, ...props },
+    { label, error, hint, startIcon, endIcon, className, type = "text", onChange, value, name, ...props },
     ref
   ) => {
     const [showPassword, setShowPassword] = React.useState(false);
@@ -183,6 +185,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
 
         {error && <AlertError errorMessage={error} />}
+        {!error && hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
       </div>
     );
   }

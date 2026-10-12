@@ -23,9 +23,12 @@ function InviteFields({ onDraft }: { onDraft: (d: { email: string; name: string 
   });
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Input label="Nome completo *" value={d.name} onChange={(e) => setD({ ...d, name: e.target.value })} />
-      <Input label="Email *" type="email" value={d.email} onChange={(e) => setD({ ...d, email: e.target.value })} />
-      <p className="text-xs text-muted-foreground sm:col-span-2">Só se convidam contas novas, exclusivas da plataforma. O convite define a palavra-passe pelo link; o segundo factor é obrigatório no primeiro acesso.</p>
+      <Input label="Nome completo *" placeholder="Ex.: João Manuel Pereira" autoComplete="off" value={d.name} onChange={(e) => setD({ ...d, name: e.target.value })} />
+      <Input label="Email *" type="email" placeholder="nome@mindware.ao" autoComplete="off" value={d.email} onChange={(e) => setD({ ...d, email: e.target.value.trim().toLowerCase() })} />
+      <div className="flex items-start gap-2 rounded-md border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground sm:col-span-2">
+        <Icon name="MailCheck" className="mt-0.5 size-4 shrink-0 text-primary" />
+        <p>Só se convidam contas novas, exclusivas da plataforma. Não há palavra-passe a definir aqui: o convite traz um link para a pessoa criar a sua, e o segundo factor é obrigatório no primeiro acesso.</p>
+      </div>
     </div>
   );
 }
@@ -100,6 +103,7 @@ export function AdminsPageContent({ embedded }: { embedded?: boolean } = {}) {
 
       <ReasonModal
         id={INVITE_MODAL}
+        icon="UserPlus"
         title="Convidar administrador"
         description="Cria uma conta nova de administrador de sistema e envia o convite por email."
         confirmLabel="Convidar"
@@ -121,6 +125,7 @@ export function AdminsPageContent({ embedded }: { embedded?: boolean } = {}) {
 
       <ReasonModal<Row>
         id={REVOKE_MODAL}
+        icon="UserMinus"
         title="Revogar acesso de administrador"
         description={(a) => (a ? `${a.full_name} (${a.email}) deixa de poder administrar a plataforma e as sessões terminam de imediato.` : undefined)}
         destructive

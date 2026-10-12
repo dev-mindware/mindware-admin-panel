@@ -164,6 +164,7 @@ export function PlansPageContent() {
       <AddonFormModal />
       <ReasonModal<ToggleTarget>
         id={TOGGLE_MODAL}
+        icon="Package"
         title="Estado no catálogo"
         description={(t) => (t ? `${t.active ? "Desactivar" : "Activar"} «${t.name}»: ${t.active ? "deixa de poder ser comprado (as subscrições existentes mantêm-no)" : "volta a poder ser comprado"}.` : undefined)}
         destructive
