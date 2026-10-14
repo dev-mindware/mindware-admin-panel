@@ -3,9 +3,9 @@ import { PaginatedResponse } from "@workspace/types";
 import { Affiliate, AffiliateCreate, AffiliateStatus, AffiliateUpdate } from "@workspace/types/affiliate";
 
 export const affiliateService = {
-  listAffiliates: async (status?: AffiliateStatus, page = 1, size = 10) => {
+  listAffiliates: async (params?: { status?: string; search?: string; level?: string; certification?: string; partnerType?: string; createdFrom?: string; createdTo?: string; page?: number; limit?: number }) => {
     return api.get<PaginatedResponse<Affiliate>>("/admin/affiliates", {
-      params: { status, page, limit: size }
+      params,
     });
   },
   

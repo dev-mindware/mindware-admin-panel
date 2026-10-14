@@ -3,9 +3,9 @@ import { PaginatedResponse } from "@workspace/types";
 import { Commission, CommissionStatus, CommissionCreate } from "@workspace/types/affiliate";
 
 export const commissionService = {
-  listCommissions: async (status?: CommissionStatus, page = 1, size = 10) => {
+  listCommissions: async (params?: { status?: string; search?: string; affiliateId?: string; source?: string; createdFrom?: string; createdTo?: string; page?: number; limit?: number }) => {
     return api.get<PaginatedResponse<Commission>>("/admin/commissions", {
-      params: { status, page, limit: size }
+      params,
     });
   },
 

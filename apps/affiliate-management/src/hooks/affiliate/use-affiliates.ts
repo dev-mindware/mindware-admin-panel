@@ -4,14 +4,37 @@ import { Affiliate, AffiliateCreate, AffiliateStatus, AffiliateUpdate } from "@w
 import { usePagination } from "@workspace/hooks";
 import { api } from "@/services/api";
 
-export function useAffiliates(filters?: {
-  status?: AffiliateStatus;
-}) {
+export interface AffiliateFilters {
+  status?: AffiliateStatus | string;
+  search?: string;
+  level?: string;
+  certification?: string;
+  partnerType?: string;
+  createdFrom?: string;
+  createdTo?: string;
+}
+
+export function useAffiliates(filters?: AffiliateFilters) {
   return usePagination<Affiliate>({
     endpoint: "/admin/affiliates",
-    queryKey: ["affiliates", String(filters?.status || "all")],
+    queryKey: [
+      "affiliates",
+      filters?.status || "all",
+      filters?.search || "",
+      filters?.level || "all",
+      filters?.certification || "all",
+      filters?.partnerType || "all",
+      filters?.createdFrom || "",
+      filters?.createdTo || "",
+    ],
     queryParams: {
-      status: filters?.status || undefined,
+      status: filters?.status && filters.status !== "ALL" ? filters.status : undefined,
+      search: filters?.search?.trim() || undefined,
+      level: filters?.level && filters.level !== "ALL" ? filters.level : undefined,
+      certification: filters?.certification && filters.certification !== "ALL" ? filters.certification : undefined,
+      partnerType: filters?.partnerType && filters.partnerType !== "ALL" ? filters.partnerType : undefined,
+      createdFrom: filters?.createdFrom || undefined,
+      createdTo: filters?.createdTo || undefined,
     },
     api,
   });

@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { useWithdrawalRequests } from "@/hooks/affiliate";
 import {
   ButtonOnlyAction,
   Column,
-  FilterBar,
   GenericTable,
   ItemStatusBadge,
   ListSkeleton,
@@ -15,11 +13,24 @@ import { formatCurrency, formatDate } from "@workspace/utils";
 import { WithdrawalRequest, WithdrawalStatus } from "@workspace/types/affiliate";
 import { useModalStore } from "@workspace/hooks";
 import { MobileCard } from "@/components/shared/mobile-card";
+import { WithdrawalFilters } from "./withdrawal-filters";
+import { useWithdrawalFilters } from "@/hooks/affiliate/use-admin-filters";
 
 export function WithdrawalList() {
-  const [status, setStatus] = useState<WithdrawalStatus | undefined>();
+  const {
+    filters,
+    raw,
+    setSearch,
+    setStatus,
+    setCreatedFrom,
+    setCreatedTo,
+    clearFilters,
+    hasActiveFilters,
+    activeFiltersCount,
+  } = useWithdrawalFilters();
+
   const { data, isLoading, isError, refetch, page, total, totalPages, setPage, goToNextPage, goToPreviousPage } =
-    useWithdrawalRequests({ status });
+    useWithdrawalRequests(filters);
   const { openModal } = useModalStore();
 
   const buildActions = (item: WithdrawalRequest) => [
@@ -75,15 +86,19 @@ export function WithdrawalList() {
 
   return (
     <div className="space-y-4">
-      <FilterBar
-        label="Filtrar por estado"
-        value={status || ""}
-        onValueChange={(value) => setStatus((value || undefined) as WithdrawalStatus | undefined)}
-        options={[
-          { label: "Pendente", value: WithdrawalStatus.PENDING },
-          { label: "Aprovado", value: WithdrawalStatus.APPROVED },
-          { label: "Rejeitado", value: WithdrawalStatus.REJECTED },
-        ]}
+      <WithdrawalFilters
+        search={raw.search}
+        onSearchChange={setSearch}
+        status={raw.status}
+        onStatusChange={setStatus}
+        createdFrom={raw.createdFrom}
+        onCreatedFromChange={setCreatedFrom}
+        createdTo={raw.createdTo}
+        onCreatedToChange={setCreatedTo}
+        onClear={clearFilters}
+        hasActiveFilters={hasActiveFilters}
+        activeCount={activeFiltersCount}
+        total={total}
       />
 
       <div className="block space-y-3 sm:hidden">

@@ -4,14 +4,28 @@ import { WithdrawalRequest, WithdrawalStatus } from "@workspace/types/affiliate"
 import { usePagination } from "@workspace/hooks";
 import { api } from "@/services/api";
 
-export function useWithdrawalRequests(filters?: {
-  status?: WithdrawalStatus;
-}) {
+export interface WithdrawalFilters {
+  status?: WithdrawalStatus | string;
+  search?: string;
+  createdFrom?: string;
+  createdTo?: string;
+}
+
+export function useWithdrawalRequests(filters?: WithdrawalFilters) {
   return usePagination<WithdrawalRequest>({
     endpoint: "/admin/withdrawals",
-    queryKey: ["withdrawals", String(filters?.status || "all")],
+    queryKey: [
+      "withdrawals",
+      filters?.status || "all",
+      filters?.search || "",
+      filters?.createdFrom || "",
+      filters?.createdTo || "",
+    ],
     queryParams: {
-      status: filters?.status || undefined,
+      status: filters?.status && filters.status !== "ALL" ? filters.status : undefined,
+      search: filters?.search?.trim() || undefined,
+      createdFrom: filters?.createdFrom || undefined,
+      createdTo: filters?.createdTo || undefined,
     },
     api,
   });

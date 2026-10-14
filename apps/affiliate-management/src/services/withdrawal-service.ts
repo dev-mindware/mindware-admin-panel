@@ -3,9 +3,9 @@ import { PaginatedResponse } from "@workspace/types";
 import { WithdrawalRequest, WithdrawalStatus } from "@workspace/types/affiliate";
 
 export const withdrawalService = {
-  listWithdrawals: async (status?: WithdrawalStatus, page = 1, size = 10) => {
+  listWithdrawals: async (params?: { status?: string; search?: string; affiliateId?: string; createdFrom?: string; createdTo?: string; page?: number; limit?: number }) => {
     return api.get<PaginatedResponse<WithdrawalRequest>>("/admin/withdrawals", {
-      params: { status, page, limit: size }
+      params,
     });
   },
 

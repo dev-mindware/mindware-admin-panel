@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { useCommissions } from "@/hooks/affiliate";
 import {
   ButtonOnlyAction,
   Column,
-  FilterBar,
   GenericTable,
   ItemStatusBadge,
   ListSkeleton,
@@ -15,11 +13,25 @@ import { Commission, CommissionStatus } from "@workspace/types/affiliate";
 import { formatCurrency, formatDate } from "@workspace/utils";
 import { useModalStore } from "@workspace/hooks";
 import { MobileCard } from "@/components/shared/mobile-card";
+import { CommissionFilters } from "./commission-filters";
+import { useCommissionFilters } from "@/hooks/affiliate/use-admin-filters";
 
 export function CommissionList() {
-  const [status, setStatus] = useState<CommissionStatus | undefined>();
+  const {
+    filters,
+    raw,
+    setSearch,
+    setStatus,
+    setSource,
+    setCreatedFrom,
+    setCreatedTo,
+    clearFilters,
+    hasActiveFilters,
+    activeFiltersCount,
+  } = useCommissionFilters();
+
   const { data, isLoading, isError, refetch, page, total, totalPages, setPage, goToNextPage, goToPreviousPage } =
-    useCommissions({ status });
+    useCommissions(filters);
   const { openModal } = useModalStore();
 
   const buildActions = (item: Commission) => [
@@ -78,16 +90,21 @@ export function CommissionList() {
 
   return (
     <div className="space-y-4">
-      <FilterBar
-        label="Filtrar por estado"
-        value={status || ""}
-        onValueChange={(value) => setStatus((value || undefined) as CommissionStatus | undefined)}
-        options={[
-          { label: "Pendente", value: CommissionStatus.PENDING },
-          { label: "Aprovado", value: CommissionStatus.APPROVED },
-          { label: "Pago", value: CommissionStatus.PAID },
-          { label: "Rejeitado", value: CommissionStatus.REJECTED },
-        ]}
+      <CommissionFilters
+        search={raw.search}
+        onSearchChange={setSearch}
+        status={raw.status}
+        onStatusChange={setStatus}
+        source={raw.source}
+        onSourceChange={setSource}
+        createdFrom={raw.createdFrom}
+        onCreatedFromChange={setCreatedFrom}
+        createdTo={raw.createdTo}
+        onCreatedToChange={setCreatedTo}
+        onClear={clearFilters}
+        hasActiveFilters={hasActiveFilters}
+        activeCount={activeFiltersCount}
+        total={total}
       />
 
       <div className="block space-y-3 sm:hidden">

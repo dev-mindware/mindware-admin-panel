@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   useAffiliates,
   useApproveAffiliate,
@@ -11,7 +10,6 @@ import {
   Badge,
   ButtonOnlyAction,
   Column,
-  FilterBar,
   GenericTable,
   ItemStatusBadge,
   ListSkeleton,
@@ -25,6 +23,8 @@ import { toast } from "sonner";
 import { AffiliateFormModal } from "./affiliate-form-modal";
 import { DeleteAffiliateModal } from "./delete-affiliate-modal";
 import { MobileCard } from "@/components/shared/mobile-card";
+import { AffiliateFilters } from "./affiliate-filters";
+import { useAffiliateFilters } from "@/hooks/affiliate/use-admin-filters";
 
 const certificationLabels: Record<string, string> = {
   not_eligible: "Não elegível",
@@ -133,7 +133,21 @@ function buildAffiliateActions(
 }
 
 export function AffiliateList() {
-  const [status, setStatus] = useState<AffiliateStatus | undefined>();
+  const {
+    filters,
+    raw,
+    setSearch,
+    setStatus,
+    setLevel,
+    setCertification,
+    setPartnerType,
+    setCreatedFrom,
+    setCreatedTo,
+    clearFilters,
+    hasActiveFilters,
+    activeFiltersCount,
+  } = useAffiliateFilters();
+
   const {
     data,
     isLoading,
@@ -145,7 +159,7 @@ export function AffiliateList() {
     setPage,
     goToNextPage,
     goToPreviousPage,
-  } = useAffiliates({ status });
+  } = useAffiliates(filters);
 
   const { openModal } = useModalStore();
   const { mutate: updateStatus } = useUpdateAffiliateStatus();
@@ -229,17 +243,25 @@ export function AffiliateList() {
 
   return (
     <div className="space-y-4">
-      <FilterBar
-        label="Filtrar por estado"
-        value={status || ""}
-        onValueChange={(value) => setStatus((value || undefined) as AffiliateStatus | undefined)}
-        options={[
-          { label: "Pendente", value: AffiliateStatus.PENDING_APPROVAL },
-          { label: "Ativo", value: AffiliateStatus.ACTIVE },
-          { label: "Inativo", value: AffiliateStatus.INACTIVE },
-          { label: "Suspenso", value: AffiliateStatus.SUSPENDED },
-          { label: "Rejeitado", value: AffiliateStatus.REJECTED },
-        ]}
+      <AffiliateFilters
+        search={raw.search}
+        onSearchChange={setSearch}
+        status={raw.status}
+        onStatusChange={setStatus}
+        level={raw.level}
+        onLevelChange={setLevel}
+        certification={raw.certification}
+        onCertificationChange={setCertification}
+        partnerType={raw.partnerType}
+        onPartnerTypeChange={setPartnerType}
+        createdFrom={raw.createdFrom}
+        onCreatedFromChange={setCreatedFrom}
+        createdTo={raw.createdTo}
+        onCreatedToChange={setCreatedTo}
+        onClear={clearFilters}
+        hasActiveFilters={hasActiveFilters}
+        activeCount={activeFiltersCount}
+        total={total}
       />
 
       <div className="block space-y-3 sm:hidden">
