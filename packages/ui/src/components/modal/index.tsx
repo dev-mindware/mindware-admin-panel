@@ -49,8 +49,8 @@ export function GlobalModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => closeModal(id)}>
-      <DialogContent className={cn(SIZE_CLASSES[size], className)}>
-        <DialogHeader>
+      <DialogContent className={cn(SIZE_CLASSES[size], "max-h-[90vh] flex flex-col", className)}>
+        <DialogHeader className="shrink-0">
           {type === "success" && (
             <div className="flex justify-center mb-4">
               <IconCheckSucessfull />
@@ -74,8 +74,8 @@ export function GlobalModal({
             </DialogDescription>
           )}
         </DialogHeader>
-        <div className="py-4">{children}</div>
-        {footer && <div className="pt-4 border-t">{footer}</div>}
+        <div className="py-2 flex-1 overflow-y-auto min-h-0">{children}</div>
+        {footer && <div className="pt-4 border-t shrink-0">{footer}</div>}
       </DialogContent>
     </Dialog>
   );

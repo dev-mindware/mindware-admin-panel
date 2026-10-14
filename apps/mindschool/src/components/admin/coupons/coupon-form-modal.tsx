@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FormSection, Input, InputCurrency, ReasonModal, SelectField, Switch } from "@workspace/ui";
+import { FormSection, Icon, Input, InputCurrency, ReasonModal, SelectField, Switch, Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui";
 import { useCouponActions, usePlans } from "@/hooks/commerce/use-catalog";
 import { getApiErrorMessage } from "@/utils/api-error";
 import { ErrorMessage, SuccessMessage } from "@/utils/messages";
@@ -52,43 +52,60 @@ function CouponFields({ coupon, draftRef }: { coupon: AdminCoupon | undefined; d
 
   return (
     <div className="space-y-4">
-      <FormSection icon="Ticket" title="Código e desconto" description="O que a escola escreve na cotação e quanto poupa.">
-        <Input label="Código *" disabled={Boolean(coupon)} placeholder="Ex.: VOLTA26" hint={coupon ? "O código não se altera depois de criado." : "Letras, dígitos, - e _. Mínimo 3 caracteres."} className="font-mono uppercase tracking-wider" value={draft.code} onChange={(e) => set({ code: e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, "") })} />
-        <Input label="Descrição" placeholder="Ex.: Campanha de regresso às aulas" hint="Só para uso interno." value={draft.description} onChange={(e) => set({ description: e.target.value })} />
-        <SelectField
-          label="Tipo de desconto *"
-          value={draft.type}
-          options={[{ value: "percentage", label: "Percentagem (máx. 90%)" }, { value: "fixed_amount", label: "Valor fixo em Kz" }]}
-          onValueChange={(v) => set({ type: v as Draft["type"], value: "" })}
-        />
-        {draft.type === "percentage" ? (
-          <Input label="Desconto em % *" inputMode="decimal" placeholder="Ex.: 15" hint="Entre 1 e 90." endIcon="Percent" value={draft.value} onChange={(e) => set({ value: e.target.value.replace(/[^\d.]/g, "") })} />
-        ) : (
-          <InputCurrency label="Desconto em Kz *" placeholder="Ex.: 5.000,00" suffix=" Kz" hint="Valor abatido ao total da ordem." value={draft.value} onValueChange={(n) => set({ value: n ? String(n) : "" })} />
-        )}
-      </FormSection>
+      <Tabs defaultValue="desconto" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-2">
+          <TabsTrigger value="desconto" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+            <Icon name="Ticket" className="size-4 shrink-0" />
+            <span>1. Código & Desconto</span>
+          </TabsTrigger>
+          <TabsTrigger value="regras" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+            <Icon name="SlidersHorizontal" className="size-4 shrink-0" />
+            <span>2. Regras & Validade</span>
+          </TabsTrigger>
+        </TabsList>
 
-      <FormSection icon="SlidersHorizontal" title="Regras de utilização" description="Quando e quantas vezes o cupão pode ser usado.">
-        <Input label="Utilizações por escola *" inputMode="numeric" placeholder="Ex.: 1" hint="Quantas vezes a mesma escola o pode usar." value={draft.perSchool} onChange={(e) => set({ perSchool: digits(e.target.value) })} />
-        <Input label="Máximo de utilizações (total)" inputMode="numeric" placeholder="Sem limite" hint="Esgota quando chega a este número." value={draft.total} onChange={(e) => set({ total: digits(e.target.value) })} />
-        <Input label="Período mínimo (meses)" inputMode="numeric" placeholder="Qualquer período" hint="Só vale para ordens com pelo menos estes meses." value={draft.minMonths} onChange={(e) => set({ minMonths: digits(e.target.value) })} />
-        <SelectField
-          label="Plano aplicável"
-          value={draft.plan || "todos"}
-          options={[{ value: "todos", label: "Todos os planos" }, ...(plans.data ?? []).map((p) => ({ value: p.code, label: p.name }))]}
-          onValueChange={(v) => set({ plan: v === "todos" ? "" : v })}
-        />
-        <Input type="date" label="Começa em" hint="Vazio = já pode ser usado." value={draft.starts} onChange={(e) => set({ starts: e.target.value })} />
-        <Input type="date" label="Termina em (inclusive)" hint="Vazio = nunca expira." value={draft.ends} onChange={(e) => set({ ends: e.target.value })} />
-      </FormSection>
+        <TabsContent value="desconto" className="mt-2 focus-visible:outline-none">
+          <FormSection icon="Ticket" title="Código e desconto" description="O que a escola escreve na cotação e quanto poupa.">
+            <Input label="Código *" disabled={Boolean(coupon)} placeholder="Ex.: VOLTA26" hint={coupon ? "O código não se altera depois de criado." : "Letras, dígitos, - e _. Mínimo 3 caracteres."} className="font-mono uppercase tracking-wider" value={draft.code} onChange={(e) => set({ code: e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, "") })} />
+            <Input label="Descrição" placeholder="Ex.: Campanha de regresso às aulas" hint="Só para uso interno." value={draft.description} onChange={(e) => set({ description: e.target.value })} />
+            <SelectField
+              label="Tipo de desconto *"
+              value={draft.type}
+              options={[{ value: "percentage", label: "Percentagem (máx. 90%)" }, { value: "fixed_amount", label: "Valor fixo em Kz" }]}
+              onValueChange={(v) => set({ type: v as Draft["type"], value: "" })}
+            />
+            {draft.type === "percentage" ? (
+              <Input label="Desconto em % *" inputMode="decimal" placeholder="Ex.: 15" hint="Entre 1 e 90." endIcon="Percent" value={draft.value} onChange={(e) => set({ value: e.target.value.replace(/[^\d.]/g, "") })} />
+            ) : (
+              <InputCurrency label="Desconto em Kz *" placeholder="Ex.: 5.000,00" suffix=" Kz" hint="Valor abatido ao total da ordem." value={draft.value} onValueChange={(n) => set({ value: n ? String(n) : "" })} />
+            )}
+          </FormSection>
+        </TabsContent>
 
-      <div className="flex items-center justify-between gap-4 rounded-lg border bg-muted/20 p-3">
-        <div>
-          <p className="text-sm font-semibold">Cupão activo</p>
-          <p className="text-xs text-muted-foreground">Se desactivado, a cotação recusa este código. O desconto nunca passa de 90% do total e só se gasta quando a ordem é aprovada.</p>
-        </div>
-        <Switch checked={draft.active} onCheckedChange={(c) => set({ active: c })} />
-      </div>
+        <TabsContent value="regras" className="mt-2 space-y-4 focus-visible:outline-none">
+          <FormSection icon="SlidersHorizontal" title="Regras de utilização" description="Quando e quantas vezes o cupão pode ser usado.">
+            <Input label="Utilizações por escola *" inputMode="numeric" placeholder="Ex.: 1" hint="Quantas vezes a mesma escola o pode usar." value={draft.perSchool} onChange={(e) => set({ perSchool: digits(e.target.value) })} />
+            <Input label="Máximo de utilizações (total)" inputMode="numeric" placeholder="Sem limite" hint="Esgota quando chega a este número." value={draft.total} onChange={(e) => set({ total: digits(e.target.value) })} />
+            <Input label="Período mínimo (meses)" inputMode="numeric" placeholder="Qualquer período" hint="Só vale para ordens com pelo menos estes meses." value={draft.minMonths} onChange={(e) => set({ minMonths: digits(e.target.value) })} />
+            <SelectField
+              label="Plano aplicável"
+              value={draft.plan || "todos"}
+              options={[{ value: "todos", label: "Todos os planos" }, ...(plans.data ?? []).map((p) => ({ value: p.code, label: p.name }))]}
+              onValueChange={(v) => set({ plan: v === "todos" ? "" : v })}
+            />
+            <Input type="date" label="Começa em" hint="Vazio = já pode ser usado." value={draft.starts} onChange={(e) => set({ starts: e.target.value })} />
+            <Input type="date" label="Termina em (inclusive)" hint="Vazio = nunca expira." value={draft.ends} onChange={(e) => set({ ends: e.target.value })} />
+          </FormSection>
+
+          <div className="flex items-center justify-between gap-4 rounded-lg border bg-muted/20 p-3">
+            <div>
+              <p className="text-sm font-semibold">Cupão activo</p>
+              <p className="text-xs text-muted-foreground">Se desactivado, a cotação recusa este código. O desconto nunca passa de 90% do total e só se gasta quando a ordem é aprovada.</p>
+            </div>
+            <Switch checked={draft.active} onCheckedChange={(c) => set({ active: c })} />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

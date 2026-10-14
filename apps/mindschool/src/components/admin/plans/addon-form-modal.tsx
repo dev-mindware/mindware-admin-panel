@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Checkbox, FormSection, Input, InputCurrency, ReasonModal } from "@workspace/ui";
+import { Checkbox, FormSection, Icon, Input, InputCurrency, ReasonModal, Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui";
 import { useAddons, useCatalogActions, useCatalogMeta } from "@/hooks/commerce/use-catalog";
 import { getApiErrorMessage } from "@/utils/api-error";
 import { ErrorMessage, SuccessMessage } from "@/utils/messages";
@@ -60,31 +60,56 @@ function AddonFields({ addon, draftRef }: { addon: AdminAddon | undefined; draft
 
   return (
     <div className="space-y-4">
-      <FormSection icon="Puzzle" title="Identificação e preço" description="Um extra que a escola contrata por cima do plano.">
-        <Input label="Código *" disabled={Boolean(addon)} placeholder="Ex.: alunos_extra" hint={addon ? "O código não se altera depois de criado." : "Identificador técnico, em minúsculas. Não se muda depois."} className="font-mono lowercase" value={draft.code} onChange={(e) => set({ code: e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, "") })} />
-        <Input label="Nome *" placeholder="Ex.: Pacote de 100 alunos extra" hint="O nome que a escola vê." value={draft.name} onChange={(e) => set({ name: e.target.value })} />
-        <InputCurrency label="Preço mensal em Kz *" placeholder="Ex.: 4.500,00" suffix=" Kz" hint="Somado à mensalidade do plano." value={draft.price} onValueChange={(n) => set({ price: n ? String(n) : "" })} />
-        <Input label="Plano mínimo (posição)" inputMode="numeric" placeholder="Qualquer plano" hint="Só planos com esta posição ou superior o podem contratar." value={draft.minRank} onChange={(e) => set({ minRank: e.target.value.replace(/\D/g, "") })} />
-      </FormSection>
+      <Tabs defaultValue="geral" className="w-full">
+        <TabsList className={`grid w-full mb-2 ${others.length > 0 ? "grid-cols-3" : "grid-cols-2"}`}>
+          <TabsTrigger value="geral" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+            <Icon name="Puzzle" className="size-4 shrink-0" />
+            <span>1. Geral & Preço</span>
+          </TabsTrigger>
+          <TabsTrigger value="concessoes" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+            <Icon name="Sparkles" className="size-4 shrink-0" />
+            <span>2. Concessões</span>
+          </TabsTrigger>
+          {others.length > 0 && (
+            <TabsTrigger value="compatibilidade" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+              <Icon name="Link2" className="size-4 shrink-0" />
+              <span>3. Compatibilidade</span>
+            </TabsTrigger>
+          )}
+        </TabsList>
 
-      <FormSection icon="Sparkles" title="O que concede" description="Funcionalidades abertas e quotas somadas ao limite do plano." columns={1}>
-        <Pick title="Funcionalidades que concede" options={(meta.data?.features ?? []).map((f) => ({ value: f.key, label: f.key }))} value={draft.grants} onChange={(grants) => set({ grants })} />
-        <div>
-          <p className="mb-1.5 text-sm font-medium">Quota que acrescenta</p>
-          <div className="grid gap-3 rounded-lg border bg-background p-3 sm:grid-cols-2">
-            {(meta.data?.quotas ?? []).map((q) => (
-              <Input key={q.key} label={`+ ${q.label}`} inputMode="numeric" placeholder="0" value={draft.limitGrants[q.key] ?? ""} onChange={(e) => set({ limitGrants: { ...draft.limitGrants, [q.key]: e.target.value.replace(/\D/g, "") } })} />
-            ))}
-          </div>
-        </div>
-      </FormSection>
+        <TabsContent value="geral" className="mt-2 focus-visible:outline-none">
+          <FormSection icon="Puzzle" title="Identificação e preço" description="Um extra que a escola contrata por cima do plano.">
+            <Input label="Código *" disabled={Boolean(addon)} placeholder="Ex.: alunos_extra" hint={addon ? "O código não se altera depois de criado." : "Identificador técnico, em minúsculas. Não se muda depois."} className="font-mono lowercase" value={draft.code} onChange={(e) => set({ code: e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, "") })} />
+            <Input label="Nome *" placeholder="Ex.: Pacote de 100 alunos extra" hint="O nome que a escola vê." value={draft.name} onChange={(e) => set({ name: e.target.value })} />
+            <InputCurrency label="Preço mensal em Kz *" placeholder="Ex.: 4.500,00" suffix=" Kz" hint="Somado à mensalidade do plano." value={draft.price} onValueChange={(n) => set({ price: n ? String(n) : "" })} />
+            <Input label="Plano mínimo (posição)" inputMode="numeric" placeholder="Qualquer plano" hint="Só planos com esta posição ou superior o podem contratar." value={draft.minRank} onChange={(e) => set({ minRank: e.target.value.replace(/\D/g, "") })} />
+          </FormSection>
+        </TabsContent>
 
-      {(others.length > 0) && (
-        <FormSection icon="Link2" title="Compatibilidade" description="Relação com os outros add-ons." columns={1}>
-          <Pick title="Incompatível com" options={others} value={draft.conflicts} onChange={(conflicts) => set({ conflicts })} />
-          <Pick title="Requer" options={others} value={draft.requires} onChange={(requires) => set({ requires })} />
-        </FormSection>
-      )}
+        <TabsContent value="concessoes" className="mt-2 focus-visible:outline-none">
+          <FormSection icon="Sparkles" title="O que concede" description="Funcionalidades abertas e quotas somadas ao limite do plano." columns={1}>
+            <Pick title="Funcionalidades que concede" options={(meta.data?.features ?? []).map((f) => ({ value: f.key, label: f.key }))} value={draft.grants} onChange={(grants) => set({ grants })} />
+            <div>
+              <p className="mb-1.5 text-sm font-medium">Quota que acrescenta</p>
+              <div className="grid gap-3 rounded-lg border bg-background p-3 sm:grid-cols-2">
+                {(meta.data?.quotas ?? []).map((q) => (
+                  <Input key={q.key} label={`+ ${q.label}`} inputMode="numeric" placeholder="0" value={draft.limitGrants[q.key] ?? ""} onChange={(e) => set({ limitGrants: { ...draft.limitGrants, [q.key]: e.target.value.replace(/\D/g, "") } })} />
+                ))}
+              </div>
+            </div>
+          </FormSection>
+        </TabsContent>
+
+        {others.length > 0 && (
+          <TabsContent value="compatibilidade" className="mt-2 focus-visible:outline-none">
+            <FormSection icon="Link2" title="Compatibilidade" description="Relação com os outros add-ons." columns={1}>
+              <Pick title="Incompatível com" options={others} value={draft.conflicts} onChange={(conflicts) => set({ conflicts })} />
+              <Pick title="Requer" options={others} value={draft.requires} onChange={(requires) => set({ requires })} />
+            </FormSection>
+          </TabsContent>
+        )}
+      </Tabs>
     </div>
   );
 }

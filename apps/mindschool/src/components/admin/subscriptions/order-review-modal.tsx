@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button, GlobalModal, Icon, Input, InputCurrency, StatusBadge, Textarea, ToneBadge } from "@workspace/ui";
+import { Button, GlobalModal, Icon, Input, InputCurrency, StatusBadge, Tabs, TabsContent, TabsList, TabsTrigger, Textarea, ToneBadge } from "@workspace/ui";
 import { useModalStore } from "@workspace/hooks";
 import { ORDER_KIND, ORDER_STATUS } from "@/constants/statuses";
 import { useOrder, useOrderActions, useOrderTimeline } from "@/hooks/commerce/use-subscriptions";
@@ -129,62 +129,77 @@ function ReviewDialog({ id }: { id: string }) {
       {order.isLoading || !o ? (
         <p className="py-8 text-center text-sm text-muted-foreground">{order.isError ? "Não foi possível carregar a ordem." : "A carregar…"}</p>
       ) : (
-        <div className="space-y-5">
-          <div className="grid gap-5 md:grid-cols-2">
-            <div>
-              <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Ordem</h4>
-              <Row label="Estado"><StatusBadge status={o.status} map={ORDER_STATUS} /></Row>
-              <Row label="Tipo">{ORDER_KIND[o.kind] ?? o.kind}</Row>
-              <Row label="Plano">{o.plan.name}</Row>
-              <Row label="Add-ons">{o.addon_codes.length ? o.addon_codes.join(", ") : "—"}</Row>
-              <Row label="Período">{o.period_months} {o.period_months === 1 ? "mês" : "meses"}</Row>
-              {Number(o.discount_amount) > 0 && <Row label="Desconto (cupão)"><ToneBadge tone="success" label={`− ${kz(o.discount_amount)}`} /></Row>}
-              <Row label="Valor a pagar"><span className="text-base text-primary">{kz(o.total_amount)}</span></Row>
-              <Row label="Criada">{dateTime(o.created_at)}</Row>
+        <Tabs defaultValue="decisao" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-3">
+            <TabsTrigger value="decisao" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+              <Icon name="ReceiptText" className="size-4 shrink-0" />
+              <span>Ordem & Decisão</span>
+            </TabsTrigger>
+            <TabsTrigger value="historico" className="flex items-center justify-center gap-1.5 text-xs sm:text-sm">
+              <Icon name="History" className="size-4 shrink-0" />
+              <span>Histórico ({timeline.data?.length ?? 0})</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="decisao" className="space-y-4 focus-visible:outline-none">
+            <div className="grid gap-5 md:grid-cols-2">
+              <div>
+                <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Ordem</h4>
+                <Row label="Estado"><StatusBadge status={o.status} map={ORDER_STATUS} /></Row>
+                <Row label="Tipo">{ORDER_KIND[o.kind] ?? o.kind}</Row>
+                <Row label="Plano">{o.plan.name}</Row>
+                <Row label="Add-ons">{o.addon_codes.length ? o.addon_codes.join(", ") : "—"}</Row>
+                <Row label="Período">{o.period_months} {o.period_months === 1 ? "mês" : "meses"}</Row>
+                {Number(o.discount_amount) > 0 && <Row label="Desconto (cupão)"><ToneBadge tone="success" label={`− ${kz(o.discount_amount)}`} /></Row>}
+                <Row label="Valor a pagar"><span className="text-base text-primary">{kz(o.total_amount)}</span></Row>
+                <Row label="Criada">{dateTime(o.created_at)}</Row>
+              </div>
+
+              <div>
+                <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Comprovativo</h4>
+                {o.proofs.filter((p) => p.is_current).map((p) => (
+                  <div key={p.id} className="space-y-2 rounded-lg border bg-muted/30 p-3 text-sm">
+                    <p className="flex items-center gap-2 font-medium"><Icon name="FileText" className="size-4 text-primary" />{p.file_name}</p>
+                    <p className="text-xs text-muted-foreground">{(p.size_bytes / 1024).toFixed(0)} KB · enviado {dateTime(p.uploaded_at)}</p>
+                    <p className="break-all font-mono text-[10px] text-muted-foreground">SHA-256 {p.sha256.slice(0, 24)}…</p>
+                    <Button size="sm" className="gap-2" onClick={() => openModal(PROOF_MODAL, o.id)}><Icon name="Eye" className="size-4" />Ver comprovativo</Button>
+                  </div>
+                ))}
+                {!o.proofs.some((p) => p.is_current) && <p className="rounded-lg border bg-muted/30 p-3 text-sm text-muted-foreground">Esta ordem ainda não tem comprovativo.</p>}
+                {o.reviewer_id && (
+                  <p className="mt-3 text-xs text-muted-foreground">Revisão iniciada {dateTime(o.review_started_at)}. {o.status === "under_review" && "Qualquer administrador pode libertar a ordem se ficar parada."}</p>
+                )}
+              </div>
             </div>
 
-            <div>
-              <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Comprovativo</h4>
-              {o.proofs.filter((p) => p.is_current).map((p) => (
-                <div key={p.id} className="space-y-2 rounded-lg border bg-muted/30 p-3 text-sm">
-                  <p className="flex items-center gap-2 font-medium"><Icon name="FileText" className="size-4 text-primary" />{p.file_name}</p>
-                  <p className="text-xs text-muted-foreground">{(p.size_bytes / 1024).toFixed(0)} KB · enviado {dateTime(p.uploaded_at)}</p>
-                  <p className="break-all font-mono text-[10px] text-muted-foreground">SHA-256 {p.sha256.slice(0, 24)}…</p>
-                  <Button size="sm" className="gap-2" onClick={() => openModal(PROOF_MODAL, o.id)}><Icon name="Eye" className="size-4" />Ver comprovativo</Button>
-                </div>
-              ))}
-              {!o.proofs.some((p) => p.is_current) && <p className="rounded-lg border bg-muted/30 p-3 text-sm text-muted-foreground">Esta ordem ainda não tem comprovativo.</p>}
-              {o.reviewer_id && (
-                <p className="mt-3 text-xs text-muted-foreground">Revisão iniciada {dateTime(o.review_started_at)}. {o.status === "under_review" && "Qualquer administrador pode libertar a ordem se ficar parada."}</p>
-              )}
-            </div>
-          </div>
+            {reviewable && needsStart && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4">
+                <p className="text-sm text-muted-foreground">Para decidir, pegue primeiro na revisão: assim mais ninguém decide esta ordem ao mesmo tempo.</p>
+                <Button loading={actions.start.isPending} className="gap-2" onClick={() => actions.start.mutate(o.id, { onSuccess: () => SuccessMessage("Revisão iniciada: a ordem ficou consigo."), onError: (e) => fail(e, "Não foi possível iniciar a revisão.") })}>
+                  <Icon name="Play" className="size-4" />
+                  Iniciar revisão
+                </Button>
+              </div>
+            )}
+            {reviewable && !needsStart && <DecisionForm key={`${o.id}:${o.status}`} o={o} onDone={() => closeModal(ORDER_REVIEW_MODAL)} />}
+          </TabsContent>
 
-          {reviewable && needsStart && (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4">
-              <p className="text-sm text-muted-foreground">Para decidir, pegue primeiro na revisão: assim mais ninguém decide esta ordem ao mesmo tempo.</p>
-              <Button loading={actions.start.isPending} className="gap-2" onClick={() => actions.start.mutate(o.id, { onSuccess: () => SuccessMessage("Revisão iniciada: a ordem ficou consigo."), onError: (e) => fail(e, "Não foi possível iniciar a revisão.") })}>
-                <Icon name="Play" className="size-4" />
-                Iniciar revisão
-              </Button>
+          <TabsContent value="historico" className="focus-visible:outline-none">
+            <div className="max-h-80 overflow-y-auto p-2">
+              <h4 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Histórico de Eventos</h4>
+              <ol className="space-y-3 border-l pl-4">
+                {(timeline.data ?? []).map((e, i) => (
+                  <li key={`${e.at}-${i}`} className="relative text-sm">
+                    <span className="absolute -left-[21px] top-1.5 size-2 rounded-full bg-primary" />
+                    <p className="font-medium">{TIMELINE_LABEL[e.type] ?? e.type}{e.actor ? <span className="font-normal text-muted-foreground"> · {e.actor}</span> : null}</p>
+                    <p className="text-xs text-muted-foreground">{dateTime(e.at)}{typeof e.detail?.reason === "string" ? ` · ${e.detail.reason}` : ""}</p>
+                  </li>
+                ))}
+                {timeline.data?.length === 0 && <li className="text-xs text-muted-foreground">Sem eventos registados.</li>}
+              </ol>
             </div>
-          )}
-          {reviewable && !needsStart && <DecisionForm key={`${o.id}:${o.status}`} o={o} onDone={() => closeModal(ORDER_REVIEW_MODAL)} />}
-
-          <div>
-            <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Histórico</h4>
-            <ol className="space-y-2 border-l pl-4">
-              {(timeline.data ?? []).map((e, i) => (
-                <li key={`${e.at}-${i}`} className="relative text-sm">
-                  <span className="absolute -left-[21px] top-1.5 size-2 rounded-full bg-primary" />
-                  <p className="font-medium">{TIMELINE_LABEL[e.type] ?? e.type}{e.actor ? <span className="font-normal text-muted-foreground"> · {e.actor}</span> : null}</p>
-                  <p className="text-xs text-muted-foreground">{dateTime(e.at)}{typeof e.detail?.reason === "string" ? ` · ${e.detail.reason}` : ""}</p>
-                </li>
-              ))}
-              {timeline.data?.length === 0 && <li className="text-xs text-muted-foreground">Sem eventos.</li>}
-            </ol>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
       )}
     </GlobalModal>
   );
