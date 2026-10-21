@@ -204,9 +204,33 @@ export interface PlatformOverview {
   };
 }
 
+export interface R2ClassMetrics {
+  payload_size: number;
+  object_count: number;
+}
+
+export interface R2MetricsData {
+  status: "ok" | "unconfigured" | "error" | "disabled";
+  last_updated?: string;
+  quota_bytes?: number;
+  standard?: R2ClassMetrics;
+  infrequent_access?: R2ClassMetrics;
+  total_bytes: number;
+  total_objects: number;
+  reconciliation?: {
+    db_total_bytes: number;
+    db_total_objects: number;
+    diff_bytes: number;
+    diff_objects: number;
+    in_sync: boolean;
+  };
+  error?: string;
+}
+
 export interface StorageStats {
   driver: string;
   data: Array<{ domain: string; status: string; objects: number; bytes: number }>;
+  r2?: R2MetricsData;
 }
 
 export interface EmailLogRow {

@@ -41,7 +41,15 @@ export function useOutbox() {
   };
 }
 export function useStorage() {
-  return useQuery({ queryKey: ["storage"], queryFn: operationsService.storage, staleTime: 60_000, retry: false });
+  const qc = useQueryClient();
+  const query = useQuery({ queryKey: ["storage"], queryFn: () => operationsService.storage(false), staleTime: 60_000, retry: false });
+  const sync = useMutation({
+    mutationFn: () => operationsService.storage(true),
+    onSuccess: (data) => {
+      qc.setQueryData(["storage"], data);
+    },
+  });
+  return Object.assign(query, { sync });
 }
 export function useOpsActions() {
   const qc = useQueryClient();

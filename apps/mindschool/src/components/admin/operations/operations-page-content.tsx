@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Button, ConfirmModal, GenericTable, Icon, BarListPanel, MetricGrid, Panel, RadarPanel, TitleList, ToneBadge, type Column } from "@workspace/ui";
+import { Badge, Button, ConfirmModal, GenericTable, Icon, BarListPanel, MetricGrid, Panel, Progress, RadarPanel, TitleList, ToneBadge, type Column } from "@workspace/ui";
 import { useModalStore } from "@workspace/hooks";
 import { useState } from "react";
 import { PermissionGate } from "@/components/admin/shared/permission-gate";
@@ -56,6 +56,9 @@ export function OperationsPageContent() {
   const failedJobs = (queues.data?.data ?? []).reduce((a, x) => a + x.failed, 0);
   const objects = (storage.data?.data ?? []).filter((x) => x.status === "disponivel");
   const totalBytes = objects.reduce((a, x) => a + x.bytes, 0);
+  const r2 = storage.data?.r2;
+  const quotaTotal = r2?.quota_bytes ?? 10 * 1024 * 1024 * 1024;
+  const quotaPct = r2?.total_bytes ? Math.min(100, Math.round((r2.total_bytes / quotaTotal) * 100)) : 0;
   const deadPage = useLocalPage(dead.data ?? [], 8);
 
   const queueColumns: Column<QueueStat & { id: string }>[] = [
@@ -144,19 +147,111 @@ export function OperationsPageContent() {
       </Panel>
 
       <Panel
-        title="Armazenamento"
-        description={`${mb(totalBytes)} em ${objects.reduce((a, x) => a + x.objects, 0)} ficheiro(s) · ${storage.data?.driver ?? "—"}. Inclui a limpeza dos expirados.`}
+        title="Armazenamento & Cloudflare R2"
+        description={`${mb(r2?.status === "ok" ? r2.total_bytes : totalBytes)} em ${r2?.status === "ok" ? r2.total_objects : objects.reduce((a, x) => a + x.objects, 0)} ficheiro(s) · Driver: ${storage.data?.driver ?? "—"}`}
         icon="HardDrive"
         action={
           <PermissionGate permission="platform:storage_manage">
-            <div className="flex gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5"
+                loading={storage.sync.isPending}
+                onClick={() =>
+                  storage.sync.mutate(undefined, {
+                    onSuccess: () => SuccessMessage("Métricas do Cloudflare R2 actualizadas."),
+                    onError: (e) => ErrorMessage(getApiErrorMessage(e, "Não foi possível sincronizar o R2.")),
+                  })
+                }
+              >
+                <Icon name="RefreshCw" className="size-3.5" />
+                Sincronizar R2
+              </Button>
               <Button size="sm" variant="outline" onClick={() => openModal(BACKFILL_MODAL)}>Migrar legado</Button>
               <Button size="sm" variant="outline" onClick={() => openModal(PURGE_MODAL)}>Limpar expirados</Button>
             </div>
           </PermissionGate>
         }
       >
-        {(storage.data?.data ?? []).length === 0 ? <p className="py-4 text-center text-sm text-muted-foreground">Sem ficheiros.</p> : (
+        {/* Monitorização Cloudflare R2 */}
+        <div className="mb-6 rounded-lg border bg-card p-4">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2 border-b pb-3">
+            <div className="flex items-center gap-2">
+              <Icon name="Cloud" className="size-4 text-primary" />
+              <span className="text-sm font-semibold">Cloudflare R2 Bucket</span>
+              {r2?.status === "ok" && <ToneBadge tone="success" label="Conectado" />}
+              {r2?.status === "unconfigured" && <ToneBadge tone="neutral" label="Não configurado" />}
+              {r2?.status === "error" && <ToneBadge tone="danger" label="Erro de ligação" />}
+            </div>
+            {r2?.last_updated && (
+              <span className="text-xs text-muted-foreground">
+                Última leitura: {dateTime(r2.last_updated)}
+              </span>
+            )}
+          </div>
+
+          {r2?.status === "ok" ? (
+            <div className="flex flex-col gap-4">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-md border bg-muted/20 p-3">
+                  <p className="text-xs text-muted-foreground">Armazenamento R2 Real</p>
+                  <p className="text-lg font-bold tracking-tight">{mb(r2.total_bytes)}</p>
+                  <p className="text-[11px] text-muted-foreground">{quotaPct}% de {mb(quotaTotal)}</p>
+                </div>
+                <div className="rounded-md border bg-muted/20 p-3">
+                  <p className="text-xs text-muted-foreground">Ficheiros no Bucket</p>
+                  <p className="text-lg font-bold tracking-tight">{r2.total_objects.toLocaleString()}</p>
+                  <p className="text-[11px] text-muted-foreground">Total de objectos R2</p>
+                </div>
+                <div className="rounded-md border bg-muted/20 p-3">
+                  <p className="text-xs text-muted-foreground">Reconciliação com BD</p>
+                  <div className="mt-1 flex items-center gap-1.5">
+                    {r2.reconciliation?.in_sync ? (
+                      <ToneBadge tone="success" label="100% Sincronizado" />
+                    ) : (
+                      <ToneBadge
+                        tone="warning"
+                        label={`${r2.reconciliation?.diff_objects ? `${r2.reconciliation.diff_objects > 0 ? "+" : ""}${r2.reconciliation.diff_objects} obj` : `${mb(Math.abs(r2.reconciliation?.diff_bytes ?? 0))} diff`}`}
+                      />
+                    )}
+                  </div>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    BD: {r2.reconciliation?.db_total_objects ?? objects.reduce((a, x) => a + x.objects, 0)} obj ({mb(r2.reconciliation?.db_total_bytes ?? totalBytes)})
+                  </p>
+                </div>
+                <div className="rounded-md border bg-muted/20 p-3">
+                  <p className="text-xs text-muted-foreground">Classes de Armazenamento</p>
+                  <p className="text-xs font-medium">Standard: {mb(r2.standard?.payload_size ?? 0)} <span className="text-[10px] text-muted-foreground">({r2.standard?.object_count ?? 0})</span></p>
+                  <p className="text-xs font-medium">Infrequent: {mb(r2.infrequent_access?.payload_size ?? 0)} <span className="text-[10px] text-muted-foreground">({r2.infrequent_access?.object_count ?? 0})</span></p>
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-1 flex justify-between text-xs text-muted-foreground">
+                  <span>Quota de armazenamento do bucket</span>
+                  <span>{quotaPct}% ({mb(r2.total_bytes)} / {mb(quotaTotal)})</span>
+                </div>
+                <Progress value={quotaPct} className="h-2" />
+              </div>
+            </div>
+          ) : r2?.status === "error" ? (
+            <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
+              <p className="font-medium">Falha na consulta à API Cloudflare R2:</p>
+              <p className="mt-0.5 text-muted-foreground">{r2.error}</p>
+            </div>
+          ) : (
+            <div className="rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
+              <p className="font-medium text-foreground">Monitorização R2 em modo passivo</p>
+              <p className="mt-0.5">
+                Para activar a leitura em tempo real directamente da Cloudflare, defina a variável <code className="rounded bg-muted px-1 py-0.5 font-mono text-[11px]">R2_METRICS_TOKEN</code> (ou <code className="rounded bg-muted px-1 py-0.5 font-mono text-[11px]">CLOUDFLARE_API_TOKEN</code>) com permissão de leitura sobre o R2 no <code className="rounded bg-muted px-1 py-0.5 font-mono text-[11px]">.env</code> da API.
+              </p>
+            </div>
+          )}
+        </div>
+
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ficheiros por Domínio e Estado</p>
+        {(storage.data?.data ?? []).length === 0 ? <p className="py-4 text-center text-sm text-muted-foreground">Sem ficheiros registados.</p> : (
           <ul className="divide-y">
             {(storage.data?.data ?? []).map((x) => (
               <li key={`${x.domain}-${x.status}`} className="flex items-center justify-between gap-3 py-2 text-sm">

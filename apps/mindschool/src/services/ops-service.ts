@@ -35,7 +35,8 @@ export const operationsService = {
   outbox: async (): Promise<{ pending: number; dead_letter: number; processed: number }> => (await api.get("/admin/outbox")).data,
   deadLetters: async (): Promise<DeadLetter[]> => (await api.get<{ data: DeadLetter[] }>("/admin/outbox/dead-letter")).data.data,
   requeue: async (id: string) => (await api.post(`/admin/outbox/dead-letter/${id}/requeue`)).data,
-  storage: async (): Promise<StorageStats> => (await api.get("/admin/storage")).data,
+  storage: async (refresh?: boolean): Promise<StorageStats> =>
+    (await api.get("/admin/storage", { params: refresh ? { refresh: "true" } : undefined })).data,
   purgeStorage: async (): Promise<{ expired: number; orphans: number; failed: number }> => (await api.post("/admin/storage/purge")).data,
   backfillStorage: async (): Promise<{ payment_proofs: number; report_jobs: number; failed: number }> => (await api.post("/admin/storage/backfill")).data,
 };
