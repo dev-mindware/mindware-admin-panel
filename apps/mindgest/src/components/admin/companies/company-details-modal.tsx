@@ -107,6 +107,39 @@ export function CompanyDetailsModal() {
 
                 <div className="space-y-3">
                     <h4 className="font-medium text-sm flex items-center gap-2 text-primary uppercase tracking-wider">
+                        <Icon name="User" className="size-4" />
+                        Proprietário
+                    </h4>
+                    <div className="p-4 rounded-xl border bg-muted/20">
+                        {company.owner ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <DetailRow label="Nome" value={company.owner.name} />
+                                    <DetailRow label="Email" value={company.owner.email} />
+                                    {company.owner.createdAt && (
+                                        <DetailRow label="Membro desde" value={formatDateTime(company.owner.createdAt)} />
+                                    )}
+                                </div>
+                                <div className="space-y-2">
+                                    <DetailRow label="Telefone" value={company.owner.phone || "N/A"} />
+                                    {company.owner.status && (
+                                        <div className="flex items-center gap-2 pt-0.5">
+                                            <span className="text-sm text-muted-foreground">Estado:</span>
+                                            <ItemStatusBadge status={company.owner.status === "ACTIVE" ? "ACTIVE" : "INACTIVE"} />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="text-sm text-muted-foreground italic">
+                                Nenhum proprietário associado a esta empresa.
+                            </p>
+                        )}
+                    </div>
+                </div>
+
+                <div className="space-y-3">
+                    <h4 className="font-medium text-sm flex items-center gap-2 text-primary uppercase tracking-wider">
                         <Icon name="Handshake" className="size-4" />
                         Afiliado
                     </h4>
