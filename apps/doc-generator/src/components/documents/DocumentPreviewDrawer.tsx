@@ -249,6 +249,7 @@ export function DocumentPreviewDrawer({
             <span>PDF Renderizado em Tempo Real</span>
           </button>
 
+          {(!document.type || document.type === "proposal") && (
           <button
             onClick={() => setActiveTab("edit")}
             className={`py-3 px-4 border-b-2 font-medium transition-colors cursor-pointer flex items-center gap-2 ${
@@ -260,6 +261,7 @@ export function DocumentPreviewDrawer({
             <Icon name="Pencil" size={14} />
             <span>Editar Conteúdo & Tabelas</span>
           </button>
+          )}
         </div>
         {/* Barra de Fluxo de Aprovao */}
         <div className="p-3.5 rounded-xl border bg-card flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">

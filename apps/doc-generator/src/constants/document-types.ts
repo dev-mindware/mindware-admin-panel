@@ -114,6 +114,22 @@ export const DOCUMENT_TYPES: DocumentTypeConfig[] = [
     newLabel: "Novo Acordo de Confidencialidade",
     emitLabel: "Emitir Novo Acordo de Confidencialidade",
   },
+  {
+    slug: "declaration",
+    name: "Declaração",
+    pluralName: "Declarações de Trabalho",
+    singularName: "Declaração de Trabalho e Vínculo Profissional",
+    description: "Declarações de vínculo profissional e de exercício de funções dos colaboradores.",
+    icon: "BadgeCheck",
+    badgeLabel: "Declaração",
+    prefix: "DECL",
+    category: "Institucional",
+    defaultDeliverableDays: 0,
+    gender: "f",
+    contractedArticle: "da",
+    newLabel: "Nova Declaração",
+    emitLabel: "Emitir Nova Declaração",
+  },
 ];
 
 export function getDocumentTypeBySlug(slug: string): DocumentTypeConfig | undefined {

@@ -248,6 +248,15 @@ export function DocumentCategoryView({ typeConfig }: DocumentCategoryViewProps) 
                 onClick: () => handleOpenPreview(item),
                 icon: "Eye",
               },
+              ...(typeConfig.slug !== "proposal"
+                ? [
+                    {
+                      label: "Editar",
+                      onClick: () => router.push(`/documents/${typeConfig.slug}/${item.id}/edit`),
+                      icon: "Pencil" as const,
+                    },
+                  ]
+                : []),
               {
                 label: "Abrir PDF em nova aba",
                 onClick: () => openDocumentPdf(item.id),
