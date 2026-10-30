@@ -17,7 +17,6 @@ export async function POST() {
     }
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005/api";
-    const apiKey = process.env.NEXT_PUBLIC_API_KEY;
 
     const response = await axios.post(
       `${apiUrl}/auth/refresh`,
@@ -25,7 +24,6 @@ export async function POST() {
       {
         headers: {
           "Content-Type": "application/json",
-          ...(apiKey ? { "x-api-key": apiKey } : {}),
         },
         timeout: 10000,
       }

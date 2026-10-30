@@ -25,6 +25,8 @@ import { clientsService, Client } from "@/services/clients-service";
 import { clausesService, Clause } from "@/services/clauses-service";
 import { GenerationStatusBadge } from "./GenerationStatusBadge";
 import { toast } from "sonner";
+import { openDocumentPdf } from "@/lib/pdf-actions";
+import { usePdfBlobUrl } from "@/hooks/use-pdf-blob-url";
 
 interface Props {
   document: DocumentItem | null;
@@ -41,6 +43,7 @@ export function DocumentPreviewDrawer({
 }: Props) {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"edit" | "pdf">("pdf");
+  const pdf = usePdfBlobUrl(document?.id, activeTab === "pdf", document?.updatedAt);
   const { isAdmin } = usePermissions();
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
@@ -718,20 +721,27 @@ export function DocumentPreviewDrawer({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() =>
-                  window.open(documentsService.getDirectPdfUrl(document.id), "_blank")
-                }
+                onClick={() => openDocumentPdf(document.id)}
                 className="h-7 text-xs gap-1 cursor-pointer"
               >
                 <Icon name="ExternalLink" size={12} />
                 <span>Abrir em Nova Aba</span>
               </Button>
             </div>
-            <iframe
-              src={documentsService.getDirectPdfUrl(document.id)}
-              className="w-full flex-1 border-0"
-              title="PDF Real-Time Preview"
-            />
+            {pdf.url ? (
+              <iframe
+                src={pdf.url}
+                className="w-full flex-1 border-0"
+                title="PDF Real-Time Preview"
+              />
+            ) : (
+              <p
+                className="flex-1 p-6 text-center text-xs text-muted-foreground"
+                role={pdf.error ? "alert" : "status"}
+              >
+                {pdf.error ? "Não foi possível carregar o PDF." : "A carregar PDF…"}
+              </p>
+            )}
           </div>
         )}
       </div>

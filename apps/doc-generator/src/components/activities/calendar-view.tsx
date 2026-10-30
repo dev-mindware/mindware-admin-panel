@@ -15,6 +15,8 @@ import type { DateClickArg } from "@fullcalendar/interaction";
 import { Plus } from "lucide-react";
 import { useActivities, useUpdateActivity } from "@/hooks/use-activities";
 import { toLocalInput } from "@/lib/format";
+import { isOverdue } from "@/lib/activity-utils";
+import { firstName, memberColorMap, membersOf } from "@/lib/member-colors";
 import type { Activity } from "@/types/activity";
 import { ActivityFormModal } from "./activity-form-modal";
 
@@ -24,44 +26,77 @@ const OFFSET_MS = 60 * 60 * 1000;
 const shown = (iso: string) => new Date(new Date(iso).getTime() + OFFSET_MS);
 const real = (d: Date) => new Date(d.getTime() - OFFSET_MS).toISOString();
 
-const PRIORITY_COLOR: Record<Activity["priority"], string> = {
-  LOW: "#64748b",
-  MEDIUM: "#2563eb",
-  HIGH: "#d97706",
-  URGENT: "#dc2626",
-};
+const NO_OWNER_COLOR = "#64748b";
+const DONE_COLOR = "#94a3b8";
+const ID_SEP = "::";
 
-function toEvent(a: Activity): EventInput | null {
+/**
+ * Eventos do calendário. Um EVENT é um só bloco; tarefas e marcos geram uma
+ * entrada por responsável, na cor de cada um, para que cada membro veja (e seja
+ * avisado do prazo da sua parte.
+ */
+function toEvents(
+  a: Activity,
+  memberId: string,
+  colors: Map<string, string>,
+): EventInput[] {
   if (a.kind === "EVENT") {
-    if (!a.startAt) return null;
-    return {
-      id: a.id,
-      title: a.title,
-      start: shown(a.startAt),
-      end: a.endAt ? shown(a.endAt) : undefined,
-      allDay: a.allDay,
-      backgroundColor: "#2563eb",
-      borderColor: "#2563eb",
-    };
+    if (!a.startAt) return [];
+    if (memberId && !a.assignees.some((x) => x.userId === memberId)) return [];
+    return [
+      {
+        id: a.id,
+        title: a.title,
+        start: shown(a.startAt),
+        end: a.endAt ? shown(a.endAt) : undefined,
+        allDay: a.allDay,
+        backgroundColor: "#2563eb",
+        borderColor: "#2563eb",
+      },
+    ];
   }
-  // Tarefas e marcos aparecem no dia do prazo, só para consulta.
-  if (!a.dueAt) return null;
-  const done = a.status === "DONE" || a.status === "CANCELLED";
-  return {
-    id: a.id,
-    title: `${a.kind === "MILESTONE" ? "◆" : "☐"} ${a.title}`,
+  if (!a.dueAt) return [];
+
+  const closed = a.status === "DONE" || a.status === "CANCELLED";
+  const late = isOverdue(a);
+  const icon = a.status === "DONE" ? "✓" : a.kind === "MILESTONE" ? "◆" : "☐";
+  const owners = a.assignees.filter((x) => !memberId || x.userId === memberId);
+  if (memberId && owners.length === 0) return [];
+
+  const base = {
     start: shown(a.dueAt),
     allDay: true,
     editable: false,
-    backgroundColor: done ? "#94a3b8" : PRIORITY_COLOR[a.priority],
-    borderColor: done ? "#94a3b8" : PRIORITY_COLOR[a.priority],
+    classNames: late ? ["ring-2", "ring-red-500"] : [],
   };
+  if (a.assignees.length === 0) {
+    return [
+      {
+        ...base,
+        id: `${a.id}${ID_SEP}none`,
+        title: `${icon} ${a.title} · sem responsável`,
+        backgroundColor: closed ? DONE_COLOR : NO_OWNER_COLOR,
+        borderColor: closed ? DONE_COLOR : NO_OWNER_COLOR,
+      },
+    ];
+  }
+  return owners.map((o) => {
+    const color = closed ? DONE_COLOR : (colors.get(o.userId) ?? NO_OWNER_COLOR);
+    return {
+      ...base,
+      id: `${a.id}${ID_SEP}${o.userId}`,
+      title: `${icon} ${a.title} · ${firstName(o.user.name)}${late ? " (atrasada)" : ""}`,
+      backgroundColor: color,
+      borderColor: color,
+    };
+  });
 }
 
 export function CalendarView() {
   const [range, setRange] = useState<{ from: string; to: string } | null>(null);
   const [editing, setEditing] = useState<Activity | null>(null);
   const [creating, setCreating] = useState<{ startAt?: string } | null>(null);
+  const [memberId, setMemberId] = useState("");
   const update = useUpdateActivity();
 
   const { data, isError, refetch } = useActivities(
@@ -70,17 +105,37 @@ export function CalendarView() {
   );
   const activities = data?.data ?? [];
   const byId = useMemo(() => new Map(activities.map((a) => [a.id, a])), [activities]);
+  const members = useMemo(() => membersOf(activities), [activities]);
+  const colors = useMemo(() => memberColorMap(members), [members]);
   const events = useMemo(
-    () => activities.map(toEvent).filter((e): e is EventInput => e !== null),
-    [activities],
+    () => activities.flatMap((a) => toEvents(a, memberId, colors)),
+    [activities, memberId, colors],
   );
+
+  // Por membro: tarefas em atraso e a vencer nas próximas 24 h.
+  const workload = useMemo(() => {
+    const soon = Date.now() + 24 * 60 * 60 * 1000;
+    return members.map((m) => {
+      const mine = activities.filter(
+        (a) => a.kind !== "EVENT" && a.assignees.some((x) => x.userId === m.id),
+      );
+      const open = mine.filter((a) => a.status !== "DONE" && a.status !== "CANCELLED");
+      return {
+        ...m,
+        overdue: open.filter((a) => isOverdue(a)).length,
+        dueSoon: open.filter(
+          (a) => a.dueAt && !isOverdue(a) && new Date(a.dueAt).getTime() <= soon,
+        ).length,
+      };
+    });
+  }, [activities, members]);
 
   function onDatesSet(arg: DatesSetArg) {
     setRange({ from: real(arg.start), to: real(arg.end) });
   }
 
   function onEventClick(arg: EventClickArg) {
-    const a = byId.get(arg.event.id);
+    const a = byId.get(arg.event.id.split(ID_SEP)[0]);
     if (a) setEditing(a);
   }
 
@@ -90,7 +145,7 @@ export function CalendarView() {
   }
 
   function onEventChange(arg: EventChangeArg) {
-    const a = byId.get(arg.event.id);
+    const a = byId.get(arg.event.id.split(ID_SEP)[0]);
     const start = arg.event.start;
     if (!a || !start) return arg.revert();
     update.mutate(
@@ -107,7 +162,7 @@ export function CalendarView() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 pr-12">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Calendário</h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -137,7 +192,49 @@ export function CalendarView() {
         </p>
       )}
 
-      <div className="rounded-xl border bg-card p-3 text-sm [&_.fc]:text-foreground [&_.fc-theme-standard_td]:border-border [&_.fc-theme-standard_th]:border-border [&_.fc-theme-standard_.fc-scrollgrid]:border-border">
+      {members.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="flex items-center gap-2 text-sm">
+            Membro
+            <select
+              value={memberId}
+              onChange={(e) => setMemberId(e.target.value)}
+              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+            >
+              <option value="">Toda a equipa</option>
+              {members.map((m) => (
+                <option key={m.id} value={m.id}>{m.name}</option>
+              ))}
+            </select>
+          </label>
+          {workload
+            .filter((m) => !memberId || m.id === memberId)
+            .map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setMemberId(memberId === m.id ? "" : m.id)}
+                aria-pressed={memberId === m.id}
+                className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs hover:bg-muted"
+              >
+                <span className="size-2 rounded-full" style={{ background: colors.get(m.id) }} />
+                {firstName(m.name)}
+                {m.overdue > 0 && (
+                  <span className="font-medium text-red-600 dark:text-red-400">
+                    {m.overdue} atrasada{m.overdue > 1 ? "s" : ""}
+                  </span>
+                )}
+                {m.dueSoon > 0 && (
+                  <span className="text-amber-600 dark:text-amber-400">
+                    {m.dueSoon} em 24 h
+                  </span>
+                )}
+              </button>
+            ))}
+        </div>
+      )}
+
+      <div className="rounded-xl border bg-card p-3 text-sm [&_.fc]:text-foreground [&_.fc-theme-standard_td]:border-border [&_.fc-theme-standard_th]:border-border [&_.fc-theme-standard_.fc-scrollgrid]:border-border [&_.fc-col-header-cell]:bg-muted [&_.fc-col-header-cell-cushion]:text-foreground [&_.fc-daygrid-day-number]:text-foreground [&_.fc-day-today]:!bg-primary/10">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"

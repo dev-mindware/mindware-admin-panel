@@ -13,6 +13,8 @@ import {
   Badge,
 } from "@workspace/ui";
 import { Icon } from "@workspace/ui";
+import { downloadDocumentPdf } from "@/lib/pdf-actions";
+import { usePdfBlobUrl } from "@/hooks/use-pdf-blob-url";
 import { documentsService, DocumentItem } from "@/services/documents-service";
 import { GenerationStatusBadge } from "./GenerationStatusBadge";
 import { toast } from "sonner";
@@ -44,6 +46,12 @@ export function DocumentPreviewModal({
       toast.error(err.response?.data?.message || "Erro ao iniciar geração de PDF.");
     },
   });
+
+  const pdf = usePdfBlobUrl(
+    document?.id,
+    isOpen && activeTab === "pdf" && document?.status === "GENERATED",
+    document?.updatedAt,
+  );
 
   if (!document) return null;
 
@@ -84,9 +92,7 @@ export function DocumentPreviewModal({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() =>
-                  window.open(documentsService.getDirectPdfUrl(document.id), "_blank")
-                }
+                onClick={() => downloadDocumentPdf(document.id, `${document.code}.pdf`)}
                 className="gap-1.5 text-xs h-9 cursor-pointer"
               >
                 <Icon name="Download" size={14} />
@@ -218,11 +224,17 @@ export function DocumentPreviewModal({
           ) : (
             <div className="h-[500px] w-full flex items-center justify-center rounded-xl border bg-muted/30">
               {document.status === "GENERATED" ? (
-                <iframe
-                  src={documentsService.getDirectPdfUrl(document.id)}
-                  className="w-full h-full rounded-xl"
-                  title="PDF Preview"
-                />
+                pdf.url ? (
+                  <iframe
+                    src={pdf.url}
+                    className="w-full h-full rounded-xl"
+                    title="PDF Preview"
+                  />
+                ) : (
+                  <p className="text-xs text-muted-foreground" role={pdf.error ? "alert" : "status"}>
+                    {pdf.error ? "Não foi possível carregar o PDF." : "A carregar PDF…"}
+                  </p>
+                )
               ) : (
                 <div className="flex flex-col items-center gap-3 text-center p-6">
                   <Icon name="FileText" size={40} className="text-muted-foreground/40" />

@@ -20,6 +20,7 @@ import {
   Badge,
 } from "@workspace/ui";
 import { Icon } from "@workspace/ui";
+import { openDocumentPdf, downloadDocumentPdf } from "@/lib/pdf-actions";
 import { documentsService, DocumentItem } from "@/services/documents-service";
 import { GenerationStatusBadge } from "@/components/documents/GenerationStatusBadge";
 import { DocumentPreviewDrawer } from "@/components/documents/DocumentPreviewDrawer";
@@ -231,10 +232,7 @@ export function DocumentCategoryView({ typeConfig }: DocumentCategoryViewProps) 
               size="sm"
               variant="outline"
               className="h-7 text-xs px-2 gap-1 cursor-pointer"
-              onClick={() => {
-                const url = documentsService.getDirectPdfUrl(item.id);
-                window.open(url, "_blank");
-              }}
+              onClick={() => openDocumentPdf(item.id)}
               title="Abrir PDF oficial em nova aba"
             >
               <Icon name="FileDown" size={13} />
@@ -252,18 +250,12 @@ export function DocumentCategoryView({ typeConfig }: DocumentCategoryViewProps) 
               },
               {
                 label: "Abrir PDF em nova aba",
-                onClick: () => {
-                  const url = documentsService.getDirectPdfUrl(item.id);
-                  window.open(url, "_blank");
-                },
+                onClick: () => openDocumentPdf(item.id),
                 icon: "FileDown",
               },
               {
                 label: "Baixar PDF (Download Direto)",
-                onClick: () => {
-                  const url = documentsService.getDownloadPdfUrl(item.id);
-                  window.open(url, "_blank");
-                },
+                onClick: () => downloadDocumentPdf(item.id, `${item.code}.pdf`),
                 icon: "Download",
               },
               {

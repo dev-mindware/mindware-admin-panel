@@ -19,6 +19,7 @@ import {
 } from "@workspace/ui";
 import { DynamicMetricCard } from "@workspace/ui";
 import { Icon } from "@workspace/ui";
+import { openDocumentPdf, downloadDocumentPdf } from "@/lib/pdf-actions";
 import { documentsService, DocumentItem } from "@/services/documents-service";
 import { GenerationStatusBadge } from "@/components/documents/GenerationStatusBadge";
 import { DocumentPreviewDrawer } from "@/components/documents/DocumentPreviewDrawer";
@@ -165,9 +166,7 @@ export default function DashboardPage() {
           <Button
             variant="secondary"
             size="sm"
-            onClick={() =>
-              window.open(documentsService.getDirectPdfUrl(item.id), "_blank")
-            }
+            onClick={() => downloadDocumentPdf(item.id, `${item.code}.pdf`)}
             className="h-8 text-xs gap-1.5 text-primary bg-primary/10 hover:bg-primary/20 cursor-pointer"
             title="Descarregar PDF em tempo real"
           >
@@ -184,9 +183,7 @@ export default function DashboardPage() {
               },
               {
                 label: "Descarregar PDF",
-                onClick: (doc) => {
-                  window.open(documentsService.getDirectPdfUrl(doc.id), "_blank");
-                },
+                onClick: (doc) => downloadDocumentPdf(doc.id, `${doc.code}.pdf`),
                 icon: "Download",
               },
             ]}

@@ -31,6 +31,8 @@ import { documentsService, PriceItem } from "@/services/documents-service";
 import { DocumentTypeConfig } from "@/constants/document-types";
 import { WorkDeclarationForm, WorkDeclarationFormData } from "@/components/documents/WorkDeclarationForm";
 import { toast } from "sonner";
+import { openDocumentPdf } from "@/lib/pdf-actions";
+import { usePdfBlobUrl } from "@/hooks/use-pdf-blob-url";
 
 export type CustomPageBlockType = "PARAGRAPH" | "TABLE" | "SCOPE_LIST" | "NOTE";
 
@@ -209,6 +211,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
   const [isRenderingLivePdf, setIsRenderingLivePdf] = useState(false);
   const [createdDocumentId, setCreatedDocumentId] = useState<string | null>(null);
   const livePdfBlobRef = useRef<string | null>(null);
+  const savedPdf = usePdfBlobUrl(createdDocumentId, activeTab === "pdf");
 
   const { data: clausesData = [] } = useQuery({
     queryKey: ["clauses", "all"],
@@ -2005,10 +2008,8 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    const url = createdDocumentId
-                      ? documentsService.getDirectPdfUrl(createdDocumentId)
-                      : livePdfUrl;
-                    if (url) window.open(url, "_blank");
+                    if (createdDocumentId) openDocumentPdf(createdDocumentId);
+                    else if (livePdfUrl) window.open(livePdfUrl, "_blank");
                   }}
                   className="h-7 text-xs gap-1.5 cursor-pointer"
                   disabled={!createdDocumentId && !livePdfUrl}
@@ -2035,15 +2036,20 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
             </div>
 
             {livePdfUrl || createdDocumentId ? (
-              <iframe
-                src={
-                  createdDocumentId
-                    ? documentsService.getDirectPdfUrl(createdDocumentId)
-                    : (livePdfUrl as string)
-                }
-                className="w-full flex-1 border-0"
-                title="PDF Real-Time Preview"
-              />
+              (createdDocumentId ? savedPdf.url : livePdfUrl) ? (
+                <iframe
+                  src={(createdDocumentId ? savedPdf.url : livePdfUrl) as string}
+                  className="w-full flex-1 border-0"
+                  title="PDF Real-Time Preview"
+                />
+              ) : (
+                <p
+                  className="flex-1 p-6 text-center text-xs text-muted-foreground"
+                  role={savedPdf.error ? "alert" : "status"}
+                >
+                  {savedPdf.error ? "Não foi possível carregar o PDF." : "A carregar PDF…"}
+                </p>
+              )
             ) : (
               <div className="flex flex-col items-center justify-center h-full p-8 text-center space-y-3">
                 <Icon name="FileText" size={48} className="text-muted-foreground/40" />
