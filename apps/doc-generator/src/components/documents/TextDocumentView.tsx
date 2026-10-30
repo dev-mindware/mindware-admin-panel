@@ -31,6 +31,7 @@ import {
 import type { DocumentTypeConfig } from "@/constants/document-types";
 import { formatPtLongDate } from "@/lib/format";
 import { clausesService } from "@/services/clauses-service";
+import { PdfPreview } from "./pdf-preview";
 import { documentsService, type DocumentItem, type PriceItem } from "@/services/documents-service";
 
 interface Props {
@@ -281,11 +282,8 @@ export function TextDocumentView({ typeConfig, documentId }: Props) {
     );
   }
 
-  const header = (
-    <TitleList
-      title={editing ? `Editar ${typeConfig.singularName}` : typeConfig.emitLabel}
-      suTitle="Preencha os campos, veja o PDF e guarde. O documento usa o modelo oficial da Mindware."
-    >
+  const actions = (
+    <>
       <Button variant="outline" onClick={() => router.push(`/documents/${typeConfig.slug}`)}>
         Cancelar
       </Button>
@@ -297,6 +295,16 @@ export function TextDocumentView({ typeConfig, documentId }: Props) {
         <Icon name="Save" />
         {save.isPending ? "A guardar..." : "Guardar"}
       </Button>
+    </>
+  );
+
+  const header = (
+    <TitleList
+      title={editing ? `Editar ${typeConfig.singularName}` : typeConfig.emitLabel}
+      suTitle="Preencha os campos, veja o PDF e guarde. O documento usa o modelo oficial da Mindware."
+    >
+      {/* No telemóvel as acções ficam numa barra fixa em baixo, sempre ao alcance do polegar. */}
+      <div className="hidden items-center gap-2 md:flex">{actions}</div>
     </TitleList>
   );
 
@@ -447,10 +455,18 @@ export function TextDocumentView({ typeConfig, documentId }: Props) {
           </TabsContent>
 
           <TabsContent value="preview">
-            {pdfUrl && <iframe title="Pré-visualização do PDF" src={pdfUrl} width="100%" height="900" />}
+            {pdfUrl && <PdfPreview url={pdfUrl} title="Pré-visualização do PDF" filename={`${code}.pdf`} />}
           </TabsContent>
         </Tabs>
       )}
+
+      <div className="h-24 md:hidden" aria-hidden />
+      <div
+        data-testid="mobile-action-bar"
+        className="mobile-action-bar fixed inset-x-0 bottom-0 z-40 flex items-center justify-end gap-2 border-t bg-background px-4 pt-3 md:hidden"
+      >
+        {actions}
+      </div>
     </PageWrapper>
   );
 }

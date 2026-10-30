@@ -2,6 +2,8 @@
 
 import {
   MetricGrid,
+  ScrollArea,
+  ScrollBar,
   StackedBarPanel,
   Tabs,
   TabsContent,
@@ -81,13 +83,16 @@ export function MemberReportView({ snapshot }: { snapshot: MemberSnapshot }) {
       />
 
       <Tabs defaultValue="completed">
-        <TabsList>
-          {LISTS.map((l) => (
-            <TabsTrigger key={l.key} value={l.key}>
-              {l.label} ({snapshot.totals[l.key]})
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <ScrollArea>
+          <TabsList>
+            {LISTS.map((l) => (
+              <TabsTrigger key={l.key} value={l.key}>
+                {l.label} ({snapshot.totals[l.key]})
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
         {LISTS.map((l) => (
           <TabsContent key={l.key} value={l.key}>
             <ReportTable data={snapshot.lists[l.key]} columns={COLUMNS} emptyTitle={l.empty} />

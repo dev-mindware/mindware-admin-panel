@@ -15,6 +15,7 @@ import {
 import { Icon } from "@workspace/ui";
 import { downloadDocumentPdf } from "@/lib/pdf-actions";
 import { usePdfBlobUrl } from "@/hooks/use-pdf-blob-url";
+import { PdfPreview } from "./pdf-preview";
 import { documentsService, DocumentItem } from "@/services/documents-service";
 import { GenerationStatusBadge } from "./GenerationStatusBadge";
 import { toast } from "sonner";
@@ -225,11 +226,7 @@ export function DocumentPreviewModal({
             <div className="h-[500px] w-full flex items-center justify-center rounded-xl border bg-muted/30">
               {document.status === "GENERATED" ? (
                 pdf.url ? (
-                  <iframe
-                    src={pdf.url}
-                    className="w-full h-full rounded-xl"
-                    title="PDF Preview"
-                  />
+                  <PdfPreview url={pdf.url} title="Pré-visualização do PDF" filename={`${document.code}.pdf`} />
                 ) : (
                   <p className="text-xs text-muted-foreground" role={pdf.error ? "alert" : "status"}>
                     {pdf.error ? "Não foi possível carregar o PDF." : "A carregar PDF…"}

@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import listPlugin from "@fullcalendar/list";
 import type {
   DatesSetArg,
   EventChangeArg,
@@ -23,6 +24,7 @@ import {
   TitleList,
 } from "@workspace/ui";
 import { useActivities, useUpdateActivity } from "@/hooks/use-activities";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { toLocalInput } from "@/lib/format";
 import { isOverdue } from "@/lib/activity-utils";
 import { firstName, memberColorMap, membersOf, type MemberRef } from "@/lib/member-colors";
@@ -108,6 +110,13 @@ export function CalendarView() {
   const [memberId, setMemberId] = useState(""); // "" = toda a equipa
   const [known, setKnown] = useState<MemberRef[]>([]);
   const update = useUpdateActivity();
+  const isMobile = useIsMobile();
+  const calendarRef = useRef<FullCalendar>(null);
+
+  // No telemóvel a vista por omissão é a lista da semana (a grelha do mês não cabe); no resto, o mês.
+  useEffect(() => {
+    calendarRef.current?.getApi().changeView(isMobile ? "listWeek" : "dayGridMonth");
+  }, [isMobile]);
 
   const { data, isError, refetch } = useActivities(
     { from: range?.from, to: range?.to, limit: 100, sortBy: "startAt", sortOrder: "asc" },
@@ -226,26 +235,33 @@ export function CalendarView() {
         description={
           data && data.total > data.data.length
             ? `A mostrar ${data.data.length} de ${data.total} neste período; mude para uma vista mais curta`
-            : "Arraste um evento para o remarcar"
+            : isMobile
+              ? "Toque numa actividade para a abrir ou editar"
+              : "Arraste um evento para o remarcar"
         }
         icon="CalendarDays"
       >
         <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          ref={calendarRef}
+          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
           initialView="dayGridMonth"
           timeZone="UTC"
           locale="pt"
           firstDay={1}
           height="auto"
           nowIndicator
-          editable
+          editable={!isMobile}
           selectable={false}
-          headerToolbar={{
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay",
-          }}
-          buttonText={{ today: "Hoje", month: "Mês", week: "Semana", day: "Dia" }}
+          headerToolbar={
+            isMobile
+              ? { left: "prev,next", center: "title", right: "today" }
+              : { left: "prev,next today", center: "title", right: "dayGridMonth,timeGridWeek,timeGridDay" }
+          }
+          footerToolbar={isMobile ? { center: "listWeek,dayGridMonth" } : undefined}
+          titleFormat={isMobile ? { month: "short", day: "numeric" } : undefined}
+          buttonText={{ today: "Hoje", month: "Mês", week: "Semana", day: "Dia", list: "Lista" }}
+          views={{ listWeek: { buttonText: "Lista" } }}
+          noEventsText="Sem actividades neste período"
           events={events}
           datesSet={onDatesSet}
           eventClick={onEventClick}

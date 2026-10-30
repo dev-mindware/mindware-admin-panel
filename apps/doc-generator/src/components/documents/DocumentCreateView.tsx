@@ -33,6 +33,7 @@ import { WorkDeclarationForm, WorkDeclarationFormData } from "@/components/docum
 import { toast } from "sonner";
 import { openDocumentPdf } from "@/lib/pdf-actions";
 import { usePdfBlobUrl } from "@/hooks/use-pdf-blob-url";
+import { PdfPreview } from "./pdf-preview";
 
 export type CustomPageBlockType = "PARAGRAPH" | "TABLE" | "SCOPE_LIST" | "NOTE";
 
@@ -2037,10 +2038,10 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
 
             {livePdfUrl || createdDocumentId ? (
               (createdDocumentId ? savedPdf.url : livePdfUrl) ? (
-                <iframe
-                  src={(createdDocumentId ? savedPdf.url : livePdfUrl) as string}
-                  className="w-full flex-1 border-0"
-                  title="PDF Real-Time Preview"
+                <PdfPreview
+                  url={(createdDocumentId ? savedPdf.url : livePdfUrl) as string}
+                  title="Pré-visualização do PDF"
+                  filename={`${code}.pdf`}
                 />
               ) : (
                 <p
