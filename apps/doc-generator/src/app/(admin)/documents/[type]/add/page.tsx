@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getDocumentTypeBySlug } from "@/constants/document-types";
 import { DocumentCreateView } from "@/components/documents/DocumentCreateView";
+import { TextDocumentView } from "@/components/documents/TextDocumentView";
 
 interface PageProps {
   params: Promise<{
@@ -16,5 +17,9 @@ export default async function DocumentTypeAddPage({ params }: PageProps) {
     notFound();
   }
 
-  return <DocumentCreateView typeConfig={typeConfig} />;
+  // As propostas têm o editor próprio (capa, escopo, páginas); os outros tipos usam formulários por tipo.
+  if (typeConfig.slug === "proposal") {
+    return <DocumentCreateView typeConfig={typeConfig} />;
+  }
+  return <TextDocumentView typeConfig={typeConfig} />;
 }

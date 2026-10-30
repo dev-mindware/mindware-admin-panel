@@ -77,7 +77,9 @@ export interface CreateDocumentPayload {
   clientId?: string;
   clientName?: string;
   clientNif?: string;
-  templateId: string;
+  clientAddress?: string;
+  /** Só as propostas usam um modelo escolhido; os restantes tipos têm modelo fixo. */
+  templateId?: string;
   validityDays?: number;
   deliveryDays?: number;
   notes?: string;

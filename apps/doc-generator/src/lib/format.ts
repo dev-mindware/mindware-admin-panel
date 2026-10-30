@@ -62,3 +62,13 @@ const fullDateTime = new Intl.DateTimeFormat("pt-PT", {
 });
 export const formatFullDateTime = (iso?: string | null) =>
   iso ? fullDateTime.format(new Date(iso)) : "—";
+
+const LONG_MONTHS = [
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+];
+
+/** "30 de Outubro de 2026", como nos documentos emitidos. */
+export function formatPtLongDate(d: Date = new Date()): string {
+  return `${String(d.getDate()).padStart(2, "0")} de ${LONG_MONTHS[d.getMonth()]} de ${d.getFullYear()}`;
+}
