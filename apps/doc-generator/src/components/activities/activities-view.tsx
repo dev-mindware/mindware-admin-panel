@@ -1,11 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
 import { parseAsBoolean, parseAsString, useQueryState } from "nuqs";
+import {
+  Button,
+  Card,
+  EmptyState,
+  Icon,
+  Input,
+  PageWrapper,
+  TitleList,
+} from "@workspace/ui";
 import { useActivities } from "@/hooks/use-activities";
 import type { Activity } from "@/types/activity";
-import { ActivityFormModal } from "./activity-form-modal";
+import { ActivityFormDrawer } from "./activity-form-drawer";
 import { KanbanBoard } from "./kanban-board";
 
 export function ActivitiesView() {
@@ -25,51 +33,67 @@ export function ActivitiesView() {
   const items = (data?.data ?? []).filter((a) => a.kind !== "EVENT");
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 pr-12">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Actividades</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Arraste os cartões entre colunas para actualizar o estado.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setCreating(true)}
-          className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          <Plus className="size-4" /> Nova actividade
-        </button>
-      </div>
+    <PageWrapper routeLabel="Actividades" subRoute="Quadro de Tarefas">
+      <TitleList
+        title="Actividades da Equipa"
+        suTitle="Acompanhe tarefas e marcos por estado; arraste os cartões entre colunas para os actualizar"
+      >
+        <Button onClick={() => setCreating(true)} className="gap-2 cursor-pointer">
+          <Icon name="CirclePlus" size={16} />
+          <span>Nova Actividade</span>
+        </Button>
+      </TitleList>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value || null)}
-          placeholder="Pesquisar…"
-          aria-label="Pesquisar actividades"
-          className="h-9 w-64 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        />
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={mine}
-            onChange={(e) => setMine(e.target.checked || null)}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="relative w-full sm:w-96">
+          <Input
+            type="text"
+            startIcon="Search"
+            placeholder="Pesquisar por título ou descrição..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value || null)}
           />
-          Só as minhas
-        </label>
+        </div>
+
+        <div className="flex items-center bg-sidebar rounded-lg p-1 border border-border/80">
+          {[
+            { id: false, label: "Todas" },
+            { id: true, label: "As minhas" },
+          ].map((tab) => (
+            <button
+              key={String(tab.id)}
+              type="button"
+              onClick={() => setMine(tab.id || null)}
+              className={`px-3 py-1 text-xs font-medium rounded-md transition-all cursor-pointer ${
+                mine === tab.id
+                  ? "bg-primary-50 dark:bg-primary/10 text-primary-700 dark:text-primary-400 font-semibold shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {isError ? (
-        <div role="alert" className="rounded-lg border border-red-500/30 p-4 text-sm">
-          Não foi possível carregar as actividades.{" "}
-          <button type="button" className="underline" onClick={() => refetch()}>
+        <Card role="alert" className="p-12 text-center flex flex-col items-center justify-center gap-3">
+          <span className="text-sm">Não foi possível carregar as actividades.</span>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
             Tentar de novo
-          </button>
-        </div>
+          </Button>
+        </Card>
       ) : isLoading ? (
-        <p className="text-sm text-muted-foreground">A carregar…</p>
+        <Card className="p-12 text-center flex flex-col items-center justify-center">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
+          <span className="text-xs text-muted-foreground">A carregar actividades...</span>
+        </Card>
+      ) : items.length === 0 && !search && !mine ? (
+        <EmptyState
+          icon="SquareKanban"
+          title="Ainda não há actividades"
+          description="Crie a primeira tarefa ou marco para começar a acompanhar o trabalho da equipa."
+        />
       ) : (
         <>
           {data && data.total > data.data.length && (
@@ -81,7 +105,7 @@ export function ActivitiesView() {
         </>
       )}
 
-      <ActivityFormModal
+      <ActivityFormDrawer
         open={creating || editing !== null}
         activity={editing}
         onClose={() => {
@@ -89,6 +113,6 @@ export function ActivitiesView() {
           setEditing(null);
         }}
       />
-    </div>
+    </PageWrapper>
   );
 }

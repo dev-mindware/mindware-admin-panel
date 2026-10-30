@@ -12,7 +12,9 @@ type InputType =
   | "quantity"
   | "date"
   | "search"
-  | "file";
+  | "file"
+  | "datetime-local"
+  | "time";
 
 type InputProps = {
   label?: string;

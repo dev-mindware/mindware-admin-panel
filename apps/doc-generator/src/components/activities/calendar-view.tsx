@@ -12,13 +12,13 @@ import type {
   EventInput,
 } from "@fullcalendar/core";
 import type { DateClickArg } from "@fullcalendar/interaction";
-import { Plus } from "lucide-react";
+import { Button, Card, Icon, PageWrapper, SelectField, TitleList } from "@workspace/ui";
 import { useActivities, useUpdateActivity } from "@/hooks/use-activities";
 import { toLocalInput } from "@/lib/format";
 import { isOverdue } from "@/lib/activity-utils";
 import { firstName, memberColorMap, membersOf } from "@/lib/member-colors";
 import type { Activity } from "@/types/activity";
-import { ActivityFormModal } from "./activity-form-modal";
+import { ActivityFormDrawer } from "./activity-form-drawer";
 
 // Luanda é UTC+1 sem mudança de hora. O calendário corre em "UTC" com horas
 // flutuantes, por isso somamos 1 h ao mostrar e subtraímos ao guardar.
@@ -96,7 +96,7 @@ export function CalendarView() {
   const [range, setRange] = useState<{ from: string; to: string } | null>(null);
   const [editing, setEditing] = useState<Activity | null>(null);
   const [creating, setCreating] = useState<{ startAt?: string } | null>(null);
-  const [memberId, setMemberId] = useState("");
+  const [memberId, setMemberId] = useState(""); // "" = toda a equipa
   const update = useUpdateActivity();
 
   const { data, isError, refetch } = useActivities(
@@ -161,30 +161,24 @@ export function CalendarView() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 pr-12">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Calendário</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Eventos sincronizados com o Google Calendar. Tarefas e marcos aparecem no dia do prazo.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setCreating({})}
-          className="inline-flex h-9 items-center gap-1.5 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          <Plus className="size-4" /> Novo evento
-        </button>
-      </div>
+    <PageWrapper routeLabel="Calendário" subRoute="Calendário de Actividades">
+      <TitleList
+        title="Calendário da Equipa"
+        suTitle="Eventos sincronizados com o Google Calendar; tarefas e marcos aparecem no dia do prazo, por responsável"
+      >
+        <Button onClick={() => setCreating({})} className="gap-2 cursor-pointer">
+          <Icon name="CirclePlus" size={16} />
+          <span>Novo Evento</span>
+        </Button>
+      </TitleList>
 
       {isError && (
-        <div role="alert" className="rounded-lg border border-red-500/30 p-3 text-sm">
-          Não foi possível carregar o calendário.{" "}
-          <button type="button" className="underline" onClick={() => refetch()}>
+        <Card role="alert" className="p-6 text-center flex flex-col items-center gap-3">
+          <span className="text-sm">Não foi possível carregar o calendário.</span>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
             Tentar de novo
-          </button>
-        </div>
+          </Button>
+        </Card>
       )}
       {data && data.total > data.data.length && (
         <p className="text-xs text-muted-foreground">
@@ -193,20 +187,17 @@ export function CalendarView() {
       )}
 
       {members.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="flex items-center gap-2 text-sm">
-            Membro
-            <select
-              value={memberId}
-              onChange={(e) => setMemberId(e.target.value)}
-              className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-            >
-              <option value="">Toda a equipa</option>
-              {members.map((m) => (
-                <option key={m.id} value={m.id}>{m.name}</option>
-              ))}
-            </select>
-          </label>
+        <div className="flex flex-wrap items-end gap-2">
+          <SelectField
+            label="Membro"
+            value={memberId || "ALL"}
+            className="w-56"
+            options={[
+              { value: "ALL", label: "Toda a equipa" },
+              ...members.map((m) => ({ value: m.id, label: m.name })),
+            ]}
+            onValueChange={(v) => setMemberId(v === "ALL" ? "" : v)}
+          />
           {workload
             .filter((m) => !memberId || m.id === memberId)
             .map((m) => (
@@ -215,7 +206,7 @@ export function CalendarView() {
                 type="button"
                 onClick={() => setMemberId(memberId === m.id ? "" : m.id)}
                 aria-pressed={memberId === m.id}
-                className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs hover:bg-muted"
+                className="inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-xs hover:bg-muted cursor-pointer"
               >
                 <span className="size-2 rounded-full" style={{ background: colors.get(m.id) }} />
                 {firstName(m.name)}
@@ -234,7 +225,7 @@ export function CalendarView() {
         </div>
       )}
 
-      <div className="rounded-xl border bg-card p-3 text-sm [&_.fc]:text-foreground [&_.fc-theme-standard_td]:border-border [&_.fc-theme-standard_th]:border-border [&_.fc-theme-standard_.fc-scrollgrid]:border-border [&_.fc-col-header-cell]:bg-muted [&_.fc-col-header-cell-cushion]:text-foreground [&_.fc-daygrid-day-number]:text-foreground [&_.fc-day-today]:!bg-primary/10">
+      <Card className="p-3 text-sm gap-0 [&_.fc]:text-foreground [&_.fc-theme-standard_td]:border-border [&_.fc-theme-standard_th]:border-border [&_.fc-theme-standard_.fc-scrollgrid]:border-border [&_.fc-col-header-cell]:bg-muted [&_.fc-col-header-cell-cushion]:text-foreground [&_.fc-daygrid-day-number]:text-foreground [&_.fc-day-today]:!bg-primary/10">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
@@ -257,9 +248,9 @@ export function CalendarView() {
           dateClick={onDateClick}
           eventChange={onEventChange}
         />
-      </div>
+      </Card>
 
-      <ActivityFormModal
+      <ActivityFormDrawer
         open={creating !== null || editing !== null}
         activity={editing}
         defaults={
@@ -272,6 +263,6 @@ export function CalendarView() {
           setEditing(null);
         }}
       />
-    </div>
+    </PageWrapper>
   );
 }

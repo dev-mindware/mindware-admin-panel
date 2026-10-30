@@ -1,7 +1,7 @@
 "use client";
 
-import { CalendarClock } from "lucide-react";
-import { PRIORITY_CLASS, PRIORITY_LABEL } from "@/constants/activities";
+import { Badge, Icon } from "@workspace/ui";
+import { PRIORITY_BADGE, PRIORITY_LABEL } from "@/constants/activities";
 import { formatDateTime } from "@/lib/format";
 import { isOverdue } from "@/lib/activity-utils";
 import type { Activity } from "@/types/activity";
@@ -19,15 +19,13 @@ export function ActivityCard({ activity, onOpen }: Props) {
     <button
       type="button"
       onClick={() => onOpen?.(activity)}
-      className="w-full rounded-lg border bg-card p-3 text-left shadow-sm transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="w-full rounded-lg border bg-card p-3 text-left shadow-xs transition-colors hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
     >
       <div className="flex items-start justify-between gap-2">
         <p className="text-sm font-medium leading-snug">{activity.title}</p>
-        <span
-          className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium ${PRIORITY_CLASS[activity.priority]}`}
-        >
+        <Badge variant={PRIORITY_BADGE[activity.priority]} className="shrink-0 text-[10px]">
           {PRIORITY_LABEL[activity.priority]}
-        </span>
+        </Badge>
       </div>
 
       {when && (
@@ -36,7 +34,7 @@ export function ActivityCard({ activity, onOpen }: Props) {
             overdue ? "font-medium text-red-600 dark:text-red-400" : "text-muted-foreground"
           }`}
         >
-          <CalendarClock className="size-3" />
+          <Icon name="CalendarClock" size={12} />
           {formatDateTime(when)}
           {overdue && " · atrasada"}
         </p>

@@ -1,11 +1,32 @@
 "use client"
 import { DinamicBreadcrumb } from "../../custom/dynamic-breadcrumb";
 import { Separator, SidebarTrigger } from "../../ui";
+import { createContext, useContext } from "react";
 import { useQueryState } from "nuqs";
 import { Icon } from "../icon";
 import { Input } from "../../ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { useAuth } from "@workspace/hooks";
+
+/**
+ * Conteúdo extra (ex.: sino de notificações) mostrado à direita do cabeçalho de
+ * todos os `PageWrapper` por baixo deste provider. Opcional: sem provider, nada muda.
+ */
+const HeaderActionsContext = createContext<React.ReactNode>(null);
+
+export function PageWrapperHeaderActions({
+  actions,
+  children,
+}: {
+  actions: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <HeaderActionsContext.Provider value={actions}>
+      {children}
+    </HeaderActionsContext.Provider>
+  );
+}
 
 type Props = {
   routePath?: string;
@@ -25,6 +46,7 @@ export function PageWrapper({
   variant = "default",
 }: Props) {
   const { user } = useAuth();
+  const headerActions = useContext(HeaderActionsContext);
   const [search, setSearch] = useQueryState("search", {
     defaultValue: "",
     shallow: true,
@@ -66,6 +88,7 @@ export function PageWrapper({
         )}
 
         <div className="flex items-center mr-4 space-x-2 md:space-x-4">
+          {headerActions}
           {variant === "counter" && (
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
