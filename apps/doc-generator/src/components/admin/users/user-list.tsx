@@ -11,11 +11,13 @@ import { Badge } from "@workspace/ui";
 
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Administrador",
+  MANAGER: "Gestor",
   EDITOR: "Editor",
 };
 
 const ROLE_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   ADMIN: "default",
+  MANAGER: "outline",
   EDITOR: "secondary",
 };
 

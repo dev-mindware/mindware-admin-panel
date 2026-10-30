@@ -18,7 +18,7 @@ export function CreateUserModal({ open, onClose, onSuccess }: Props) {
     name: "",
     email: "",
     password: "",
-    role: "EDITOR" as "EDITOR" | "ADMIN",
+    role: "EDITOR" as "EDITOR" | "MANAGER" | "ADMIN",
     allowedDocumentTypes: [] as string[],
   });
   const [error, setError] = useState<string | null>(null);
@@ -97,6 +97,7 @@ export function CreateUserModal({ open, onClose, onSuccess }: Props) {
                 className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <option value="EDITOR">Editor</option>
+                <option value="MANAGER">Gestor</option>
                 <option value="ADMIN">Administrador</option>
               </select>
             </div>
