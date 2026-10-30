@@ -1,4 +1,5 @@
 "use client";
+import { useId } from "react";
 import Select from "react-select";
 
 export interface SelectOption {
@@ -31,12 +32,14 @@ export function MultiSelect({
   inputId,
   isLoading,
 }: MultiSelectProps) {
+  const autoId = useId();
+  const id = inputId ?? autoId;
   return (
     <div className={className}>
-      <label className="block text-sm font-medium mb-1">{label}</label>
+      <label htmlFor={id} className="block text-sm font-medium mb-1">{label}</label>
 
       <Select<SelectOption, boolean>
-        inputId={inputId}
+        inputId={id}
         isMulti={isMulti}
         options={options}
         value={value}

@@ -27,6 +27,7 @@ import { GenerationStatusBadge } from "./GenerationStatusBadge";
 import { toast } from "sonner";
 import { openDocumentPdf } from "@/lib/pdf-actions";
 import { usePdfBlobUrl } from "@/hooks/use-pdf-blob-url";
+import { PdfPreview } from "./pdf-preview";
 
 interface Props {
   document: DocumentItem | null;
@@ -731,11 +732,7 @@ export function DocumentPreviewDrawer({
               </Button>
             </div>
             {pdf.url ? (
-              <iframe
-                src={pdf.url}
-                className="w-full flex-1 border-0"
-                title="PDF Real-Time Preview"
-              />
+              <PdfPreview url={pdf.url} title="Pré-visualização do PDF" filename={`${document.code}.pdf`} />
             ) : (
               <p
                 className="flex-1 p-6 text-center text-xs text-muted-foreground"

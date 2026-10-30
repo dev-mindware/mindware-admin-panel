@@ -14,10 +14,12 @@ import {
   TitleList,
 } from "@workspace/ui";
 import { useActivities } from "@/hooks/use-activities";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { isOverdue } from "@/lib/activity-utils";
 import type { Activity } from "@/types/activity";
 import { ActivityFormDrawer } from "./activity-form-drawer";
 import { KanbanBoard } from "./kanban-board";
+import { KanbanMobile } from "./kanban-mobile";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -26,6 +28,7 @@ export function ActivitiesView() {
   const [scope, setScope] = useQueryState("scope", parseAsString.withDefault(""));
   const [editing, setEditing] = useState<Activity | null>(null);
   const [creating, setCreating] = useState(false);
+  const isMobile = useIsMobile();
 
   // O kanban mostra tarefas e marcos; os eventos vivem no calendário.
   const { data, isLoading, isError, refetch } = useActivities({
@@ -50,7 +53,11 @@ export function ActivitiesView() {
     <PageWrapper routeLabel="Actividades" subRoute="Quadro de Tarefas">
       <TitleList
         title="Actividades da Equipa"
-        suTitle="Acompanhe tarefas e marcos por estado; arraste os cartões entre colunas para os actualizar"
+        suTitle={
+          isMobile
+            ? "Acompanhe tarefas e marcos por estado; use «Mover» para mudar o estado"
+            : "Acompanhe tarefas e marcos por estado; arraste os cartões entre colunas (ou use «Mover») para os actualizar"
+        }
       >
         <Button onClick={() => setCreating(true)}>
           <Icon name="CirclePlus" />
@@ -121,7 +128,11 @@ export function ActivitiesView() {
               A mostrar {data.data.length} de {data.total}. Use a pesquisa para refinar.
             </p>
           )}
-          <KanbanBoard activities={items} onOpen={setEditing} />
+          {isMobile ? (
+            <KanbanMobile activities={items} onOpen={setEditing} />
+          ) : (
+            <KanbanBoard activities={items} onOpen={setEditing} />
+          )}
         </>
       )}
 

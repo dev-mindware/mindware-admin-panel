@@ -32,6 +32,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     { label, error, hint, startIcon, endIcon, className, type = "text", onChange, value, name, ...props },
     ref
   ) => {
+    const autoId = React.useId();
+    const inputId = (props as { id?: string }).id ?? autoId;
     const [showPassword, setShowPassword] = React.useState(false);
     const isPassword = type === "password";
     const isQuantidade = type === "quantity";
@@ -83,7 +85,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block mb-1 text-sm font-medium text-foreground">
+          <label htmlFor={inputId} className="block mb-1 text-sm font-medium text-foreground">
             {label}
           </label>
         )}
@@ -109,6 +111,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             >
               <input
                 ref={ref}
+                id={inputId}
                 name={name}
                 type="number"
                 inputMode="numeric"
@@ -136,6 +139,14 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           </div>
         ) : (
           <div
+            // Tocar em qualquer ponto da caixa foca o campo (no telemóvel a faixa interior tem só ~20 px).
+            onMouseDown={(e) => {
+              const input = e.currentTarget.querySelector("input");
+              if (input && e.target !== input && !(e.target as HTMLElement).closest("button")) {
+                e.preventDefault();
+                input.focus();
+              }
+            }}
             className={cn(
               "flex items-center rounded-md border px-3 py-2 text-sm transition-colors duration-200 w-full",
               error
@@ -153,6 +164,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             )}
             <input
               ref={ref}
+              id={inputId}
+              // Sem etiqueta visível, o texto de exemplo serve de nome acessível.
+              aria-label={label ? undefined : (props as { placeholder?: string })["placeholder"]}
               type={inputType}
               name={name}
               value={value}

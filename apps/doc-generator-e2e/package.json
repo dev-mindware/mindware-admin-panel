@@ -1,0 +1,14 @@
+{
+  "name": "doc-generator-e2e",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Testes e2e (Playwright) do doc-generator, com a API simulada. Pré-requisito: `pnpm --filter doc-generator build`.",
+  "scripts": {
+    "test": "playwright test",
+    "test:mobile": "playwright test --project=phone-360 --project=phone-390"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "^20"
+  }
+}

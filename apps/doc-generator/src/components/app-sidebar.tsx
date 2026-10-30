@@ -1,7 +1,8 @@
 ﻿"use client";
 
 import * as React from "react";
-import { GlobalSidebar } from "@workspace/ui";
+import { usePathname } from "next/navigation";
+import { GlobalSidebar, useSidebar } from "@workspace/ui";
 import { adminMenuItems, MenuItem } from "@/constants/menu-items";
 import { useAuthStore } from "@/stores/auth/auth-store";
 import { usePermissions } from "@/hooks/use-permissions";
@@ -9,6 +10,14 @@ import { DOCUMENT_TYPES } from "@/constants/document-types";
 
 export function AppSidebar(props: Partial<React.ComponentProps<typeof GlobalSidebar>>) {
   const { user, logout } = useAuthStore();
+  const { setOpenMobile } = useSidebar();
+  const pathname = usePathname();
+
+  // No telemóvel o menu é uma gaveta: fecha-se ao navegar para outra página.
+  React.useEffect(() => {
+    setOpenMobile(false);
+  }, [pathname, setOpenMobile]);
+
   const { isAdmin, canCreateDocumentType } = usePermissions();
 
   const handleLogout = async () => {
