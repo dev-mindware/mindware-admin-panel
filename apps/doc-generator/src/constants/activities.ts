@@ -31,15 +31,12 @@ export const PRIORITY_LABEL: Record<ActivityPriority, string> = {
   URGENT: "Urgente",
 };
 
-/** Variante do `Badge` de @workspace/ui por prioridade. */
-export const PRIORITY_BADGE: Record<
-  ActivityPriority,
-  "outline" | "secondary" | "pending" | "destructive"
-> = {
-  LOW: "outline",
-  MEDIUM: "secondary",
-  HIGH: "pending",
-  URGENT: "destructive",
+/** Tom do `ToneBadge` por prioridade. */
+export const PRIORITY_TONE: Record<ActivityPriority, "neutral" | "info" | "warning" | "danger"> = {
+  LOW: "neutral",
+  MEDIUM: "info",
+  HIGH: "warning",
+  URGENT: "danger",
 };
 
 export const CLOSED_STATUSES: ActivityStatus[] = ["DONE", "CANCELLED"];

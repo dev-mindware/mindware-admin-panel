@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   DndContext,
   DragOverlay,
-  PointerSensor,
   KeyboardSensor,
+  PointerSensor,
   closestCorners,
   useDroppable,
   useSensor,
@@ -20,6 +20,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Panel, ScrollArea, ScrollBar } from "@workspace/ui";
 import { KANBAN_COLUMNS } from "@/constants/activities";
 import { columnItems, positionAt } from "@/lib/activity-utils";
 import { useMoveActivity } from "@/hooks/use-activities";
@@ -28,19 +29,23 @@ import { ActivityCard } from "./activity-card";
 
 const COLUMN_PREFIX = "column:";
 
-function SortableCard({ activity, onOpen }: { activity: Activity; onOpen: (a: Activity) => void }) {
+function SortableCard({ activity, onOpen }: { activity: Activity; onOpen: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: activity.id,
   });
   return (
     <div
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={isDragging ? "opacity-40" : undefined}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.4 : undefined,
+      }}
+      onClick={onOpen}
       {...attributes}
       {...listeners}
     >
-      <ActivityCard activity={activity} onOpen={onOpen} />
+      <ActivityCard activity={activity} />
     </div>
   );
 }
@@ -56,32 +61,22 @@ function Column({
   items: Activity[];
   onOpen: (a: Activity) => void;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: `${COLUMN_PREFIX}${status}` });
+  const { setNodeRef } = useDroppable({ id: `${COLUMN_PREFIX}${status}` });
   return (
-    <section
-      ref={setNodeRef}
-      aria-label={label}
-      className={`flex w-72 shrink-0 flex-col rounded-xl border bg-muted/30 ${
-        isOver ? "ring-2 ring-primary/40" : ""
-      }`}
-    >
-      <header className="flex items-center justify-between px-3 py-2">
-        <h3 className="text-sm font-semibold">{label}</h3>
-        <span className="rounded-full bg-muted px-2 text-xs text-muted-foreground">
-          {items.length}
-        </span>
-      </header>
-      <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-        <div className="flex min-h-24 flex-1 flex-col gap-2 p-2">
-          {items.map((a) => (
-            <SortableCard key={a.id} activity={a} onOpen={onOpen} />
-          ))}
-          {items.length === 0 && (
-            <p className="py-6 text-center text-xs text-muted-foreground">Sem actividades</p>
-          )}
-        </div>
-      </SortableContext>
-    </section>
+    <div ref={setNodeRef} className="w-72 shrink-0">
+      <Panel
+        title={label}
+        description={`${items.length} ${items.length === 1 ? "actividade" : "actividades"}`}
+      >
+        <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+          <div className="flex min-h-16 flex-col gap-3">
+            {items.map((a) => (
+              <SortableCard key={a.id} activity={a} onOpen={() => onOpen(a)} />
+            ))}
+          </div>
+        </SortableContext>
+      </Panel>
+    </div>
   );
 }
 
@@ -93,6 +88,8 @@ interface Props {
 export function KanbanBoard({ activities, onOpen }: Props) {
   const move = useMoveActivity();
   const [activeId, setActiveId] = useState<string | null>(null);
+  // O clique que se segue a largar um cartão não deve abrir a actividade.
+  const dragged = useRef(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -106,15 +103,17 @@ export function KanbanBoard({ activities, onOpen }: Props) {
   const active = activities.find((a) => a.id === activeId) ?? null;
 
   function onDragStart(e: DragStartEvent) {
+    dragged.current = true;
     setActiveId(String(e.active.id));
   }
 
   function onDragEnd(e: DragEndEvent) {
     setActiveId(null);
-    const { active: dragged, over } = e;
+    setTimeout(() => (dragged.current = false), 0);
+    const { active: item, over } = e;
     if (!over) return;
 
-    const activity = activities.find((a) => a.id === dragged.id);
+    const activity = activities.find((a) => a.id === item.id);
     if (!activity) return;
 
     const overId = String(over.id);
@@ -153,13 +152,25 @@ export function KanbanBoard({ activities, onOpen }: Props) {
       collisionDetection={closestCorners}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      onDragCancel={() => setActiveId(null)}
+      onDragCancel={() => {
+        setActiveId(null);
+        dragged.current = false;
+      }}
     >
-      <div className="flex gap-3 overflow-x-auto pb-4">
-        {columns.map((c) => (
-          <Column key={c.status} status={c.status} label={c.label} items={c.items} onOpen={onOpen} />
-        ))}
-      </div>
+      <ScrollArea>
+        <div className="flex gap-4 pb-4">
+          {columns.map((c) => (
+            <Column
+              key={c.status}
+              status={c.status}
+              label={c.label}
+              items={c.items}
+              onOpen={(a) => !dragged.current && onOpen(a)}
+            />
+          ))}
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
       <DragOverlay>{active ? <ActivityCard activity={active} /> : null}</DragOverlay>
     </DndContext>
   );

@@ -1,0 +1,17 @@
+/* Tema do FullCalendar a partir dos tokens do design system (sem alterar componentes predefinidos). */
+.fc {
+  --fc-border-color: var(--border);
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: var(--muted);
+  --fc-neutral-text-color: var(--muted-foreground);
+  --fc-today-bg-color: color-mix(in oklab, var(--primary) 10%, transparent);
+  --fc-now-indicator-color: var(--destructive);
+  --fc-button-bg-color: var(--primary);
+  --fc-button-border-color: var(--primary);
+  --fc-button-hover-bg-color: color-mix(in oklab, var(--primary) 90%, black);
+  --fc-button-hover-border-color: var(--primary);
+  --fc-button-active-bg-color: color-mix(in oklab, var(--primary) 80%, black);
+  --fc-button-active-border-color: var(--primary);
+  --fc-button-text-color: var(--primary-foreground);
+  color: var(--foreground);
+}

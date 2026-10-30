@@ -3,21 +3,16 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
   Button,
+  ConfirmModal,
   DynamicDrawer,
+  FormSection,
   Input,
   MultiSelect,
   SelectField,
   Textarea,
 } from "@workspace/ui";
+import { useModalStore } from "@workspace/hooks";
 import {
   KANBAN_COLUMNS,
   KIND_LABEL,
@@ -85,6 +80,8 @@ const fromActivity = (a: Activity): ActivityFormState => ({
 const options = (labels: Record<string, string>) =>
   Object.entries(labels).map(([value, label]) => ({ value, label }));
 
+const DELETE_MODAL = "activity-delete";
+
 interface Props {
   open: boolean;
   /** Actividade a editar; `null` cria uma nova. */
@@ -98,7 +95,7 @@ export function ActivityFormDrawer({ open, activity, defaults, onClose }: Props)
   const { isAdmin } = usePermissions();
   const [form, setForm] = useState<ActivityFormState>(EMPTY);
   const [error, setError] = useState<string | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const { openModal } = useModalStore();
 
   const create = useCreateActivity();
   const update = useUpdateActivity();
@@ -175,16 +172,15 @@ export function ActivityFormDrawer({ open, activity, defaults, onClose }: Props)
         title={activity ? "Editar Actividade" : "Nova Actividade"}
         description="Tarefas e marcos aparecem no kanban; eventos aparecem no calendário"
       >
-        <form onSubmit={submit} className="space-y-4 pt-2">
-          <Input
-            label="Título *"
-            placeholder="Ex: Reunião de kickoff com o cliente"
-            value={form.title}
-            maxLength={200}
-            onChange={(e) => set("title", e.target.value)}
-          />
-
-          <div className="grid grid-cols-3 gap-3">
+        <form onSubmit={submit}>
+          <FormSection icon="ListTodo" title="Actividade" description="O que é e em que estado está." columns={2}>
+            <Input
+              label="Título *"
+              placeholder="Ex: Reunião de kickoff com o cliente"
+              value={form.title}
+              maxLength={200}
+              onChange={(e) => set("title", e.target.value)}
+            />
             <SelectField
               label="Tipo"
               value={form.kind}
@@ -203,9 +199,21 @@ export function ActivityFormDrawer({ open, activity, defaults, onClose }: Props)
               options={options(PRIORITY_LABEL)}
               onValueChange={(v) => set("priority", v as ActivityPriority)}
             />
-          </div>
+            <Textarea
+              label="Descrição"
+              rows={3}
+              maxLength={5000}
+              value={form.description}
+              onChange={(e) => set("description", e.target.value)}
+            />
+          </FormSection>
 
-          <div className="grid grid-cols-2 gap-3">
+          <FormSection
+            icon="CalendarClock"
+            title="Datas"
+            description="Horas em Africa/Luanda (UTC+1)."
+            columns={2}
+          >
             <Input
               label={isEvent ? "Início *" : "Início"}
               type="datetime-local"
@@ -218,21 +226,16 @@ export function ActivityFormDrawer({ open, activity, defaults, onClose }: Props)
               value={form.endAt}
               onChange={(e) => set("endAt", e.target.value)}
             />
-          </div>
-
-          {!isEvent && (
-            <Input
-              label="Prazo"
-              type="datetime-local"
-              hint="Os responsáveis são avisados 1 dia antes, 1 hora antes e no momento do prazo."
-              value={form.dueAt}
-              onChange={(e) => set("dueAt", e.target.value)}
-            />
-          )}
-          <p className="-mt-2 text-xs text-muted-foreground">Horas em Africa/Luanda (UTC+1).</p>
-
-          {isEvent && (
-            <div className="grid grid-cols-2 items-end gap-3">
+            {!isEvent && (
+              <Input
+                label="Prazo"
+                type="datetime-local"
+                hint="Os responsáveis são avisados 1 dia antes, 1 hora antes e no momento do prazo."
+                value={form.dueAt}
+                onChange={(e) => set("dueAt", e.target.value)}
+              />
+            )}
+            {isEvent && (
               <Input
                 label="Local"
                 placeholder="Ex: Sala de reuniões"
@@ -240,88 +243,69 @@ export function ActivityFormDrawer({ open, activity, defaults, onClose }: Props)
                 maxLength={200}
                 onChange={(e) => set("location", e.target.value)}
               />
-              <label className="flex h-9 items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={form.allDay}
-                  onChange={(e) => set("allDay", e.target.checked)}
-                />
-                Dia inteiro
-              </label>
-            </div>
-          )}
-
-          <Textarea
-            label="Descrição"
-            rows={3}
-            maxLength={5000}
-            value={form.description}
-            onChange={(e) => set("description", e.target.value)}
-          />
+            )}
+            {isEvent && (
+              <SelectField
+                label="Duração"
+                value={form.allDay ? "allday" : "timed"}
+                options={[
+                  { value: "timed", label: "Hora marcada" },
+                  { value: "allday", label: "Dia inteiro" },
+                ]}
+                onValueChange={(v) => set("allDay", v === "allday")}
+              />
+            )}
+          </FormSection>
 
           {isAdmin && (
-            <MultiSelect
-              label="Responsáveis"
-              placeholder="Sem selecção, fica consigo"
-              isLoading={users.isLoading}
-              options={userOptions}
-              value={userOptions.filter((o) => form.assigneeIds.includes(String(o.value)))}
-              onChange={(opts) => set("assigneeIds", opts.map((o) => String(o.value)))}
-            />
+            <FormSection
+              icon="Users"
+              title="Responsáveis"
+              description="O primeiro seleccionado é o principal. Sem selecção, fica consigo."
+              columns={1}
+            >
+              <MultiSelect
+                label="Responsáveis"
+                placeholder="Seleccionar membros"
+                isLoading={users.isLoading}
+                options={userOptions}
+                value={userOptions.filter((o) => form.assigneeIds.includes(String(o.value)))}
+                onChange={(opts) => set("assigneeIds", opts.map((o) => String(o.value)))}
+              />
+            </FormSection>
           )}
 
-          {error && (
-            <p role="alert" className="text-sm text-red-600 dark:text-red-400">
-              {error}
-            </p>
-          )}
+          {error && <p role="alert">{error}</p>}
 
-          <div className="pt-4 flex items-center justify-between gap-2">
-            {activity ? (
-              <Button
-                type="button"
-                variant="destructive"
-                disabled={busy}
-                onClick={() => setConfirmDelete(true)}
-              >
-                Remover
-              </Button>
-            ) : (
-              <span />
-            )}
-            <div className="flex gap-2">
-              <Button type="button" variant="outline" onClick={onClose}>
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={busy}>
-                {busy ? "A guardar..." : activity ? "Guardar Alterações" : "Criar Actividade"}
-              </Button>
-            </div>
-          </div>
+          <Button type="submit" disabled={busy}>
+            {busy ? "A guardar..." : activity ? "Guardar Alterações" : "Criar Actividade"}
+          </Button>
+          <Button type="button" variant="outline" onClick={onClose}>
+            Cancelar
+          </Button>
+          {activity && (
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={busy}
+              onClick={() => openModal(DELETE_MODAL, activity)}
+            >
+              Remover
+            </Button>
+          )}
         </form>
       </DynamicDrawer>
 
-      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remover actividade?</AlertDialogTitle>
-            <AlertDialogDescription>
-              A actividade deixa de aparecer no kanban e no calendário. O histórico fica guardado.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (activity) remove.mutate(activity.id, { onSuccess: onClose });
-                setConfirmDelete(false);
-              }}
-            >
-              Remover
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmModal<Activity>
+        id={DELETE_MODAL}
+        title="Remover actividade?"
+        description={(a) => (a ? `"${a.title}" deixa de aparecer no kanban e no calendário. O histórico fica guardado.` : undefined)}
+        confirmLabel="Remover"
+        destructive
+        onConfirm={(a) => {
+          if (a) remove.mutate(a.id, { onSuccess: onClose });
+        }}
+      />
     </>
   );
 }

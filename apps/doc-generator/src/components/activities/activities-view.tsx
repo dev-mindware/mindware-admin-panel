@@ -1,24 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { parseAsBoolean, parseAsString, useQueryState } from "nuqs";
+import { parseAsString, useQueryState } from "nuqs";
 import {
   Button,
-  Card,
   EmptyState,
+  FilterToolbar,
   Icon,
-  Input,
+  ListSkeleton,
+  MetricGrid,
   PageWrapper,
+  RequestError,
   TitleList,
 } from "@workspace/ui";
 import { useActivities } from "@/hooks/use-activities";
+import { isOverdue } from "@/lib/activity-utils";
 import type { Activity } from "@/types/activity";
 import { ActivityFormDrawer } from "./activity-form-drawer";
 import { KanbanBoard } from "./kanban-board";
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 export function ActivitiesView() {
   const [search, setSearch] = useQueryState("q", parseAsString.withDefault(""));
-  const [mine, setMine] = useQueryState("mine", parseAsBoolean.withDefault(false));
+  const [scope, setScope] = useQueryState("scope", parseAsString.withDefault(""));
   const [editing, setEditing] = useState<Activity | null>(null);
   const [creating, setCreating] = useState(false);
 
@@ -26,11 +31,20 @@ export function ActivitiesView() {
   const { data, isLoading, isError, refetch } = useActivities({
     limit: 100,
     search: search || undefined,
-    mine: mine || undefined,
+    mine: scope === "mine" || undefined,
     sortBy: "position",
     sortOrder: "asc",
   });
   const items = (data?.data ?? []).filter((a) => a.kind !== "EVENT");
+
+  const open = items.filter((a) => a.status !== "DONE" && a.status !== "CANCELLED");
+  const soon = Date.now() + DAY_MS;
+  const overdue = items.filter((a) => isOverdue(a)).length;
+  const dueSoon = open.filter(
+    (a) => a.dueAt && !isOverdue(a) && new Date(a.dueAt).getTime() <= soon,
+  ).length;
+
+  const filtered = Boolean(search) || scope === "mine";
 
   return (
     <PageWrapper routeLabel="Actividades" subRoute="Quadro de Tarefas">
@@ -38,66 +52,72 @@ export function ActivitiesView() {
         title="Actividades da Equipa"
         suTitle="Acompanhe tarefas e marcos por estado; arraste os cartões entre colunas para os actualizar"
       >
-        <Button onClick={() => setCreating(true)} className="gap-2 cursor-pointer">
-          <Icon name="CirclePlus" size={16} />
-          <span>Nova Actividade</span>
+        <Button onClick={() => setCreating(true)}>
+          <Icon name="CirclePlus" />
+          Nova Actividade
         </Button>
       </TitleList>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="relative w-full sm:w-96">
-          <Input
-            type="text"
-            startIcon="Search"
-            placeholder="Pesquisar por título ou descrição..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value || null)}
-          />
-        </div>
+      <MetricGrid
+        isLoading={isLoading}
+        isError={isError}
+        onRetry={() => void refetch()}
+        skeletons={4}
+        items={[
+          { title: open.length, subtitle: "Em aberto", description: `${items.length} no quadro`, icon: "ListTodo" },
+          {
+            title: items.filter((a) => a.status === "IN_PROGRESS" || a.status === "REVIEW").length,
+            subtitle: "Em curso e revisão",
+            icon: "Loader",
+          },
+          {
+            title: overdue,
+            subtitle: "Atrasadas",
+            description: "Prazo passado e não concluídas",
+            icon: "CalendarX",
+            colors: overdue > 0 ? "destructive" : "default",
+            variant: overdue > 0 ? "action" : "default",
+          },
+          { title: dueSoon, subtitle: "A vencer em 24 h", icon: "Clock" },
+        ]}
+      />
 
-        <div className="flex items-center bg-sidebar rounded-lg p-1 border border-border/80">
-          {[
-            { id: false, label: "Todas" },
-            { id: true, label: "As minhas" },
-          ].map((tab) => (
-            <button
-              key={String(tab.id)}
-              type="button"
-              onClick={() => setMine(tab.id || null)}
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-all cursor-pointer ${
-                mine === tab.id
-                  ? "bg-primary-50 dark:bg-primary/10 text-primary-700 dark:text-primary-400 font-semibold shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <FilterToolbar
+        search={{ value: search, onChange: (v) => void setSearch(v || null), placeholder: "Pesquisar por título ou descrição…" }}
+        filters={[
+          {
+            key: "scope",
+            label: "Responsável",
+            value: scope,
+            onChange: (v) => void setScope(v || null),
+            options: [{ label: "As minhas", value: "mine" }],
+            placeholder: "Toda a equipa",
+          },
+        ]}
+        onClear={() => {
+          void setSearch(null);
+          void setScope(null);
+        }}
+      />
 
       {isError ? (
-        <Card role="alert" className="p-12 text-center flex flex-col items-center justify-center gap-3">
-          <span className="text-sm">Não foi possível carregar as actividades.</span>
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
-            Tentar de novo
-          </Button>
-        </Card>
+        <RequestError refetch={() => void refetch()} message="Não foi possível carregar as actividades." />
       ) : isLoading ? (
-        <Card className="p-12 text-center flex flex-col items-center justify-center">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
-          <span className="text-xs text-muted-foreground">A carregar actividades...</span>
-        </Card>
-      ) : items.length === 0 && !search && !mine ? (
+        <ListSkeleton cols={4} rows={3} />
+      ) : items.length === 0 ? (
         <EmptyState
           icon="SquareKanban"
-          title="Ainda não há actividades"
-          description="Crie a primeira tarefa ou marco para começar a acompanhar o trabalho da equipa."
+          title={filtered ? "Nenhuma actividade encontrada" : "Ainda não há actividades"}
+          description={
+            filtered
+              ? "Ajuste a pesquisa ou o filtro."
+              : "Crie a primeira tarefa ou marco para acompanhar o trabalho da equipa."
+          }
         />
       ) : (
         <>
           {data && data.total > data.data.length && (
-            <p className="text-xs text-muted-foreground">
+            <p>
               A mostrar {data.data.length} de {data.total}. Use a pesquisa para refinar.
             </p>
           )}

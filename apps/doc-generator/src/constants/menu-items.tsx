@@ -42,6 +42,11 @@ export const adminMenuItems: MenuStructure = {
       icon: <Icon name="CalendarDays" />,
     },
     {
+      name: "Relatórios",
+      url: "/reports",
+      icon: <Icon name="ChartColumn" />,
+    },
+    {
       name: "Clientes",
       url: "/clients",
       icon: <Icon name="Users" />,
