@@ -74,7 +74,7 @@ function buildMetadata(def: TypeFormDef, values: Values, sections: FreeSection[]
   const meta: Record<string, any> = {};
   for (const f of def.sections.flatMap((s) => s.fields)) {
     const raw = (values[f.key] ?? "").trim();
-    if (!raw) continue;
+    if (!raw || (f.kind === "select" && raw === "none")) continue;
     if (f.kind === "number") setPath(meta, f.key, Number(raw));
     else if (f.key === "mutual") setPath(meta, f.key, raw === "true");
     else setPath(meta, f.key, raw);
@@ -160,6 +160,12 @@ export function TextDocumentView({ typeConfig, documentId }: Props) {
     }
     for (const f of def.sections.flatMap((s) => s.fields)) {
       if (f.required && !(values[f.key] ?? "").trim()) return `Preencha «${f.label}».`;
+    }
+    // Quem assina por uma sociedade deve indicar a qualidade (cargo).
+    for (const [who, label] of [["firstSignatory", "pela Mindware"], ["secondSignatory", "pela outra parte"]] as const) {
+      if ((values[`${who}.name`] ?? "").trim() && !(values[`${who}.role`] ?? "").trim()) {
+        return `Indique o cargo de quem assina ${label}.`;
+      }
     }
     if (priceItems.some((p) => !p.phaseName.trim() || !p.deliverable.trim())) {
       return "Cada item de preço precisa de fase e entregável.";

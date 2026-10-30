@@ -51,7 +51,7 @@ export interface TypeFormDef {
 
 const SIGNATORIES: FormSectionDef = {
   title: "Assinaturas",
-  description: "Quem assina por cada parte. Pode ficar em branco.",
+  description: "Quem assina por cada parte. Se indicar o nome, indique também o cargo: a lei exige que se assine na qualidade em que se vincula a sociedade.",
   icon: "PenLine",
   columns: 2,
   fields: [
@@ -134,6 +134,15 @@ export const DOCUMENT_FORMS: Record<string, TypeFormDef> = {
           { key: "noticeDays", label: "Pré-aviso de denúncia (dias)", kind: "number", placeholder: "30" },
           { key: "confidentialityYears", label: "Sigilo após o termo (anos)", kind: "number", placeholder: "5" },
           { key: "jurisdiction", label: "Foro (comarca)", kind: "text", placeholder: "Luanda" },
+          {
+            key: "ipModel",
+            label: "Direitos sobre os entregáveis",
+            kind: "select",
+            options: [
+              { value: "transfer", label: "Transmitem-se ao cliente com o pagamento integral" },
+              { value: "license", label: "Ficam com a Mindware (licença de uso ao cliente)" },
+            ],
+          },
         ],
       },
       SIGNATORIES,
@@ -149,14 +158,14 @@ export const DOCUMENT_FORMS: Record<string, TypeFormDef> = {
     ],
     freeSections: {
       title: "Cláusulas adicionais",
-      description: "Numeradas a seguir às cláusulas-base (a 10.ª em diante).",
+      description: "Numeradas a seguir às cláusulas-base (a 12.ª em diante).",
       addLabel: "Adicionar cláusula",
       titleLabel: "Título da cláusula",
       bodyLabel: "Texto",
     },
     priceTable: true,
     clauseLibrary: true,
-    defaults: { term: "12 (doze) meses", noticeDays: 30, confidentialityYears: 5, jurisdiction: "Luanda" },
+    defaults: { term: "12 (doze) meses", noticeDays: 30, confidentialityYears: 5, jurisdiction: "Luanda", ipModel: "transfer" },
   },
 
   nda: {
@@ -203,7 +212,7 @@ export const DOCUMENT_FORMS: Record<string, TypeFormDef> = {
     ],
     freeSections: {
       title: "Cláusulas adicionais",
-      description: "Numeradas a seguir às cláusulas-base, antes da lei aplicável e foro.",
+      description: "Numeradas a seguir às cláusulas-base (a 10.ª em diante), antes da lei aplicável e foro.",
       addLabel: "Adicionar cláusula",
       titleLabel: "Título da cláusula",
       bodyLabel: "Texto",
@@ -314,6 +323,17 @@ export const DOCUMENT_FORMS: Record<string, TypeFormDef> = {
           { key: "workerIdNumber", label: "N.º do B.I.", kind: "text" },
           { key: "workerRole", label: "Função", kind: "text", required: true },
           { key: "workerDepartment", label: "Departamento", kind: "text" },
+          { key: "workerAdmissionDate", label: "Data de admissão", kind: "text", placeholder: "Ex: 02 de Março de 2022", hint: "Opcional. Se preencher, o texto indica a admissão." },
+          {
+            key: "workerContractType",
+            label: "Tipo de contrato",
+            kind: "select",
+            options: [
+              { value: "none", label: "Não indicar" },
+              { value: "por tempo indeterminado", label: "Por tempo indeterminado" },
+              { value: "por tempo determinado", label: "Por tempo determinado" },
+            ],
+          },
         ],
       },
       {
