@@ -4,16 +4,19 @@ import { parseAsString, useQueryState } from "nuqs";
 import {
   Button,
   EmptyState,
-  FilterToolbar,
   Icon,
   ListSkeleton,
   PageWrapper,
   RequestError,
   Tabs,
-  TabsContent,
   TabsList,
   TabsTrigger,
   TitleList,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@workspace/ui";
 import {
   isReportMissing,
@@ -76,46 +79,76 @@ export function ReportsView() {
         </Button>
       </TitleList>
 
-      <FilterToolbar
-        filters={[
-          {
-            key: "week",
-            label: "Semana",
-            value: week,
-            onChange: (v) => void setWeek(v || null),
-            placeholder: "Mais recente",
-            options: (weeks.data ?? []).map((w) => ({
-              label: `${formatWindow(w.weekStart, w.weekEnd)} (até ${formatDate(w.weekEnd)})`,
-              value: w.weekEnd,
-            })),
-          },
-          ...(isManager && view === "member"
-            ? [
-                {
-                  key: "member",
-                  label: "Membro",
-                  value: member,
-                  onChange: (v: string) => void setMember(v || null),
-                  placeholder: "O meu relatório",
-                  options: (team.data?.snapshot.members ?? []).map((m) => ({ label: m.name, value: m.id })),
-                },
-              ]
-            : []),
-        ]}
-        onClear={() => {
-          void setWeek(null);
-          void setMember(null);
-        }}
-      />
+      {/* Barra de Filtros Canónica Clean MindSchool: sem card, sem caixa cinzenta */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-2">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Seletor de Semana */}
+          <div className="w-full sm:w-72">
+            <Select value={week || "latest"} onValueChange={(v) => void setWeek(v === "latest" ? null : v)}>
+              <SelectTrigger className="h-10 bg-background">
+                <div className="flex items-center gap-2 truncate">
+                  <Icon name="Calendar" className="size-4 text-muted-foreground shrink-0" />
+                  <SelectValue placeholder="Mais recente" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="latest">Mais recente (semana ativa)</SelectItem>
+                {(weeks.data ?? []).map((w) => (
+                  <SelectItem key={w.weekEnd} value={w.weekEnd}>
+                    {formatWindow(w.weekStart, w.weekEnd)} (até {formatDate(w.weekEnd)})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      {isManager ? (
-        <Tabs value={view} onValueChange={(v) => void setTab(v === "team" ? null : v)}>
-          <TabsList>
-            <TabsTrigger value="team">Equipa</TabsTrigger>
-            <TabsTrigger value="member">Membro</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      ) : null}
+          {/* Seletor de Membro (apenas para Gestores na vista individual) */}
+          {isManager && view === "member" && (
+            <div className="w-full sm:w-64">
+              <Select value={member || "all"} onValueChange={(v) => void setMember(v === "all" ? null : v)}>
+                <SelectTrigger className="h-10 bg-background">
+                  <div className="flex items-center gap-2 truncate">
+                    <Icon name="User" className="size-4 text-muted-foreground shrink-0" />
+                    <SelectValue placeholder="O meu relatório" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">O meu relatório</SelectItem>
+                  {(team.data?.snapshot.members ?? []).map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {(week || member) && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                void setWeek(null);
+                void setMember(null);
+              }}
+              className="h-10 text-xs text-destructive hover:text-destructive"
+            >
+              <Icon name="X" className="w-3.5 h-3.5 mr-1" />
+              Limpar filtros
+            </Button>
+          )}
+        </div>
+
+        {isManager && (
+          <Tabs value={view} onValueChange={(v) => void setTab(v === "team" ? null : v)} className="w-full sm:w-auto">
+            <TabsList className="w-full sm:w-auto grid grid-cols-2">
+              <TabsTrigger value="team">Equipa</TabsTrigger>
+              <TabsTrigger value="member">Membro</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        )}
+      </div>
 
       {active.isLoading ? (
         <ListSkeleton cols={4} rows={3} />

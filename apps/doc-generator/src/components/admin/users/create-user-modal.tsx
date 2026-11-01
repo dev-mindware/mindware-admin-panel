@@ -2,7 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Button, DynamicDrawer, FormSection, Input, MultiSelect, SelectField } from "@workspace/ui";
+import {
+  Button,
+  ButtonSubmit,
+  FormSection,
+  Input,
+  MultiSelect,
+  SelectField,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@workspace/ui";
 import { usersService } from "@/services/users-service";
 import { DOCUMENT_TYPES } from "@/constants/document-types";
 import type { CreateUserPayload } from "@/types/user";
@@ -49,47 +62,92 @@ export function CreateUserModal({ open, onClose, onSuccess }: Props) {
     setForm((f) => ({ ...f, [key]: value }));
 
   return (
-    <DynamicDrawer
-      open={open}
-      onOpenChange={(v) => !v && onClose()}
-      side="right"
-      title="Novo Utilizador"
-      description="Defina os dados de acesso e o que este utilizador pode fazer"
-    >
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          mutation.mutate();
-        }}
-      >
-        <FormSection icon="UserPlus" title="Dados de acesso" columns={2}>
-          <Input label="Nome *" placeholder="Ex: João Silva" value={form.name} onChange={(e) => set("name", e.target.value)} />
-          <Input label="Email *" type="email" placeholder="joao@empresa.ao" value={form.email} onChange={(e) => set("email", e.target.value)} />
-          <Input label="Senha inicial *" type="password" placeholder="Mínimo 8 caracteres" value={form.password} onChange={(e) => set("password", e.target.value)} />
-          <SelectField label="Papel" value={form.role} options={ROLE_OPTIONS} onValueChange={(v) => set("role", v as Role)} />
-        </FormSection>
+    <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
+      <SheetContent side="right" className="w-full sm:max-w-xl flex flex-col p-0 gap-0">
+        <SheetHeader className="p-6 border-b shrink-0 text-left">
+          <SheetTitle>Novo Utilizador</SheetTitle>
+          <SheetDescription>
+            Defina os dados de acesso e as permissões de emissão deste utilizador.
+          </SheetDescription>
+        </SheetHeader>
 
-        {form.role === "EDITOR" && (
-          <FormSection icon="ScrollText" title="Documentos permitidos" description="Seleccione pelo menos um tipo." columns={1}>
-            <MultiSelect
-              label="Tipos de documentos"
-              placeholder="Seleccionar tipos"
-              options={DOC_OPTIONS}
-              value={DOC_OPTIONS.filter((o) => form.allowedDocumentTypes.includes(o.value))}
-              onChange={(opts) => set("allowedDocumentTypes", opts.map((o) => o.value))}
+        <form
+          id="create-user-form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            mutation.mutate();
+          }}
+          className="flex-1 overflow-y-auto p-6 space-y-6"
+        >
+          <FormSection icon="UserPlus" title="Dados de acesso" columns={2}>
+            <Input
+              label="Nome *"
+              placeholder="Ex: João Silva"
+              value={form.name}
+              onChange={(e) => set("name", e.target.value)}
+            />
+            <Input
+              label="Correio Eletrónico *"
+              type="email"
+              placeholder="Ex: joao@empresa.ao"
+              value={form.email}
+              onChange={(e) => set("email", e.target.value)}
+            />
+            <Input
+              label="Senha Inicial *"
+              type="password"
+              placeholder="Mínimo 8 caracteres"
+              value={form.password}
+              onChange={(e) => set("password", e.target.value)}
+            />
+            <SelectField
+              label="Perfil de Acesso"
+              value={form.role}
+              options={ROLE_OPTIONS}
+              onValueChange={(v) => set("role", v as Role)}
             />
           </FormSection>
-        )}
 
-        {error && <p role="alert">{error}</p>}
+          {form.role === "EDITOR" && (
+            <FormSection
+              icon="ScrollText"
+              title="Documentos permitidos"
+              description="Selecione pelo menos um tipo de documento para este editor."
+              columns={1}
+            >
+              <MultiSelect
+                label="Tipos de documentos"
+                placeholder="Selecionar tipos"
+                options={DOC_OPTIONS}
+                value={DOC_OPTIONS.filter((o) => form.allowedDocumentTypes.includes(o.value))}
+                onChange={(opts) => set("allowedDocumentTypes", opts.map((o) => o.value))}
+              />
+            </FormSection>
+          )}
 
-        <Button type="submit" disabled={mutation.isPending || !form.name || !form.email || !form.password}>
-          {mutation.isPending ? "A criar..." : "Criar Utilizador"}
-        </Button>
-        <Button type="button" variant="outline" onClick={onClose}>
-          Cancelar
-        </Button>
-      </form>
-    </DynamicDrawer>
+          {error && (
+            <div className="p-3 rounded-lg border border-destructive/20 bg-destructive/10 text-destructive text-xs">
+              {error}
+            </div>
+          )}
+        </form>
+
+        <SheetFooter className="p-4 border-t shrink-0 flex flex-row justify-end gap-2">
+          <Button type="button" variant="outline" onClick={onClose} disabled={mutation.isPending}>
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            form="create-user-form"
+            disabled={mutation.isPending || !form.name || !form.email || !form.password}
+          >
+            {mutation.isPending && (
+              <span className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-background border-t-transparent inline-block" />
+            )}
+            Criar Utilizador
+          </Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }

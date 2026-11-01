@@ -462,7 +462,7 @@ export function DocumentPreviewDrawer({
                   >
                     <div className="flex items-center justify-between gap-2 border-b border-border/50 pb-2">
                       <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                        <span className="size-5 rounded-full bg-muted flex items-center justify-center text-[10px] font-semibold text-foreground">
+                        <span className="size-5 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-foreground">
                           {index + 1}
                         </span>
                         Fase / Módulo {index + 1}
@@ -483,7 +483,7 @@ export function DocumentPreviewDrawer({
 
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
                       <div className="sm:col-span-6 space-y-1">
-                        <label className="text-[11px] font-medium text-muted-foreground">
+                        <label className="text-xs font-medium text-muted-foreground">
                           Nome da Fase
                         </label>
                         <Input
@@ -495,7 +495,7 @@ export function DocumentPreviewDrawer({
                         />
                       </div>
                       <div className="sm:col-span-2 space-y-1">
-                        <label className="text-[11px] font-medium text-muted-foreground">
+                        <label className="text-xs font-medium text-muted-foreground">
                           Dias
                         </label>
                         <Input
@@ -507,7 +507,7 @@ export function DocumentPreviewDrawer({
                         />
                       </div>
                       <div className="sm:col-span-4 space-y-1">
-                        <label className="text-[11px] font-medium text-muted-foreground">
+                        <label className="text-xs font-medium text-muted-foreground">
                           Subtotal (Kz)
                         </label>
                         <Input
@@ -521,7 +521,7 @@ export function DocumentPreviewDrawer({
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[11px] font-medium text-muted-foreground">
+                      <label className="text-xs font-medium text-muted-foreground">
                         Entregável detalhado
                       </label>
                       <Input
@@ -555,7 +555,7 @@ export function DocumentPreviewDrawer({
                       <Icon name="FileSpreadsheet" size={16} className="text-primary" />
                       Cláusulas & Condições Contratuais
                     </CardTitle>
-                    <Badge variant="outline" className="text-[10px]">
+                    <Badge variant="outline" className="text-xs">
                       {selectedClauses.length} seleccionadas
                     </Badge>
                   </div>
@@ -568,7 +568,7 @@ export function DocumentPreviewDrawer({
                         setSelectedClauses(clauses.map((c) => c.id));
                         toast.success("Todas as cláusulas seleccionadas!");
                       }}
-                      className="h-6 text-[10px] px-2 cursor-pointer"
+                      className="h-6 text-xs px-2 cursor-pointer"
                     >
                       Todas ({clauses.length})
                     </Button>
@@ -580,7 +580,7 @@ export function DocumentPreviewDrawer({
                         setSelectedClauses([]);
                         toast.info("Seleção de cláusulas limpa.");
                       }}
-                      className="h-6 text-[10px] px-1.5 text-muted-foreground hover:text-destructive cursor-pointer"
+                      className="h-6 text-xs px-1.5 text-muted-foreground hover:text-destructive cursor-pointer"
                     >
                       Limpar
                     </Button>
@@ -602,7 +602,7 @@ export function DocumentPreviewDrawer({
                   </div>
                   <div className="sm:col-span-5">
                     <select
-                      className="w-full h-7 px-2 text-[11px] rounded-md border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                      className="w-full h-7 px-2 text-xs rounded-md border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                       value={clauseCategoryFilter}
                       onChange={(e) => setClauseCategoryFilter(e.target.value)}
                     >
@@ -655,16 +655,16 @@ export function DocumentPreviewDrawer({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-1">
                             <p className="font-medium text-foreground truncate">{clause.title}</p>
-                            <Badge variant={isChecked ? "default" : "outline"} className="text-[9px] shrink-0">
+                            <Badge variant={isChecked ? "default" : "outline"} className="text-xs shrink-0">
                               {isChecked ? "Incluída no PDF" : "Omitida"}
                             </Badge>
                           </div>
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[10px] text-primary/80 font-medium">
+                            <span className="text-xs text-primary/80 font-medium">
                               {clause.category?.name || "Geral"}
                             </span>
                           </div>
-                          <p className="text-[11px] text-muted-foreground line-clamp-2 mt-1 leading-relaxed">
+                          <p className="text-xs text-muted-foreground line-clamp-2 mt-1 leading-relaxed">
                             {clause.contentMarkdown}
                           </p>
                         </div>
