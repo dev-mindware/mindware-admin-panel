@@ -1,6 +1,11 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 import { errorMessage } from "@/hooks/use-activities";
 import { notificationsService } from "@/services/notifications-service";
@@ -31,6 +36,29 @@ export function useNotifications(enabled: boolean) {
     queryFn: () => notificationsService.list({ limit: 20 }),
     enabled,
   });
+}
+
+const PAGE_SIZE = 10;
+/** Com a lista aberta, actualiza-se a cada 30 s (o contador do sino continua a 60 s). */
+const LIST_POLL_MS = 30_000;
+
+/** Lista paginada com scroll infinito (sino e página «Ver todas»). */
+export function useInfiniteNotifications(opts: { unread?: boolean; enabled?: boolean } = {}) {
+  const { unread, enabled = true } = opts;
+  const query = useInfiniteQuery({
+    queryKey: [...notificationKeys.list, { unread: !!unread }] as const,
+    queryFn: ({ pageParam }) =>
+      notificationsService.list({ page: pageParam, limit: PAGE_SIZE, unread: unread || undefined }),
+    initialPageParam: 1,
+    getNextPageParam: (last) => (last.meta.hasNextPage ? last.meta.page + 1 : undefined),
+    enabled,
+    refetchInterval: enabled ? LIST_POLL_MS : false,
+    refetchIntervalInBackground: false,
+  });
+  return {
+    ...query,
+    notifications: query.data?.pages.flatMap((p) => p.data) ?? [],
+  };
 }
 
 export function useMarkRead() {

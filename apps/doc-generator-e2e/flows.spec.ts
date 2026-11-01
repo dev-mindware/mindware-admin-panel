@@ -141,6 +141,22 @@ test.describe("notificações", () => {
     await expectInViewport(page, page.getByRole("menu"));
     await item.click();
     await expect.poll(() => lastRequest(state, "POST", /^\/notifications\/n1\/read$/) !== undefined).toBe(true);
+    // Clicar abre o detalhe (como no sino do MindGest) e fecha sem bloquear a página.
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toContainText(/Prazo em 1 h/);
+    await dialog.getByRole("button", { name: "Fechar" }).first().click();
+    await expect(dialog).toBeHidden();
+    await expect(page.getByRole("button", { name: "Notificações" })).toBeEnabled();
+  });
+
+  test("«Ver todas» abre a página de notificações", async ({ page, context }) => {
+    await setup(page, context);
+    await page.goto("./dashboard");
+    await page.getByRole("button", { name: "Notificações" }).click();
+    await page.getByRole("link", { name: "Ver todas" }).click();
+    await expect(page).toHaveURL(/\/notifications/);
+    await expect(page.getByRole("heading", { name: "Notificações" }).first()).toBeVisible();
+    await expect(page.getByText(/Prazo em 1 h/).first()).toBeVisible();
   });
 });
 

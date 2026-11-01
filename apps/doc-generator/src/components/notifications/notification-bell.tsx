@@ -1,76 +1,78 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Bell } from "lucide-react";
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@workspace/ui";
 import {
-  Badge,
-  Button,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  Icon,
-} from "@workspace/ui";
-import {
+  useInfiniteNotifications,
   useMarkAllRead,
   useMarkRead,
-  useNotifications,
   useUnreadCount,
 } from "@/hooks/use-notifications";
-import { formatDateTime } from "@/lib/format";
 import type { NotificationItem } from "@/types/notification";
+import { NotificationDetail } from "./notification-detail";
+import { NotificationList } from "./notification-list";
 
+/** Sino com menu de notificações in-app (mesmo desenho do sino do MindGest). */
 export function NotificationBell() {
-  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
+  const [selected, setSelected] = useState<NotificationItem | null>(null);
+
   const unread = useUnreadCount();
   const count = unread.data ?? 0;
-  const list = useNotifications(true);
+  const list = useInfiniteNotifications({ enabled: isOpen });
   const markRead = useMarkRead();
   const markAll = useMarkAllRead();
 
-  function openItem(n: NotificationItem) {
-    if (!n.readAt) markRead.mutate(n.id);
-    // Só navega para caminhos internos.
-    const target = n.link?.startsWith("/") ? n.link : n.activityId ? "/activities" : null;
-    if (target) router.push(target);
+  function openNotification(notification: NotificationItem) {
+    setSelected(notification);
+    if (!notification.readAt) markRead.mutate(notification.id);
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" aria-label="Notificações">
-          <Icon name="Bell" />
-          {count > 0 && <Badge variant="destructive">{count > 99 ? "99+" : count}</Badge>}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Notificações</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {list.isLoading && <DropdownMenuItem disabled>A carregar...</DropdownMenuItem>}
-        {list.isError && <DropdownMenuItem disabled>Não foi possível carregar.</DropdownMenuItem>}
-        {list.data?.data.length === 0 && <DropdownMenuItem disabled>Sem notificações</DropdownMenuItem>}
-        {list.data?.data.map((n) => (
-          <DropdownMenuItem key={n.id} onSelect={() => openItem(n)}>
-            <div>
-              <p>
-                {!n.readAt && "● "}
-                {n.title}
-              </p>
-              <p>{n.body}</p>
-              <p>{formatDateTime(n.createdAt)}</p>
-            </div>
-          </DropdownMenuItem>
-        ))}
-        {count > 0 && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem disabled={markAll.isPending} onSelect={() => markAll.mutate()}>
-              Marcar todas como lidas
-            </DropdownMenuItem>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="relative"
+            aria-label={count > 0 ? `Notificações, ${count} por ler` : "Notificações"}
+          >
+            <Bell className="h-5 w-5 text-foreground" />
+            {count > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-medium text-white">
+                {count > 9 ? "9+" : count}
+              </span>
+            )}
+          </Button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent
+          align="end"
+          className="w-[calc(100vw-1.5rem)] max-w-96 border-border p-0 shadow-lg"
+          sideOffset={8}
+        >
+          <NotificationList
+            isDropdown
+            notifications={list.notifications}
+            unreadCount={count}
+            hasNextPage={list.hasNextPage}
+            fetchNextPage={() => void list.fetchNextPage()}
+            isFetchingNextPage={list.isFetchingNextPage}
+            onNotificationClick={openNotification}
+            onMarkAllAsRead={() => markAll.mutate()}
+            isMarkingAllAsRead={markAll.isPending}
+          />
+          {list.isError && (
+            <p className="border-t border-border p-3 text-center text-xs text-destructive">
+              Não foi possível carregar as notificações.
+            </p>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <NotificationDetail notification={selected} onClose={() => setSelected(null)} />
+    </>
   );
 }

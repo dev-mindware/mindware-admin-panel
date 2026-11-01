@@ -11,6 +11,7 @@ const ROUTES = [
   "/activities",
   "/calendar",
   "/reports",
+  "/notifications",
   "/documents/proposal",
   "/documents/contract",
   "/documents/contract/add",
