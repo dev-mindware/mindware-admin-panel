@@ -42,17 +42,11 @@ export function BarListPanel({ title, description, icon, items, orientation = "h
         <ChartContainer config={config} className="aspect-auto w-full" style={{ height }}>
           <BarChart data={items} layout={horizontal ? "vertical" : "horizontal"} margin={horizontal ? { left: 0, right: 40 } : { left: 0, right: 8, top: 16 }}>
             <CartesianGrid horizontal={!horizontal} vertical={horizontal} strokeDasharray="3 3" />
-            {horizontal ? (
-              <>
-                <XAxis type="number" hide />
-                <YAxis type="category" dataKey="label" tickLine={false} axisLine={false} width={104} tick={{ fontSize: 11 }} />
-              </>
-            ) : (
-              <>
-                <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 11 }} interval={0} />
-                <YAxis hide />
-              </>
-            )}
+            {/* Sem fragmentos <>: o Recharts 2 não os atravessa com React 19 e os eixos desaparecem. */}
+            {horizontal && <XAxis type="number" hide />}
+            {horizontal && <YAxis type="category" dataKey="label" tickLine={false} axisLine={false} width={104} tick={{ fontSize: 11 }} />}
+            {!horizontal && <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} tick={{ fontSize: 11 }} interval={0} />}
+            {!horizontal && <YAxis hide />}
             <ChartTooltip content={<ChartTooltipContent hideLabel formatter={(v) => fmt(Number(v))} />} />
             <Bar dataKey="value" fill="var(--color-value)" radius={horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0]} maxBarSize={horizontal ? 18 : 48}>
               {multicolor && items.map((_, i) => <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />)}

@@ -2,7 +2,7 @@
   id: string;
   name: string;
   email: string;
-  role: "ADMIN" | "EDITOR";
+  role: "ADMIN" | "MANAGER" | "EDITOR";
   allowedDocumentTypes: string[];
   isActive: boolean;
   createdAt: string;
@@ -16,13 +16,13 @@ export interface CreateUserPayload {
   name: string;
   email: string;
   password: string;
-  role?: "ADMIN" | "EDITOR";
+  role?: "ADMIN" | "MANAGER" | "EDITOR";
   allowedDocumentTypes?: string[];
 }
 
 export interface UpdateUserPayload {
   name?: string;
-  role?: "ADMIN" | "EDITOR";
+  role?: "ADMIN" | "MANAGER" | "EDITOR";
   allowedDocumentTypes?: string[];
   isActive?: boolean;
 }

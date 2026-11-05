@@ -7,10 +7,12 @@ const ALL_DOC_TYPES = ["proposal", "contract", "letter", "opinion", "official", 
 export function usePermissions() {
   const { user } = useAuthStore();
   const isAdmin = user?.role === "ADMIN";
+  const isManager = isAdmin || user?.role === "MANAGER";
 
   return {
     user,
     isAdmin,
+    isManager,
     canManageUsers: isAdmin,
     canViewAuditLogs: isAdmin,
     canApproveDocuments: isAdmin,

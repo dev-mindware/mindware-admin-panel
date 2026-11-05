@@ -32,7 +32,7 @@ interface FilterToolbarProps {
 export function FilterToolbar({ search, filters = [], onClear, children }: FilterToolbarProps) {
   const active = Boolean(search?.value) || filters.some((f) => f.value);
   return (
-    <div className="flex flex-col gap-3 rounded-lg border bg-muted/30 p-3 lg:flex-row lg:items-end">
+    <div className="flex flex-col gap-3 py-1 pb-3 lg:flex-row lg:items-end">
       {search && (
         <div className="relative min-w-0 flex-1 lg:max-w-sm">
           <Icon name="Search" className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -75,3 +75,4 @@ export function FilterToolbar({ search, filters = [], onClear, children }: Filte
     </div>
   );
 }
+

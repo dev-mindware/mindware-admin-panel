@@ -1,3 +1,4 @@
+import * as React from "react";
 import {
   Select,
   SelectContent,
@@ -32,11 +33,12 @@ export function SelectField({
   onValueChange,
   className,
 }: SelectFieldProps) {
+  const labelId = React.useId();
   return (
     <div className={`flex flex-col ${className ?? ""}`}>
-      <label className="text-sm font-medium mb-1">{label}</label>
+      <label id={labelId} className="text-sm font-medium mb-1">{label}</label>
       <Select value={String(value)} onValueChange={onValueChange} disabled={disabled}>
-        <SelectTrigger>
+        <SelectTrigger aria-labelledby={labelId}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>

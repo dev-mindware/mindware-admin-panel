@@ -32,6 +32,21 @@ export const adminMenuItems: MenuStructure = {
       })),
     },
     {
+      name: "Actividades",
+      url: "/activities",
+      icon: <Icon name="SquareKanban" />,
+    },
+    {
+      name: "Calendário",
+      url: "/calendar",
+      icon: <Icon name="CalendarDays" />,
+    },
+    {
+      name: "Relatórios",
+      url: "/reports",
+      icon: <Icon name="ChartColumn" />,
+    },
+    {
       name: "Clientes",
       url: "/clients",
       icon: <Icon name="Users" />,

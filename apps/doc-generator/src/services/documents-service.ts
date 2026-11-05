@@ -77,7 +77,9 @@ export interface CreateDocumentPayload {
   clientId?: string;
   clientName?: string;
   clientNif?: string;
-  templateId: string;
+  clientAddress?: string;
+  /** Só as propostas usam um modelo escolhido; os restantes tipos têm modelo fixo. */
+  templateId?: string;
   validityDays?: number;
   deliveryDays?: number;
   notes?: string;
@@ -213,28 +215,54 @@ export const documentsService = {
     return response.data;
   },
 
-  getPreviewHtmlUrl(documentId: string): string {
-    const rawBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005/api";
-    const baseUrl = rawBase.replace(/\/+$/, "");
-    const apiKey = process.env.NEXT_PUBLIC_API_KEY;
-    const query = apiKey ? `?apiKey=${encodeURIComponent(apiKey)}` : "";
-    return `${baseUrl}/documents/${documentId}/preview-html${query}`;
+  /**
+   * PDF/HTML do documento como Blob, pedido com `Authorization: Bearer` (e
+   * refresh automático em 401). Os URLs directos deixaram de existir: a chave
+   * pública da API já não é aceite e um <iframe> não consegue enviar cabeçalhos.
+   */
+  async fetchPdfBlob(documentId: string, mode: "render" | "download" = "render"): Promise<Blob> {
+    const path = mode === "download" ? "download-pdf" : "render-pdf";
+    const response = await api.get(`/documents/${documentId}/${path}`, {
+      responseType: "blob",
+    });
+    return response.data;
   },
 
-  getDirectPdfUrl(documentId: string): string {
-    const rawBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005/api";
-    const baseUrl = rawBase.replace(/\/+$/, "");
-    const apiKey = process.env.NEXT_PUBLIC_API_KEY;
-    const query = apiKey ? `?apiKey=${encodeURIComponent(apiKey)}` : "";
-    return `${baseUrl}/documents/${documentId}/render-pdf${query}`;
+  async fetchPreviewHtml(documentId: string): Promise<string> {
+    const response = await api.get<string>(`/documents/${documentId}/preview-html`, {
+      responseType: "text",
+    });
+    return response.data;
   },
 
-  getDownloadPdfUrl(documentId: string): string {
-    const rawBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005/api";
-    const baseUrl = rawBase.replace(/\/+$/, "");
-    const apiKey = process.env.NEXT_PUBLIC_API_KEY;
-    const query = apiKey ? `?apiKey=${encodeURIComponent(apiKey)}` : "";
-    return `${baseUrl}/documents/${documentId}/download-pdf${query}`;
+  /** Abre o PDF numa nova aba. A aba abre já (clique do utilizador) para não ser bloqueada. */
+  async openPdf(documentId: string): Promise<void> {
+    const tab = window.open("", "_blank");
+    try {
+      const blob = await this.fetchPdfBlob(documentId);
+      const url = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+      if (tab) {
+        tab.location.href = url;
+      } else {
+        window.location.assign(url);
+      }
+      setTimeout(() => URL.revokeObjectURL(url), 5 * 60 * 1000);
+    } catch (err) {
+      tab?.close();
+      throw err;
+    }
+  },
+
+  async downloadPdf(documentId: string, filename = `documento-${documentId}.pdf`): Promise<void> {
+    const blob = await this.fetchPdfBlob(documentId, "download");
+    const url = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+    const a = window.document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    window.document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10_000);
   },
 
   async submitForApproval(id: string): Promise<DocumentItem> {

@@ -25,6 +25,9 @@ import { clientsService, Client } from "@/services/clients-service";
 import { clausesService, Clause } from "@/services/clauses-service";
 import { GenerationStatusBadge } from "./GenerationStatusBadge";
 import { toast } from "sonner";
+import { openDocumentPdf } from "@/lib/pdf-actions";
+import { usePdfBlobUrl } from "@/hooks/use-pdf-blob-url";
+import { PdfPreview } from "./pdf-preview";
 
 interface Props {
   document: DocumentItem | null;
@@ -41,6 +44,7 @@ export function DocumentPreviewDrawer({
 }: Props) {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"edit" | "pdf">("pdf");
+  const pdf = usePdfBlobUrl(document?.id, activeTab === "pdf", document?.updatedAt);
   const { isAdmin } = usePermissions();
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
@@ -246,6 +250,7 @@ export function DocumentPreviewDrawer({
             <span>PDF Renderizado em Tempo Real</span>
           </button>
 
+          {(!document.type || document.type === "proposal") && (
           <button
             onClick={() => setActiveTab("edit")}
             className={`py-3 px-4 border-b-2 font-medium transition-colors cursor-pointer flex items-center gap-2 ${
@@ -257,6 +262,7 @@ export function DocumentPreviewDrawer({
             <Icon name="Pencil" size={14} />
             <span>Editar Conteúdo & Tabelas</span>
           </button>
+          )}
         </div>
         {/* Barra de Fluxo de Aprovao */}
         <div className="p-3.5 rounded-xl border bg-card flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
@@ -456,7 +462,7 @@ export function DocumentPreviewDrawer({
                   >
                     <div className="flex items-center justify-between gap-2 border-b border-border/50 pb-2">
                       <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                        <span className="size-5 rounded-full bg-muted flex items-center justify-center text-[10px] font-semibold text-foreground">
+                        <span className="size-5 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-foreground">
                           {index + 1}
                         </span>
                         Fase / Módulo {index + 1}
@@ -477,7 +483,7 @@ export function DocumentPreviewDrawer({
 
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
                       <div className="sm:col-span-6 space-y-1">
-                        <label className="text-[11px] font-medium text-muted-foreground">
+                        <label className="text-xs font-medium text-muted-foreground">
                           Nome da Fase
                         </label>
                         <Input
@@ -489,7 +495,7 @@ export function DocumentPreviewDrawer({
                         />
                       </div>
                       <div className="sm:col-span-2 space-y-1">
-                        <label className="text-[11px] font-medium text-muted-foreground">
+                        <label className="text-xs font-medium text-muted-foreground">
                           Dias
                         </label>
                         <Input
@@ -501,7 +507,7 @@ export function DocumentPreviewDrawer({
                         />
                       </div>
                       <div className="sm:col-span-4 space-y-1">
-                        <label className="text-[11px] font-medium text-muted-foreground">
+                        <label className="text-xs font-medium text-muted-foreground">
                           Subtotal (Kz)
                         </label>
                         <Input
@@ -515,7 +521,7 @@ export function DocumentPreviewDrawer({
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[11px] font-medium text-muted-foreground">
+                      <label className="text-xs font-medium text-muted-foreground">
                         Entregável detalhado
                       </label>
                       <Input
@@ -549,7 +555,7 @@ export function DocumentPreviewDrawer({
                       <Icon name="FileSpreadsheet" size={16} className="text-primary" />
                       Cláusulas & Condições Contratuais
                     </CardTitle>
-                    <Badge variant="outline" className="text-[10px]">
+                    <Badge variant="outline" className="text-xs">
                       {selectedClauses.length} seleccionadas
                     </Badge>
                   </div>
@@ -562,7 +568,7 @@ export function DocumentPreviewDrawer({
                         setSelectedClauses(clauses.map((c) => c.id));
                         toast.success("Todas as cláusulas seleccionadas!");
                       }}
-                      className="h-6 text-[10px] px-2 cursor-pointer"
+                      className="h-6 text-xs px-2 cursor-pointer"
                     >
                       Todas ({clauses.length})
                     </Button>
@@ -574,7 +580,7 @@ export function DocumentPreviewDrawer({
                         setSelectedClauses([]);
                         toast.info("Seleção de cláusulas limpa.");
                       }}
-                      className="h-6 text-[10px] px-1.5 text-muted-foreground hover:text-destructive cursor-pointer"
+                      className="h-6 text-xs px-1.5 text-muted-foreground hover:text-destructive cursor-pointer"
                     >
                       Limpar
                     </Button>
@@ -596,7 +602,7 @@ export function DocumentPreviewDrawer({
                   </div>
                   <div className="sm:col-span-5">
                     <select
-                      className="w-full h-7 px-2 text-[11px] rounded-md border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                      className="w-full h-7 px-2 text-xs rounded-md border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                       value={clauseCategoryFilter}
                       onChange={(e) => setClauseCategoryFilter(e.target.value)}
                     >
@@ -649,16 +655,16 @@ export function DocumentPreviewDrawer({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-1">
                             <p className="font-medium text-foreground truncate">{clause.title}</p>
-                            <Badge variant={isChecked ? "default" : "outline"} className="text-[9px] shrink-0">
+                            <Badge variant={isChecked ? "default" : "outline"} className="text-xs shrink-0">
                               {isChecked ? "Incluída no PDF" : "Omitida"}
                             </Badge>
                           </div>
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[10px] text-primary/80 font-medium">
+                            <span className="text-xs text-primary/80 font-medium">
                               {clause.category?.name || "Geral"}
                             </span>
                           </div>
-                          <p className="text-[11px] text-muted-foreground line-clamp-2 mt-1 leading-relaxed">
+                          <p className="text-xs text-muted-foreground line-clamp-2 mt-1 leading-relaxed">
                             {clause.contentMarkdown}
                           </p>
                         </div>
@@ -718,20 +724,23 @@ export function DocumentPreviewDrawer({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() =>
-                  window.open(documentsService.getDirectPdfUrl(document.id), "_blank")
-                }
+                onClick={() => openDocumentPdf(document.id)}
                 className="h-7 text-xs gap-1 cursor-pointer"
               >
                 <Icon name="ExternalLink" size={12} />
                 <span>Abrir em Nova Aba</span>
               </Button>
             </div>
-            <iframe
-              src={documentsService.getDirectPdfUrl(document.id)}
-              className="w-full flex-1 border-0"
-              title="PDF Real-Time Preview"
-            />
+            {pdf.url ? (
+              <PdfPreview url={pdf.url} title="Pré-visualização do PDF" filename={`${document.code}.pdf`} />
+            ) : (
+              <p
+                className="flex-1 p-6 text-center text-xs text-muted-foreground"
+                role={pdf.error ? "alert" : "status"}
+              >
+                {pdf.error ? "Não foi possível carregar o PDF." : "A carregar PDF…"}
+              </p>
+            )}
           </div>
         )}
       </div>

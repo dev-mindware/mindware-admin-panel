@@ -1,0 +1,76 @@
+/*
+ * Ajustes de toque e de ecrãs pequenos, só desta app. Não estilizam componentes
+ * por classe: corrigem tamanhos mínimos para dedos (44 px, como a Apple e o
+ * Material recomendam; o WCAG 2.5.8 exige 24 px) e evitam o zoom do iOS ao focar.
+ */
+@media (max-width: 1023px), (pointer: coarse) {
+  /* Botões, separadores, menus e selecções: pelo menos 44 px de altura. */
+  :where(button, [role="button"], [role="tab"], [role="menuitem"], [role="combobox"], select, summary):not(
+      [role="checkbox"],
+      [role="switch"],
+      [role="radio"]
+    ) {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Menu lateral e ligações dentro do conteúdo (listas, cartões). */
+  [data-sidebar="menu-button"],
+  [data-sidebar="menu-sub-button"],
+  [data-sidebar="trigger"] {
+    min-height: 44px;
+  }
+  [data-sidebar="trigger"] {
+    min-width: 44px;
+  }
+  :where(main) a[href] {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  /* Caixas e interruptores são pequenos por desenho: alarga-se a área tocável sem mudar o aspecto. */
+  [role="checkbox"],
+  [role="switch"],
+  [role="radio"] {
+    position: relative;
+  }
+  [role="checkbox"]::after,
+  [role="switch"]::after,
+  [role="radio"]::after {
+    content: "";
+    position: absolute;
+    inset: -12px;
+  }
+
+  /* A caixa de texto (o contentor do <input>) é o alvo de toque: 44 px. */
+  :where(div):has(> input:not([type="checkbox"], [type="radio"], [type="range"], [type="hidden"], [type="file"])) {
+    min-height: 44px;
+  }
+
+  /* react-select (MultiSelect) */
+  .react-select__control {
+    min-height: 44px;
+  }
+}
+
+/* Abaixo de 16 px o iOS faz zoom ao focar um campo (também nos iPad). */
+@media (max-width: 1023px), (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea,
+  .react-select__input-container {
+    font-size: 16px !important;
+  }
+}
+
+/* Barra de acções fixa em baixo (formulários longos): respeita o entalhe e a barra do iOS. */
+.mobile-action-bar {
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+}
+
+/* Sem o atraso de 300 ms nem o realce cinzento ao tocar. */
+html {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}

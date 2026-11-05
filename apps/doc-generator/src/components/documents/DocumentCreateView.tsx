@@ -31,6 +31,9 @@ import { documentsService, PriceItem } from "@/services/documents-service";
 import { DocumentTypeConfig } from "@/constants/document-types";
 import { WorkDeclarationForm, WorkDeclarationFormData } from "@/components/documents/WorkDeclarationForm";
 import { toast } from "sonner";
+import { openDocumentPdf } from "@/lib/pdf-actions";
+import { usePdfBlobUrl } from "@/hooks/use-pdf-blob-url";
+import { PdfPreview } from "./pdf-preview";
 
 export type CustomPageBlockType = "PARAGRAPH" | "TABLE" | "SCOPE_LIST" | "NOTE";
 
@@ -209,6 +212,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
   const [isRenderingLivePdf, setIsRenderingLivePdf] = useState(false);
   const [createdDocumentId, setCreatedDocumentId] = useState<string | null>(null);
   const livePdfBlobRef = useRef<string | null>(null);
+  const savedPdf = usePdfBlobUrl(createdDocumentId, activeTab === "pdf");
 
   const { data: clausesData = [] } = useQuery({
     queryKey: ["clauses", "all"],
@@ -867,7 +871,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
             <span>
               PDF em Tempo Real{" "}
               {livePdfUrl && (
-                <Badge variant="secondary" className="ml-1 text-[10px]">
+                <Badge variant="secondary" className="ml-1 text-xs">
                   Visualização Activa
                 </Badge>
               )}
@@ -987,7 +991,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                         <Icon name="LayoutGrid" size={16} className="text-primary" />
                         Escopos do Projecto (Módulos & Especificações)
                       </CardTitle>
-                      <Badge variant="outline" className="text-[10px]">
+                      <Badge variant="outline" className="text-xs">
                         {scopeItems.length} / {MAX_SCOPE_ITEMS} Módulos
                       </Badge>
                     </div>
@@ -1025,7 +1029,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
 
                 {showScope && (
                   <CardContent className="space-y-4">
-                    <div className="p-2.5 rounded-lg bg-muted/20 border text-[11px] text-muted-foreground flex items-center gap-2">
+                    <div className="p-2.5 rounded-lg bg-muted/20 border text-xs text-muted-foreground flex items-center gap-2">
                       <Icon name="Info" size={14} className="text-primary shrink-0" />
                       <span>
                         <strong>Dica de Alinhamento PDF:</strong> Escreva um título conciso (máx. {MAX_SCOPE_TITLE_LENGTH} caracteres) e digite um ponto por linha na caixa de texto (até {MAX_SCOPE_POINTS} pontos por módulo).
@@ -1045,7 +1049,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                           >
                             <div className="flex items-center justify-between border-b border-border/50 pb-2">
                               <span className="text-xs font-semibold text-primary flex items-center gap-1.5 uppercase tracking-wide">
-                                <span className="size-5 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
+                                <span className="size-5 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
                                   {index + 1}
                                 </span>
                                 Escopo #{index + 1}
@@ -1067,11 +1071,11 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
 
                             <div className="space-y-1">
                               <div className="flex items-center justify-between">
-                                <label className="text-[11px] font-medium text-foreground">
+                                <label className="text-xs font-medium text-foreground">
                                   Título do Escopo
                                 </label>
                                 <span
-                                  className={`text-[10px] ${
+                                  className={`text-xs ${
                                     isOverTitle ? "text-destructive font-semibold" : "text-muted-foreground"
                                   }`}
                                 >
@@ -1091,11 +1095,11 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
 
                             <div className="space-y-1">
                               <div className="flex items-center justify-between">
-                                <label className="text-[11px] font-medium text-foreground">
+                                <label className="text-xs font-medium text-foreground">
                                   Lista de Pontos (1 por linha)
                                 </label>
                                 <span
-                                  className={`text-[10px] ${
+                                  className={`text-xs ${
                                     isOverPoints ? "text-destructive font-semibold" : "text-muted-foreground"
                                   }`}
                                 >
@@ -1151,7 +1155,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                     >
                       <div className="flex items-center justify-between gap-2 border-b border-border/50 pb-2">
                         <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                          <span className="size-5 rounded-full bg-muted flex items-center justify-center text-[10px] font-semibold text-foreground">
+                          <span className="size-5 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-foreground">
                             {index + 1}
                           </span>
                           Fase / Módulo {index + 1}
@@ -1172,7 +1176,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
 
                       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
                         <div className="sm:col-span-6 space-y-1">
-                          <label className="text-[11px] font-medium text-muted-foreground">
+                          <label className="text-xs font-medium text-muted-foreground">
                             Nome da Fase / Módulo
                           </label>
                           <Input
@@ -1185,7 +1189,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                           />
                         </div>
                         <div className="sm:col-span-2 space-y-1">
-                          <label className="text-[11px] font-medium text-muted-foreground">
+                          <label className="text-xs font-medium text-muted-foreground">
                             Dias
                           </label>
                           <Input
@@ -1197,7 +1201,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                           />
                         </div>
                         <div className="sm:col-span-4 space-y-1">
-                          <label className="text-[11px] font-medium text-muted-foreground">
+                          <label className="text-xs font-medium text-muted-foreground">
                             Subtotal (Kz)
                           </label>
                           <Input
@@ -1212,7 +1216,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[11px] font-medium text-muted-foreground">
+                        <label className="text-xs font-medium text-muted-foreground">
                           Descrição do Entregável
                         </label>
                         <Input
@@ -1265,7 +1269,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                 {showIntro && (
                   <CardContent className="space-y-4">
                     <div className="space-y-1">
-                      <label className="text-[11px] font-medium text-muted-foreground">
+                      <label className="text-xs font-medium text-muted-foreground">
                         Texto de Introdução (opcional - deixe vazio para padrão)
                       </label>
                       <textarea
@@ -1278,7 +1282,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[11px] font-medium text-muted-foreground">
+                      <label className="text-xs font-medium text-muted-foreground">
                         Objectivos Gerais (opcional - deixe vazio para padrão)
                       </label>
                       <textarea
@@ -1308,7 +1312,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
 
                   <div className="flex items-center gap-2 flex-wrap">
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <span className="text-[11px] font-medium hidden sm:inline">Inserir como:</span>
+                      <span className="text-xs font-medium hidden sm:inline">Inserir como:</span>
                       <Select
                         value={newPagePosition}
                         onValueChange={setNewPagePosition}
@@ -1360,7 +1364,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/50 pb-2.5">
                           <div className="flex items-center gap-2">
-                            <span className="size-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[11px] font-bold shrink-0">
+                            <span className="size-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
                               {index + 1}
                             </span>
                             <div className="flex items-center gap-1.5">
@@ -1368,12 +1372,12 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                                 {getOrdinalText(index + 1, customPages.length)}
                               </span>
                               {index === 0 && (
-                                <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-4.5 bg-background font-normal text-muted-foreground">
+                                <Badge variant="outline" className="text-xs py-0 px-1.5 h-4.5 bg-background font-normal text-muted-foreground">
                                   Primeira
                                 </Badge>
                               )}
                               {index === customPages.length - 1 && customPages.length > 1 && (
-                                <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-4.5 bg-background font-normal text-muted-foreground">
+                                <Badge variant="outline" className="text-xs py-0 px-1.5 h-4.5 bg-background font-normal text-muted-foreground">
                                   Última
                                 </Badge>
                               )}
@@ -1382,25 +1386,25 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
 
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {/* Seletor de localização no documento PDF */}
-                            <div className="flex items-center gap-1 text-[11px] text-muted-foreground mr-1">
-                              <span className="hidden md:inline text-[10px]">Posição no PDF:</span>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground mr-1">
+                              <span className="hidden md:inline text-xs">Posição no PDF:</span>
                               <Select
                                 value={page.placement || "MIDDLE"}
                                 onValueChange={(val: "START" | "MIDDLE" | "END") =>
                                   handleCustomPagePlacementChange(page.id, val)
                                 }
                               >
-                                <SelectTrigger className="h-6.5 text-[10px] px-2 min-w-[130px] bg-background">
+                                <SelectTrigger className="h-6.5 text-xs px-2 min-w-[130px] bg-background">
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="START" className="text-[11px]">
+                                  <SelectItem value="START" className="text-xs">
                                     Início (após Capa)
                                   </SelectItem>
-                                  <SelectItem value="MIDDLE" className="text-[11px]">
+                                  <SelectItem value="MIDDLE" className="text-xs">
                                     Meio (após Escopo)
                                   </SelectItem>
-                                  <SelectItem value="END" className="text-[11px]">
+                                  <SelectItem value="END" className="text-xs">
                                     Fim (última do PDF)
                                   </SelectItem>
                                 </SelectContent>
@@ -1417,12 +1421,12 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                                     handleMoveCustomPage(index, target);
                                   }}
                                 >
-                                  <SelectTrigger className="h-6.5 text-[10px] px-2 w-[90px] bg-background">
+                                  <SelectTrigger className="h-6.5 text-xs px-2 w-[90px] bg-background">
                                     <SelectValue placeholder="Mover..." />
                                   </SelectTrigger>
                                   <SelectContent>
                                     {customPages.map((_, i) => (
-                                      <SelectItem key={i} value={String(i + 1)} className="text-[11px]">
+                                      <SelectItem key={i} value={String(i + 1)} className="text-xs">
                                         {i === 0 ? "1ª (Primeira)" : i === customPages.length - 1 ? `${i + 1}ª (Última)` : `${i + 1}ª Página`}
                                       </SelectItem>
                                     ))}
@@ -1472,7 +1476,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[11px] font-medium text-muted-foreground">
+                          <label className="text-xs font-medium text-muted-foreground">
                             Título da Página
                           </label>
                           <Input
@@ -1488,7 +1492,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                         {/* Blocos de Conteúdo Dinâmicos */}
                         <div className="space-y-3 pt-2">
                           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/40 pb-2">
-                            <span className="text-[11px] font-medium text-foreground flex items-center gap-1.5">
+                            <span className="text-xs font-medium text-foreground flex items-center gap-1.5">
                               <Icon name="Layers" size={13} className="text-primary" />
                               Blocos de Conteúdo ({page.blocks.length})
                             </span>
@@ -1498,7 +1502,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleAddBlock(page.id, "PARAGRAPH")}
-                                className="h-6 text-[10px] px-2 gap-1 cursor-pointer"
+                                className="h-6 text-xs px-2 gap-1 cursor-pointer"
                               >
                                 <Icon name="Type" size={11} />
                                 <span>+ Parágrafo</span>
@@ -1508,7 +1512,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleAddBlock(page.id, "TABLE")}
-                                className="h-6 text-[10px] px-2 gap-1 cursor-pointer"
+                                className="h-6 text-xs px-2 gap-1 cursor-pointer"
                               >
                                 <Icon name="Table" size={11} />
                                 <span>+ Tabela</span>
@@ -1518,7 +1522,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleAddBlock(page.id, "SCOPE_LIST")}
-                                className="h-6 text-[10px] px-2 gap-1 cursor-pointer"
+                                className="h-6 text-xs px-2 gap-1 cursor-pointer"
                               >
                                 <Icon name="List" size={11} />
                                 <span>+ Lista</span>
@@ -1528,7 +1532,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleAddBlock(page.id, "NOTE")}
-                                className="h-6 text-[10px] px-2 gap-1 cursor-pointer"
+                                className="h-6 text-xs px-2 gap-1 cursor-pointer"
                               >
                                 <Icon name="StickyNote" size={11} />
                                 <span>+ Nota</span>
@@ -1537,7 +1541,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                           </div>
 
                           {page.blocks.length === 0 ? (
-                            <div className="p-3 rounded-lg border border-dashed text-center text-[11px] text-muted-foreground">
+                            <div className="p-3 rounded-lg border border-dashed text-center text-xs text-muted-foreground">
                               Nenhum bloco adicionado. Use os botões acima para adicionar parágrafos, tabelas, listas ou notas.
                             </div>
                           ) : (
@@ -1547,7 +1551,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                                 className="p-3 rounded-lg border border-border/60 bg-muted/20 space-y-2.5 relative group"
                               >
                                 <div className="flex items-center justify-between">
-                                  <span className="text-[10px] font-semibold text-primary uppercase tracking-wider flex items-center gap-1.5">
+                                  <span className="text-xs font-semibold text-primary uppercase tracking-wider flex items-center gap-1.5">
                                     {block.type === "PARAGRAPH" && <Icon name="Type" size={12} />}
                                     {block.type === "TABLE" && <Icon name="Table" size={12} />}
                                     {block.type === "SCOPE_LIST" && <Icon name="List" size={12} />}
@@ -1618,7 +1622,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                                       className="h-7 text-xs font-semibold uppercase tracking-wider"
                                     />
                                     <div className="space-y-1">
-                                      <label className="text-[10px] text-muted-foreground">
+                                      <label className="text-xs text-muted-foreground">
                                         Pontos com marcadores (digite 1 ponto por linha):
                                       </label>
                                       <textarea
@@ -1638,7 +1642,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                                 {block.type === "TABLE" && (
                                   <div className="space-y-2">
                                     <div className="flex items-center justify-between gap-2">
-                                      <span className="text-[10px] text-muted-foreground font-medium">
+                                      <span className="text-xs text-muted-foreground font-medium">
                                         Colunas ({block.headers.length}) e Linhas ({block.rows.length})
                                       </span>
                                       <div className="flex items-center gap-1.5">
@@ -1647,7 +1651,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                                           variant="outline"
                                           size="sm"
                                           onClick={() => handleAddTableColumn(page.id, block.id)}
-                                          className="h-5 text-[10px] px-2 cursor-pointer"
+                                          className="h-5 text-xs px-2 cursor-pointer"
                                         >
                                           + Coluna
                                         </Button>
@@ -1656,7 +1660,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                                           variant="outline"
                                           size="sm"
                                           onClick={() => handleAddTableRow(page.id, block.id)}
-                                          className="h-5 text-[10px] px-2 cursor-pointer"
+                                          className="h-5 text-xs px-2 cursor-pointer"
                                         >
                                           + Linha
                                         </Button>
@@ -1664,14 +1668,14 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                                     </div>
 
                                     <div className="overflow-x-auto border rounded-md bg-background">
-                                      <table className="w-full text-[11px] border-collapse">
+                                      <table className="w-full text-xs border-collapse">
                                         <thead>
                                           <tr className="bg-primary/10 border-b">
                                             {block.headers.map((h, cIdx) => (
                                               <th key={cIdx} className="p-1.5 text-left font-semibold">
                                                 <div className="flex items-center gap-1">
                                                   <input
-                                                    className="w-full bg-transparent border-b border-primary/40 focus:outline-none font-semibold text-[11px] text-primary"
+                                                    className="w-full bg-transparent border-b border-primary/40 focus:outline-none font-semibold text-xs text-primary"
                                                     value={h}
                                                     onChange={(e) =>
                                                       handleUpdateTableHeader(page.id, block.id, cIdx, e.target.value)
@@ -1681,7 +1685,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                                                     <button
                                                       type="button"
                                                       onClick={() => handleRemoveTableColumn(page.id, block.id, cIdx)}
-                                                      className="text-muted-foreground hover:text-destructive text-[10px] px-1 cursor-pointer"
+                                                      className="text-muted-foreground hover:text-destructive text-xs px-1 cursor-pointer"
                                                       title="Remover coluna"
                                                     >
                                                       ×
@@ -1712,7 +1716,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                                                   <button
                                                     type="button"
                                                     onClick={() => handleRemoveTableRow(page.id, block.id, rIdx)}
-                                                    className="text-muted-foreground hover:text-destructive text-[11px] cursor-pointer"
+                                                    className="text-muted-foreground hover:text-destructive text-xs cursor-pointer"
                                                     title="Remover linha"
                                                   >
                                                     ×
@@ -1811,7 +1815,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                           <Icon name="Layers" size={16} className="text-primary" />
                           Cláusulas & Condições Jurídicas
                         </CardTitle>
-                        <Badge variant="outline" className="text-[10px]">
+                        <Badge variant="outline" className="text-xs">
                           {selectedClauses.length} seleccionadas
                         </Badge>
                       </div>
@@ -1860,7 +1864,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                             setSelectedClauses(recIds);
                             toast.success("Cláusulas essenciais recomendadas seleccionadas!");
                           }}
-                          className="h-6 text-[10px] px-2 cursor-pointer"
+                          className="h-6 text-xs px-2 cursor-pointer"
                         >
                           Padrão Recomendado
                         </Button>
@@ -1872,7 +1876,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                             setSelectedClauses(clauses.map((c) => c.id));
                             toast.success("Todas as cláusulas foram seleccionadas!");
                           }}
-                          className="h-6 text-[10px] px-2 cursor-pointer"
+                          className="h-6 text-xs px-2 cursor-pointer"
                         >
                           Todas ({clauses.length})
                         </Button>
@@ -1884,13 +1888,13 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                             setSelectedClauses([]);
                             toast.info("Seleção de cláusulas limpa.");
                           }}
-                          className="h-6 text-[10px] px-1.5 text-muted-foreground hover:text-destructive cursor-pointer"
+                          className="h-6 text-xs px-1.5 text-muted-foreground hover:text-destructive cursor-pointer"
                         >
                           Limpar
                         </Button>
                       </div>
 
-                      <span className="text-[10px] text-muted-foreground font-medium">
+                      <span className="text-xs text-muted-foreground font-medium">
                         Total no catálogo: {clauses.length}
                       </span>
                     </div>
@@ -1907,7 +1911,7 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                       </div>
                       <div className="sm:col-span-6">
                         <select
-                          className="w-full h-7 px-2 text-[11px] rounded-md border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                          className="w-full h-7 px-2 text-xs rounded-md border border-input bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                           value={clauseCategoryFilter}
                           onChange={(e) => setClauseCategoryFilter(e.target.value)}
                         >
@@ -1963,17 +1967,17 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                                   <p className="font-medium text-foreground truncate">{clause.title}</p>
                                   <Badge
                                     variant={isChecked ? "default" : "outline"}
-                                    className="text-[9px] shrink-0"
+                                    className="text-xs shrink-0"
                                   >
                                     {isChecked ? "Incluída" : "Omitida"}
                                   </Badge>
                                 </div>
                                 <div className="flex items-center gap-1.5 mt-0.5">
-                                  <span className="text-[10px] text-primary/80 font-medium">
+                                  <span className="text-xs text-primary/80 font-medium">
                                     {clause.category?.name || "Geral"}
                                   </span>
                                 </div>
-                                <p className="text-[11px] text-muted-foreground line-clamp-2 mt-1 leading-relaxed">
+                                <p className="text-xs text-muted-foreground line-clamp-2 mt-1 leading-relaxed">
                                   {clause.contentMarkdown}
                                 </p>
                               </div>
@@ -2005,10 +2009,8 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    const url = createdDocumentId
-                      ? documentsService.getDirectPdfUrl(createdDocumentId)
-                      : livePdfUrl;
-                    if (url) window.open(url, "_blank");
+                    if (createdDocumentId) openDocumentPdf(createdDocumentId);
+                    else if (livePdfUrl) window.open(livePdfUrl, "_blank");
                   }}
                   className="h-7 text-xs gap-1.5 cursor-pointer"
                   disabled={!createdDocumentId && !livePdfUrl}
@@ -2035,15 +2037,20 @@ export function DocumentCreateView({ typeConfig }: DocumentCreateViewProps) {
             </div>
 
             {livePdfUrl || createdDocumentId ? (
-              <iframe
-                src={
-                  createdDocumentId
-                    ? documentsService.getDirectPdfUrl(createdDocumentId)
-                    : (livePdfUrl as string)
-                }
-                className="w-full flex-1 border-0"
-                title="PDF Real-Time Preview"
-              />
+              (createdDocumentId ? savedPdf.url : livePdfUrl) ? (
+                <PdfPreview
+                  url={(createdDocumentId ? savedPdf.url : livePdfUrl) as string}
+                  title="Pré-visualização do PDF"
+                  filename={`${code}.pdf`}
+                />
+              ) : (
+                <p
+                  className="flex-1 p-6 text-center text-xs text-muted-foreground"
+                  role={savedPdf.error ? "alert" : "status"}
+                >
+                  {savedPdf.error ? "Não foi possível carregar o PDF." : "A carregar PDF…"}
+                </p>
+              )
             ) : (
               <div className="flex flex-col items-center justify-center h-full p-8 text-center space-y-3">
                 <Icon name="FileText" size={48} className="text-muted-foreground/40" />

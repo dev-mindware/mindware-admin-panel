@@ -69,7 +69,7 @@ export function WorkDeclarationForm({ data, onChange }: Props) {
           <div className="space-y-2">
             <label className="text-xs font-semibold text-foreground flex items-center justify-between">
               <span>Sexo / Género do Trabalhador *</span>
-              <span className="text-[11px] font-normal text-muted-foreground">
+              <span className="text-xs font-normal text-muted-foreground">
                 (Altera automaticamente todos os pronomes e flexões no documento)
               </span>
             </label>
@@ -97,11 +97,11 @@ export function WorkDeclarationForm({ data, onChange }: Props) {
                 <div>
                   <div className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                     <span>Masculino</span>
-                    <Badge variant={isMale ? "default" : "secondary"} className="text-[10px] py-0 px-1.5 h-4">
+                    <Badge variant={isMale ? "default" : "secondary"} className="text-xs py-0 px-1.5 h-4">
                       o Sr.
                     </Badge>
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-1 leading-snug">
+                  <p className="text-xs text-muted-foreground mt-1 leading-snug">
                     O referido colaborador • portador • o mesmo • a pedido do interessado
                   </p>
                 </div>
@@ -129,11 +129,11 @@ export function WorkDeclarationForm({ data, onChange }: Props) {
                 <div>
                   <div className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                     <span>Feminino</span>
-                    <Badge variant={!isMale ? "default" : "secondary"} className="text-[10px] py-0 px-1.5 h-4">
+                    <Badge variant={!isMale ? "default" : "secondary"} className="text-xs py-0 px-1.5 h-4">
                       a Sra.
                     </Badge>
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-1 leading-snug">
+                  <p className="text-xs text-muted-foreground mt-1 leading-snug">
                     A referida colaboradora • portadora • a mesma • a pedido da interessada
                   </p>
                 </div>
@@ -157,7 +157,7 @@ export function WorkDeclarationForm({ data, onChange }: Props) {
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground flex items-center gap-1">
                 <span>N.º do Bilhete de Identidade (B.I.)</span>
-                <span className="text-[10px] text-muted-foreground">(Opcional)</span>
+                <span className="text-xs text-muted-foreground">(Opcional)</span>
               </label>
               <Input
                 placeholder="ex: 005829142LA042"
@@ -276,7 +276,7 @@ export function WorkDeclarationForm({ data, onChange }: Props) {
               Pré-visualização do Texto Oficial Adaptado
             </CardTitle>
             <div className="flex items-center gap-1.5">
-              <Badge variant="outline" className="text-[10px] text-primary border-primary/30">
+              <Badge variant="outline" className="text-xs text-primary border-primary/30">
                 {isMale ? "Flexão: Masculino" : "Flexão: Feminino"}
               </Badge>
             </div>
@@ -315,7 +315,7 @@ export function WorkDeclarationForm({ data, onChange }: Props) {
             <strong className="text-foreground">{data.purpose || "[Finalidade]"}</strong>, podendo ser apresentada perante entidades públicas ou privadas que dela necessitem.
           </p>
 
-          <div className="pt-2 text-center text-[11px] text-foreground font-medium">
+          <div className="pt-2 text-center text-xs text-foreground font-medium">
             {data.city || "Luanda"}, aos {data.emissionDate || "[Data de Emissão]"}.
             <div className="mt-2 font-bold tracking-wide text-primary">
               {data.signatoryRole || "A DIRECÇÃO GERAL"}

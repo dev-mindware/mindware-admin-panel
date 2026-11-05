@@ -3,7 +3,6 @@ import { clearLocalSession } from "@/actions/auth";
 import { ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY, USER_KEY } from "@/constants/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005/api";
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
 export const api: AxiosInstance = axios.create({
   baseURL: API_URL,
@@ -90,15 +89,12 @@ function processQueue(error: any, token: string | null = null): void {
   failedQueue = [];
 }
 
-// Request Interceptor: Injeta Bearer Token e API Key
+// Request Interceptor: Injeta o Bearer Token
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = getStoredToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
-    }
-    if (API_KEY && config.headers) {
-      config.headers["x-api-key"] = API_KEY;
     }
     return config;
   },
