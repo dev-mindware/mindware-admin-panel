@@ -54,7 +54,7 @@ export function SchoolDetailContent({ schoolId }: { schoolId: string }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <TitleList title={school.name} suTitle={`NIF ${school.nif}${school.med_code ? ` · MED ${school.med_code}` : ""} · ${SUBSYSTEM_LABEL[school.subsystem] ?? school.subsystem}`}>
+      <TitleList title={school.name} suTitle={`${school.med_code ? `MED ${school.med_code} · ` : ""}${SUBSYSTEM_LABEL[school.subsystem] ?? school.subsystem}`}>
         <div className="flex flex-wrap items-center gap-2">
           {sub && <StatusBadge status={sub.status} map={SUBSCRIPTION_STATUS} />}
           <PermissionGate permission="platform:subscription_manage">

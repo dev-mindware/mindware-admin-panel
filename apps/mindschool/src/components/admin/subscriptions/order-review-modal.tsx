@@ -123,7 +123,7 @@ function ReviewDialog({ id }: { id: string }) {
       id={ORDER_REVIEW_MODAL}
       size="lg"
       title={<span className="flex items-center gap-2"><Icon name="ReceiptText" className="size-5 text-primary" />Revisão da ordem</span>}
-      description={o ? `${o.school.name} · NIF ${o.school.nif}` : undefined}
+      description={o?.school.name}
       footer={<div className="flex justify-end"><Button variant="outline" onClick={() => closeModal(ORDER_REVIEW_MODAL)}>Fechar</Button></div>}
     >
       {order.isLoading || !o ? (

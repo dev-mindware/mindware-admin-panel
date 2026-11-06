@@ -12,7 +12,6 @@ export interface ActivationSummary {
 export interface AdminSchool {
   id: string;
   name: string;
-  nif: string;
   med_code: string | null;
   subsystem: "geral" | "tecnico_profissional" | "formacao_professores";
   status: string;
@@ -34,7 +33,7 @@ export interface SchoolStats {
 
 export interface AdminSchoolDetail {
   school: {
-    id: string; name: string; nif: string; med_code: string | null; subsystem: string; status: string; phone: string | null; email: string | null;
+    id: string; name: string; med_code: string | null; subsystem: string; status: string; phone: string | null; email: string | null;
     address: string | null; school_group_id: string | null; created_at: string;
   };
   subscription: {

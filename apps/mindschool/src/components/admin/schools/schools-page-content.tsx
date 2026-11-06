@@ -37,7 +37,7 @@ export function SchoolsPageContent() {
       render: (_, x) => (
         <Link href={`/schools/${x.id}`} className="block hover:underline">
           <p className="font-medium">{x.name}</p>
-          <p className="text-xs text-muted-foreground">NIF {x.nif}{x.med_code ? ` · MED ${x.med_code}` : ""} · {SUBSYSTEM_LABEL[x.subsystem] ?? x.subsystem}</p>
+          <p className="text-xs text-muted-foreground">{x.med_code ? `MED ${x.med_code} · ` : ""}{SUBSYSTEM_LABEL[x.subsystem] ?? x.subsystem}</p>
         </Link>
       ),
     },
@@ -124,7 +124,7 @@ export function SchoolsPageContent() {
 
       <div className="space-y-4">
         <FilterToolbar
-          search={{ value: q, onChange: (v) => void setQ(v), placeholder: "Pesquisar por nome, NIF ou código MED…" }}
+          search={{ value: q, onChange: (v) => void setQ(v), placeholder: "Pesquisar por nome ou código MED…" }}
           filters={[{ key: "status", label: "Estado comercial", value: status, onChange: (v) => void setStatus(v), options: Object.entries(SUBSCRIPTION_STATUS).map(([value, x]) => ({ value, label: x.label })) }]}
           onClear={() => { void setQ(""); void setStatus(""); }}
         />

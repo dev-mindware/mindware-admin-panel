@@ -21,7 +21,6 @@ export type OrderKind = "new" | "upgrade" | "downgrade" | "renewal" | "addon";
 export interface SchoolRef {
   id: string;
   name: string;
-  nif: string;
 }
 
 export interface AdminOrder {

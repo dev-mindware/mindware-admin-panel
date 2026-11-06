@@ -10,14 +10,14 @@ import { EMAIL_FAILURE_LABEL, SUBSYSTEM_LABEL } from "@/constants/labels";
 import { useOnboard } from "@/hooks/directory/use-directory";
 import { onboardSchema, type OnboardFormData } from "@/schemas/school";
 import { getApiErrorMessage } from "@/utils/api-error";
-import { maskNif, maskPhone } from "@/utils/masks";
+import { maskPhone } from "@/utils/masks";
 import { ErrorMessage } from "@/utils/messages";
 import type { OnboardResult } from "@/services/directory-service";
 import type { AdminSchool } from "@/types/directory";
 
 export const ONBOARD_MODAL = "onboard-school";
 
-const DEFAULTS: OnboardFormData = { name: "", nif: "", subsystem: "geral", med: "", phone: "", email: "", address: "", trial: "14", titularName: "", titularEmail: "" };
+const DEFAULTS: OnboardFormData = { name: "", subsystem: "geral", med: "", phone: "", email: "", address: "", trial: "14", titularName: "", titularEmail: "" };
 
 /**
  * Assistente «Nova escola»: escola + período de teste + Titular numa só chamada atómica.
@@ -36,14 +36,14 @@ function OnboardDialog() {
   const onSubmit = (f: OnboardFormData) =>
     onboard.mutate(
       {
-        name: f.name.trim(), nif: f.nif.trim(), subsystem: f.subsystem as AdminSchool["subsystem"],
+        name: f.name.trim(), subsystem: f.subsystem as AdminSchool["subsystem"],
         ...(f.med?.trim() ? { medCode: f.med.trim() } : {}), ...(f.phone?.trim() ? { phone: f.phone.trim() } : {}), ...(f.email?.trim() ? { email: f.email.trim() } : {}),
         ...(f.address?.trim() ? { address: f.address.trim() } : {}), trialDays: Number(f.trial) || 14, titularName: f.titularName.trim(), titularEmail: f.titularEmail.trim().toLowerCase(),
       },
       { onSuccess: setResult, onError: (e) => ErrorMessage(getApiErrorMessage(e, "Não foi possível criar a escola.")) },
     );
 
-  const hasSchoolError = Boolean(errors.name || errors.nif || errors.subsystem || errors.med || errors.phone || errors.email || errors.address);
+  const hasSchoolError = Boolean(errors.name || errors.subsystem || errors.med || errors.phone || errors.email || errors.address);
   const hasTitularError = Boolean(errors.titularName || errors.titularEmail);
 
   return (
@@ -90,15 +90,12 @@ function OnboardDialog() {
             </TabsList>
 
             <TabsContent value="escola" className="mt-4 focus-visible:outline-none">
-              <FormSection step={1} title="Escola" description="Os dados legais da escola. O NIF identifica a escola nos documentos emitidos.">
+              <FormSection step={1} title="Escola" description="Os dados legais da escola.">
                 <div className="sm:col-span-2">
                   <Controller name="name" control={control} render={({ field }) => (
                     <Input label="Nome da escola *" placeholder="Ex.: Colégio Horizonte Azul" error={errors.name?.message} {...field} />
                   )} />
                 </div>
-                <Controller name="nif" control={control} render={({ field }) => (
-                  <Input label="NIF *" placeholder="Ex.: 5417000000" inputMode="text" error={errors.nif?.message} hint="Número de Identificação Fiscal da escola." {...field} onChange={(e) => field.onChange(maskNif(e.target.value))} />
-                )} />
                 <Controller name="subsystem" control={control} render={({ field }) => (
                   <SelectField label="Subsistema de ensino *" value={field.value} options={Object.entries(SUBSYSTEM_LABEL).map(([value, label]) => ({ value, label }))} onValueChange={field.onChange} hint="Define as regras académicas aplicadas à escola." />
                 )} />

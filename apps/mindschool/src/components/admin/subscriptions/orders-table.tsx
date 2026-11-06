@@ -50,7 +50,6 @@ export function OrdersTable({ queue = false }: { queue?: boolean }) {
       render: (_, o) => (
         <div>
           <p className="font-medium">{o.school.name}</p>
-          <p className="text-xs text-muted-foreground">NIF {o.school.nif}</p>
         </div>
       ),
     },
@@ -120,7 +119,7 @@ export function OrdersTable({ queue = false }: { queue?: boolean }) {
   return (
     <div className="space-y-4">
       <FilterToolbar
-        search={{ value: q, onChange: (v) => void setQ(v), placeholder: "Pesquisar escola ou NIF…" }}
+        search={{ value: q, onChange: (v) => void setQ(v), placeholder: "Pesquisar escola…" }}
         filters={[
           ...(queue ? [] : [{ key: "status", label: "Estado", value: status, onChange: (v: string) => void setStatus(v), options: STATUS_OPTIONS }]),
           { key: "kind", label: "Tipo", value: kind, onChange: (v: string) => void setKind(v), options: KIND_OPTIONS },

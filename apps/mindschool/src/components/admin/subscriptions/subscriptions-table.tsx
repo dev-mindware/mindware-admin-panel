@@ -42,7 +42,6 @@ export function SubscriptionsTable() {
       render: (_, s) => (
         <Link href={`/schools/${s.school.id}`} className="block hover:underline">
           <p className="font-medium">{s.school.name}</p>
-          <p className="text-xs text-muted-foreground">NIF {s.school.nif}</p>
         </Link>
       ),
     },
@@ -92,7 +91,7 @@ export function SubscriptionsTable() {
   return (
     <div className="space-y-4">
       <FilterToolbar
-        search={{ value: q, onChange: (v) => void setQ(v), placeholder: "Pesquisar escola ou NIF…" }}
+        search={{ value: q, onChange: (v) => void setQ(v), placeholder: "Pesquisar escola…" }}
         filters={[
           { key: "status", label: "Estado", value: status, onChange: (v) => void setStatus(v), options: STATUS_OPTIONS },
           { key: "plan", label: "Plano", value: plan, onChange: (v) => void setPlan(v), options: (plans.data ?? []).map((p) => ({ value: p.code, label: p.name })) },
