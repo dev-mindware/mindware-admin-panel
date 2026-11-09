@@ -20,12 +20,21 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
+const isBrowser =
+  typeof window !== "undefined" && process.env.NODE_ENV !== "test";
+const basePath = (process.env.NEXT_PUBLIC_BASE_PATH ?? "/mindgest").replace(
+  /\/+$/,
+  "",
+);
+
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: isBrowser
+    ? `${basePath}/api/proxy`
+    : process.env.NEXT_PUBLIC_API_URL,
   headers: {
     "Content-Type": "application/json",
-    ...(process.env.NEXT_PUBLIC_API_KEY
-      ? { "x-api-key": process.env.NEXT_PUBLIC_API_KEY }
+    ...(typeof window === "undefined" && process.env.API_KEY
+      ? { "x-api-key": process.env.API_KEY }
       : {}),
   },
 });
